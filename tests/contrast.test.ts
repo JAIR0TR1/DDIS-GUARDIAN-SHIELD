@@ -24,7 +24,15 @@ const textOnBg = [
   'danger',
   'dangerText'
 ] as const
-const textOnGlass = ['text', 'textMuted', 'accent', 'accentStrong', 'safe', 'warn', 'dangerText'] as const
+const textOnGlass = [
+  'text',
+  'textMuted',
+  'accent',
+  'accentStrong',
+  'safe',
+  'warn',
+  'dangerText'
+] as const
 
 describe('contraste AA de los tokens', () => {
   it.each(textOnBg)('%s sobre el fondo base', (name) => {
@@ -40,7 +48,9 @@ describe('contraste AA de los tokens', () => {
   })
 
   it('el texto del botón primario sobre cian cumple AA', () => {
-    expect(contrastRatio(hexToRgb(colors.accentInk), hexToRgb(colors.accent))).toBeGreaterThanOrEqual(AA)
+    expect(
+      contrastRatio(hexToRgb(colors.accentInk), hexToRgb(colors.accent))
+    ).toBeGreaterThanOrEqual(AA)
   })
 
   it('los iconos de semáforo cumplen 3:1 sobre vidrio (elementos gráficos)', () => {

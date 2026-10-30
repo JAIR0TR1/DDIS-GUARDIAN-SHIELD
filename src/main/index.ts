@@ -1,8 +1,9 @@
 import { app, shell, BrowserWindow } from 'electron'
-import { join } from 'path'
+import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../build/icon.png?asset'
 import { registerWindowControls } from './windowControls'
+import { runDevScreenshots } from './devScreenshot'
 
 const APP_ID = 'com.escudoguardian.app'
 const BACKGROUND = '#05070D'
@@ -43,10 +44,11 @@ function createWindow(): BrowserWindow {
   } else {
     void mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+  runDevScreenshots(mainWindow)
   return mainWindow
 }
 
-app.whenReady().then(() => {
+void app.whenReady().then(() => {
   electronApp.setAppUserModelId(APP_ID)
 
   app.on('browser-window-created', (_, window) => {

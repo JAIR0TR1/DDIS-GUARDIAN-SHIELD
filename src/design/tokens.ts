@@ -24,6 +24,13 @@ export const rarityColors = {
 
 export type Rarity = keyof typeof rarityColors
 
+export const rarityLabels: Record<Rarity, string> = {
+  comun: 'Común',
+  rara: 'Rara',
+  epica: 'Épica',
+  legendaria: 'Legendaria'
+}
+
 /** Color del halo de la criatura según el estado del sistema. */
 export const haloColors = {
   activo: colors.accent,

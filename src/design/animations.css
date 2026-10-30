@@ -1,0 +1,193 @@
+/*
+ * Animaciones en bucle. Regla: solo transform y opacity (nada de blur ni box-shadow animados).
+ * El halo es un degradado radial ya difuminado: lo que se anima es su opacidad y escala.
+ */
+
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.09), transparent);
+  animation: shimmer 1.6s var(--ease-guardian) infinite;
+}
+
+/* Punto de estado que pulsa: un anillo que crece y se desvanece. */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+.pulse-dot {
+  position: relative;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: currentColor;
+}
+
+.pulse-dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  animation: pulse-ring 1.8s var(--ease-guardian) infinite;
+}
+
+/* Criatura */
+.creature svg {
+  overflow: visible;
+}
+
+.creature [data-part] {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes creature-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.025) translateY(-1px);
+  }
+}
+
+@keyframes creature-blink {
+  0%,
+  92%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.08);
+  }
+}
+
+@keyframes creature-look {
+  0%,
+  100% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes creature-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-1.5px);
+  }
+  75% {
+    transform: translateX(1.5px);
+  }
+}
+
+@keyframes creature-hop {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes halo-breathe {
+  0%,
+  100% {
+    transform: scale(0.96);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+@keyframes ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ring-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.creature-body {
+  animation: creature-breathe 4.2s ease-in-out infinite;
+}
+
+.creature-eyes {
+  animation: creature-blink 5.5s ease-in-out infinite;
+}
+
+.creature[data-state='escaneando'] .creature-eye-group {
+  animation: creature-look 1.4s ease-in-out infinite;
+}
+
+.creature[data-state='alerta'] .creature-body {
+  animation:
+    creature-shake 0.18s linear 6,
+    creature-breathe 2s ease-in-out 1.1s infinite;
+}
+
+.creature[data-state='feliz'] .creature-body {
+  animation:
+    creature-hop 0.7s var(--ease-guardian) 2,
+    creature-breathe 4.2s ease-in-out 1.4s infinite;
+}
+
+.creature-halo {
+  animation: halo-breathe 4.6s ease-in-out infinite;
+}
+
+.creature[data-state='alerta'] .creature-halo {
+  animation-duration: 1.4s;
+}
+
+.creature-ring {
+  transform-origin: center;
+  animation: ring-spin 60s linear infinite;
+}
+
+.creature-ring[data-ring='1'] {
+  animation-duration: 90s;
+  animation-direction: reverse;
+}
+
+.creature-ring[data-ring='2'] {
+  animation-duration: 140s;
+}
+
+.creature-ring-fade {
+  animation: ring-pulse 5s ease-in-out infinite;
+}

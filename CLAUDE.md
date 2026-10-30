@@ -71,3 +71,4 @@ SVG por capas, original. Estados: reposo, escaneando, alerta, feliz. `creature.j
 ## Estado
 Fase 0 en curso (scaffold). Mantener esta secciÃ³n actualizada.
 
+
