@@ -1,0 +1,146 @@
+/*
+ * Tokens de diseño de Escudo Guardián. Única fuente de verdad visual.
+ * Los valores TypeScript equivalentes viven en tokens.ts (los comprueba tests/design.test.ts).
+ */
+
+@theme {
+  /* Fuentes */
+  --font-display: 'Space Grotesk Variable', 'Inter Variable', system-ui, sans-serif;
+  --font-sans: 'Inter Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Mono', monospace;
+
+  /* Superficies y texto */
+  --color-bg: #05070d;
+  --color-bg-raised: #0b0f19;
+  --color-text: #e6eaf2;
+  --color-text-muted: #a9b2c5;
+  --color-text-subtle: #8791a6;
+
+  /* Acentos */
+  --color-accent: #22d3ee;
+  --color-accent-strong: #67e8f9;
+  --color-accent-ink: #04222a; /* texto sobre botón cian */
+  --color-violet: #8b5cf6;
+
+  /* Semáforo (siempre con icono y texto) */
+  --color-safe: #34d399;
+  --color-warn: #fbbf24;
+  --color-danger: #f43f5e; /* rellenos, bordes e iconos */
+  --color-danger-text: #ff8a9c; /* texto sobre vidrio (AA) */
+
+  /* Rareza */
+  --color-rarity-common: #9ca3af;
+  --color-rarity-rare: #3b82f6;
+  --color-rarity-epic: #a855f7;
+  --color-rarity-legendary: #f59e0b;
+
+  /* Radios */
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+
+  /* Duraciones y curva */
+  --ease-guardian: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 120ms;
+  --duration-base: 220ms;
+  --duration-slow: 420ms;
+  --duration-scene: 800ms;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Vidrio */
+  --glass-bg: rgb(255 255 255 / 0.07);
+  --glass-bg-strong: rgb(255 255 255 / 0.1);
+  --glass-border: rgb(255 255 255 / 0.12);
+  --glass-blur: 24px;
+  --glass-highlight: inset 0 1px 0 rgb(255 255 255 / 0.1);
+
+  /* Sombras en capas con resplandor de color */
+  --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.5), 0 8px 24px rgb(0 0 0 / 0.35),
+    0 24px 64px rgb(0 0 0 / 0.3);
+  --shadow-glow-accent: 0 0 0 1px rgb(34 211 238 / 0.35), 0 0 24px rgb(34 211 238 / 0.25);
+  --shadow-glow-danger: 0 0 0 1px rgb(244 63 94 / 0.4), 0 0 24px rgb(244 63 94 / 0.22);
+
+  --focus-ring: 0 0 0 2px #05070d, 0 0 0 4px #67e8f9;
+}
+
+/* Reducir movimiento: la clase la aplica Ajustes además de la preferencia del sistema. */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    user-select: none;
+  }
+  /* El texto de mensajes analizados sí se puede seleccionar y copiar. */
+  .selectable {
+    user-select: text;
+  }
+  ::selection {
+    background: rgb(34 211 238 / 0.3);
+  }
+  :focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .glass {
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.09), rgb(255 255 255 / 0.05));
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+    box-shadow: var(--glass-highlight), var(--shadow-panel);
+  }
+
+  /* Etiqueta HUD: mono pequeña en mayúsculas. */
+  .hud-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  /* Arrastre de la ventana (barra de título). */
+  .app-drag {
+    -webkit-app-region: drag;
+  }
+  .app-no-drag {
+    -webkit-app-region: no-drag;
+  }
+}
