@@ -20,3 +20,4 @@ Thumbs.db
 
 # Capturas de verificación
 .screenshots/
+.eslintcache
