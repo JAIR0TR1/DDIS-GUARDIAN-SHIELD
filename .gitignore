@@ -1,0 +1,22 @@
+# Secretos (NUNCA al repositorio)
+.env
+.env.*
+!.env.example
+*.bin
+
+# Dependencias y compilados
+node_modules/
+out/
+dist/
+release/
+*.log
+
+# Editor y sistema
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Capturas de verificación
+.screenshots/
