@@ -9,7 +9,7 @@ import { createProviderResolver } from './analysis/providerFactory'
 import { createApiKeyStore } from './secrets/apiKeyStore'
 import { loadEnvironment, resolveConfig } from './config'
 import { createGuardianController } from './guardianController'
-import { runAlertTest } from './devAlertTest'
+import { runAlertTest, runWatcherTest } from './devAlertTest'
 import { prepareAlertWindow, registerAlertReady } from './windows/alertWindow'
 import { createMainWindow, showMainWindow } from './windows/mainWindow'
 
@@ -51,6 +51,7 @@ if (!gotLock) {
     prepareAlertWindow()
     await controller.init()
     void runAlertTest(controller)
+    void runWatcherTest(data)
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0)

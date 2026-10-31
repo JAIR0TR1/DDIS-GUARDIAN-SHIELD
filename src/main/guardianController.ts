@@ -1,5 +1,7 @@
-import { app, clipboard, globalShortcut } from 'electron'
+import { app, clipboard, globalShortcut, Notification } from 'electron'
+import { decideClipboard } from '../domain/clipboardFilter'
 import { normalizeShortcut } from '../domain/shortcut'
+import { createClipboardWatcher } from './clipboard/watcher'
 import type { AlertPayload, NavigateRequest, ShortcutChange } from '../shared/alert'
 import type { AnalysisOutcome } from '../shared/analysis'
 import { IPC } from '../shared/ipc'
@@ -7,7 +9,7 @@ import type { Profile } from '../shared/models'
 import type { Verdict } from '../shared/threat'
 import type { AnalysisService } from './analysis/service'
 import type { AppData } from './storage/appData'
-import { createTray, type TrayController, type TrayState } from './tray'
+import { createTray, trayIconFor, type TrayController, type TrayState } from './tray'
 import { hideAlert, showAlert } from './windows/alertWindow'
 import { sendToMain, showMainWindow } from './windows/mainWindow'
 
@@ -97,8 +99,44 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
     sendToMain(IPC.nav.go, request)
   }
 
+  /**
+   * Un texto nuevo en el portapapeles. Pasa por el filtro de privacidad (descarta contraseñas,
+   * claves y tarjetas) y se revisa SOLO con reglas locales: el vigilante nunca envía nada a la IA.
+   * Solo molesta si es sospechoso o peligroso.
+   */
+  async function handleCopiedText(text: string): Promise<void> {
+    if (!decideClipboard(text).analyze) return
+    const peek = await analysis.peek(text)
+    if (peek.verdict === 'seguro') return
+    const outcome = await analysis.run({ text, source: 'text' }, { useAI: false })
+    const { verdict, creatureMessage } = outcome.entry.result
+    showAlert(resultPayload(outcome, true), { focus: false })
+    notify(
+      verdict === 'peligroso' ? '¡Cuidado! Posible estafa' : 'Ojo: mensaje dudoso',
+      creatureMessage,
+      outcome.entry.id
+    )
+    setTray(trayByVerdict[verdict], true)
+    notifyDataChanged()
+  }
+
+  /** Notificación nativa de Windows. Al hacer clic abre el detalle. */
+  function notify(title: string, body: string, entryId: string): void {
+    if (!Notification.isSupported()) return
+    const notification = new Notification({ title, body, icon: trayIconFor('activo') })
+    notification.on('click', () => openDetail(entryId))
+    notification.show()
+  }
+
+  const watcher = createClipboardWatcher({
+    read: () => clipboard.readText(),
+    onText: handleCopiedText
+  })
+
   function applyWatcher(enabled: boolean): void {
     watcherOn = enabled
+    if (enabled) void watcher.start()
+    else watcher.stop()
     tray?.setWatcher(enabled, shortcutDisplay)
     setTray(baseState(), false)
     deps.onWatcherChange?.(enabled)
@@ -162,6 +200,7 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
 
     dispose() {
       if (decay) clearTimeout(decay)
+      watcher.stop()
       globalShortcut.unregisterAll()
       tray?.destroy()
     }

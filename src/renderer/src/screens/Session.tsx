@@ -10,6 +10,8 @@ import { pickPhrase } from '@domain/phrases'
 import { fadeOnly, panelContainer, panelItemBlur, transition } from '@design/motion'
 import { CreatureAvatar } from '../components/ui/CreatureAvatar'
 import { ProgressBar } from '../components/ui/ProgressBar'
+import { WatcherChip } from '../components/ui/WatcherChip'
+import { useToast } from '../components/ui/toastContext'
 import { Sidebar, type Section } from '../components/ui/Sidebar'
 import type { Tone } from '../components/AmbientBackground'
 import type { CreatureState } from '../creature/creatureState'
@@ -70,6 +72,8 @@ export function Session({
   }
   const [mood, setMood] = useState<CreatureState>('feliz')
   const [pasted, setPasted] = useState('')
+  const [savingWatcher, setSavingWatcher] = useState(false)
+  const toast = useToast()
   const osReduced = useReducedMotion()
   const reduced = osReduced === true || settings.reduceMotion
   const moodTimer = useRef<number>(0)
@@ -104,6 +108,25 @@ export function Session({
     onTone(toneByVerdict[verdict])
     settleMood(6000)
     onAnalyzed(outcome)
+  }
+
+  const toggleWatcher = (): void => {
+    const next = !profile.vigilante
+    setSavingWatcher(true)
+    onSaveProfile({ ...profile, vigilante: next })
+      .then(() =>
+        toast.show(
+          next
+            ? 'Vigilante activo: reviso lo que copies, solo en tu equipo.'
+            : 'Vigilante apagado. Ya no miro lo que copias.',
+          next ? 'success' : 'info'
+        )
+      )
+      .catch((error: unknown) => {
+        console.error('No se pudo cambiar el vigilante', error)
+        toast.show('No pude cambiar el vigilante. Inténtalo de nuevo.', 'error')
+      })
+      .finally(() => setSavingWatcher(false))
   }
 
   const goAnalyze = (text: string): void => {
@@ -158,6 +181,13 @@ export function Session({
                 {demoMode ? 'modo demo' : 'modo real'}
               </span>
             </p>
+            <div className="mt-2.5">
+              <WatcherChip
+                on={profile.vigilante}
+                disabled={savingWatcher}
+                onToggle={toggleWatcher}
+              />
+            </div>
           </div>
           <div className="w-52 shrink-0 pt-1">
             <p className="tabular mb-1.5 flex justify-between font-mono text-[12px] text-text-muted">

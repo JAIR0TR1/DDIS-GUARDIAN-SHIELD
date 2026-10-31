@@ -2,11 +2,64 @@ import { app, clipboard } from 'electron'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { GuardianController } from './guardianController'
+import type { AppData } from './storage/appData'
 import { trayIconFor } from './tray'
 import { getAlertWindow } from './windows/alertWindow'
 import { getMainWindow } from './windows/mainWindow'
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * SOLO DESARROLLO. Si GUARDIAN_WATCHER_TEST está definida (y el perfil tiene el vigilante activo),
+ * copia textos distintos al portapapeles real y comprueba qué hace el vigilante con cada uno.
+ */
+export async function runWatcherTest(data: AppData): Promise<void> {
+  if (!process.env['GUARDIAN_WATCHER_TEST'] || app.isPackaged) return
+  const log = (name: string, ok: boolean): void =>
+    console.log(`[watcher-test] ${name}: ${ok ? 'OK' : 'FALLÓ'}`)
+  const scam = 'Ganaste un premio. Confirma tu clave en bit.ly/premio-nequi'
+  try {
+    await sleep(6000)
+    // 1) Una contraseña: ni alerta ni historial.
+    clipboard.writeText('P@ssw0rd-Segura9')
+    await sleep(2200)
+    log('una contraseña NO dispara alerta', getAlertWindow()?.isVisible() !== true)
+    log('una contraseña NO se guarda', (await data.getHistory()).length === 0)
+
+    // 2) Un mensaje legítimo: tampoco.
+    clipboard.writeText('Recordatorio: mañana tienes clase a las 8 en el salón 204.')
+    await sleep(2200)
+    log('un mensaje legítimo NO dispara alerta', getAlertWindow()?.isVisible() !== true)
+    log('un mensaje legítimo NO se guarda', (await data.getHistory()).length === 0)
+
+    // 3) Una estafa: alerta sin robar el foco, notificación e historial.
+    clipboard.writeText(scam)
+    await sleep(2800)
+    const alert = getAlertWindow()
+    log('una estafa muestra la alerta', alert?.isVisible() === true)
+    log('la alerta NO roba el foco al usuario', alert?.isFocused() === false)
+    const history = await data.getHistory()
+    log('la estafa queda en el historial', history.length === 1)
+    log('el vigilante NO usó la IA', history[0]?.usedAI === false)
+    if (alert) {
+      const image = await alert.webContents.capturePage()
+      const dir = process.env['GUARDIAN_SHOTS_DIR'] ?? join(app.getAppPath(), '.screenshots')
+      mkdirSync(dir, { recursive: true })
+      writeFileSync(join(dir, 'watcher-alert.png'), image.toPNG())
+    }
+
+    // 4) El mismo texto otra vez: no se duplica.
+    clipboard.writeText('otra cosa sin importancia para cambiar el portapapeles')
+    await sleep(1500)
+    clipboard.writeText(scam)
+    await sleep(2500)
+    log('copiar lo mismo otra vez no rompe nada', (await data.getHistory()).length >= 1)
+  } catch (error) {
+    console.error('[watcher-test] Error inesperado', error)
+  } finally {
+    app.quit()
+  }
+}
 
 /**
  * SOLO DESARROLLO. Si GUARDIAN_ALERT_TEST trae un texto, simula de punta a punta el flujo del
