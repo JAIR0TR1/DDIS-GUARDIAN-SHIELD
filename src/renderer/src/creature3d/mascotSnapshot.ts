@@ -58,6 +58,7 @@ export function mascotSnapshot(state: CreatureState, halo?: HaloState): string |
       greetAge: 0,
       greetFor: 0,
       gesture: 'ninguno',
+      gestureScale: 1,
       prop: 'ninguno',
       gestureAge: 0,
       look: { x: 0, y: 0 },

@@ -39,6 +39,9 @@ const api: GuardianApi = {
     dismiss: () => ipcRenderer.send(IPC.alert.dismiss),
     openDetail: (entryId) => ipcRenderer.send(IPC.alert.openDetail, entryId)
   },
+  watcher: {
+    onEvent: (listener) => subscribe(IPC.watcher.event, listener)
+  },
   nav: {
     onGo: (listener) => subscribe(IPC.nav.go, listener)
   },

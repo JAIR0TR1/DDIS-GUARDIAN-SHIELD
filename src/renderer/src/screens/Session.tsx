@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
-import type { NavigateRequest } from '@shared/alert'
+import type { NavigateRequest, WatcherEvent } from '@shared/alert'
 import type { AnalysisOutcome } from '@shared/analysis'
 import type { Creature, Profile, Settings } from '@shared/models'
 import type { HistoryEntry } from '@shared/history'
@@ -34,6 +34,19 @@ export interface SessionProps {
   onClearHistory: () => Promise<void>
   onSaveSettings: (settings: Settings) => Promise<void>
   onSaveProfile: (profile: Profile) => Promise<void>
+}
+
+function watcherNoteFor(event: WatcherEvent): string {
+  switch (event.kind) {
+    case 'ignored':
+      return `Copiaste algo y lo salté (${event.reason}).`
+    case 'safe':
+      return 'Revisé lo último que copiaste: todo en orden.'
+    case 'alert':
+      return event.verdict === 'peligroso'
+        ? 'Lo último que copiaste se ve peligroso.'
+        : 'Lo último que copiaste tiene cosas raras.'
+  }
 }
 
 const moodByVerdict: Record<Verdict, CreatureState> = {
@@ -74,7 +87,22 @@ export function Session({
   const [pasted, setPasted] = useState('')
   const [droppedFile, setDroppedFile] = useState<File | null>(null)
   const [savingWatcher, setSavingWatcher] = useState(false)
+  const [watcherNote, setWatcherNote] = useState<string | null>(null)
   const toast = useToast()
+
+  // El vigilante cuenta qué hizo con lo último copiado, para que nunca parezca que «no hace nada».
+  useEffect(() => {
+    let timer = 0
+    const off = window.guardian.watcher.onEvent((event) => {
+      window.clearTimeout(timer)
+      setWatcherNote(watcherNoteFor(event))
+      timer = window.setTimeout(() => setWatcherNote(null), 6000)
+    })
+    return () => {
+      window.clearTimeout(timer)
+      off()
+    }
+  }, [])
   const osReduced = useReducedMotion()
   const reduced = osReduced === true || settings.reduceMotion
   const moodTimer = useRef<number>(0)
@@ -190,12 +218,17 @@ export function Session({
                 {demoMode ? 'modo demo' : 'modo real'}
               </span>
             </p>
-            <div className="mt-2.5">
+            <div className="mt-2.5 flex items-center gap-3">
               <WatcherChip
                 on={profile.vigilante}
                 disabled={savingWatcher}
                 onToggle={toggleWatcher}
               />
+              {profile.vigilante && watcherNote && (
+                <span role="status" className="text-[13px] text-text-muted">
+                  {watcherNote}
+                </span>
+              )}
             </div>
           </div>
           <div className="w-52 shrink-0 pt-1">

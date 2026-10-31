@@ -19,6 +19,8 @@ export interface CreatureViewProps {
   greet?: number
   /** Gesto de contexto. Solo lo hace el 3D vivo (en foto fija o SVG se ignora). */
   gesture?: Gesture
+  /** Qué tan marcado es el gesto (0-1; lo dudoso va suave). */
+  gestureScale?: number
   /** Objeto flotante sobre la cabeza (solo 3D vivo). */
   prop?: Prop
   /** Cambia para reiniciar el gesto (p. ej. el id del resultado). */
@@ -42,6 +44,7 @@ export function CreatureView({
   rings = false,
   greet = 0,
   gesture = 'ninguno',
+  gestureScale = 1,
   prop = 'ninguno',
   gestureKey,
   title = 'Nilo, tu Guardián'
@@ -60,6 +63,7 @@ export function CreatureView({
           halo={haloState}
           greetFor={reduced ? 0 : greet}
           gesture={reduced ? 'ninguno' : gesture}
+          gestureScale={gestureScale}
           prop={reduced ? 'ninguno' : prop}
           gestureKey={gestureKey}
           animated={!reduced}

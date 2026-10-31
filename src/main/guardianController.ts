@@ -2,7 +2,7 @@ import { app, clipboard, globalShortcut, Notification } from 'electron'
 import { decideClipboard } from '../domain/clipboardFilter'
 import { normalizeShortcut } from '../domain/shortcut'
 import { createClipboardWatcher } from './clipboard/watcher'
-import type { AlertPayload, NavigateRequest, ShortcutChange } from '../shared/alert'
+import type { AlertPayload, NavigateRequest, ShortcutChange, WatcherEvent } from '../shared/alert'
 import type { AnalysisOutcome } from '../shared/analysis'
 import { IPC } from '../shared/ipc'
 import type { Profile } from '../shared/models'
@@ -112,9 +112,17 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
    * Solo molesta si es sospechoso o peligroso.
    */
   async function handleCopiedText(text: string): Promise<void> {
-    if (!decideClipboard(text).analyze) return
+    const decision = decideClipboard(text)
+    if (!decision.analyze) {
+      sendToMain(IPC.watcher.event, {
+        kind: 'ignored',
+        reason: decision.reason
+      } satisfies WatcherEvent)
+      return
+    }
     const peek = await analysis.peek(text)
     if (peek.verdict === 'seguro') {
+      sendToMain(IPC.watcher.event, { kind: 'safe' } satisfies WatcherEvent)
       // Todo bien: una confirmación breve y discreta (si el usuario no la apagó en Ajustes).
       // No se guarda en el historial ni suma XP, para que copiar mucho no llene nada.
       const settings = await data.getSettings()
@@ -129,6 +137,9 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
     }
     const outcome = await analysis.run({ text, source: 'text' }, { useAI: false })
     const { verdict, creatureMessage } = outcome.entry.result
+    if (verdict !== 'seguro') {
+      sendToMain(IPC.watcher.event, { kind: 'alert', verdict } satisfies WatcherEvent)
+    }
     showAlert(resultPayload(outcome, true), { focus: false })
     notify(
       verdict === 'peligroso' ? '¡Cuidado! Posible estafa' : 'Ojo: mensaje dudoso',

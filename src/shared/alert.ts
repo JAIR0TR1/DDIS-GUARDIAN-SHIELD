@@ -23,6 +23,15 @@ export interface NavigateRequest {
   entryId?: string
 }
 
+/**
+ * Qué hizo el vigilante con lo último que se copió. Sirve para que el usuario sepa por qué
+ * apareció (o no) una alerta, sin mostrar nunca el contenido copiado.
+ */
+export type WatcherEvent =
+  | { kind: 'ignored'; reason: string }
+  | { kind: 'safe' }
+  | { kind: 'alert'; verdict: 'sospechoso' | 'peligroso' }
+
 export interface ShortcutChange {
   ok: boolean
   /** Frase lista para mostrar. */

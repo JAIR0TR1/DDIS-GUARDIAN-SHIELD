@@ -1,4 +1,4 @@
-import type { AlertPayload, NavigateRequest, ShortcutChange } from './alert'
+import type { AlertPayload, NavigateRequest, ShortcutChange, WatcherEvent } from './alert'
 import type { AiTestResult, AnalysisOutcome, AnalyzeInput, AppConfig } from './analysis'
 import type { HistoryEntry } from './history'
 import type { AnalyzeImageInput, ImageAnalysisResponse } from './image'
@@ -35,6 +35,10 @@ export interface GuardianApi {
     dismiss: () => void
     /** Abre la ventana principal en el historial, en esa entrada. */
     openDetail: (entryId: string) => void
+  }
+  watcher: {
+    /** Qué hizo el vigilante con lo último copiado (nunca incluye el contenido). */
+    onEvent: (listener: (event: WatcherEvent) => void) => () => void
   }
   nav: {
     onGo: (listener: (request: NavigateRequest) => void) => () => void

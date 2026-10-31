@@ -16,6 +16,8 @@ export interface CreatureAvatarProps extends Omit<CreatureProps, 'className'> {
   greet?: number
   /** Gesto de contexto: Nilo reacciona con el cuerpo a lo que se analizó. */
   gesture?: Gesture
+  /** Qué tan marcado es el gesto (0-1; lo dudoso va suave). */
+  gestureScale?: number
   /** Objeto que flota sobre la cabeza y dice de qué trata el mensaje. */
   prop?: Prop
   /** Cambia para reiniciar el gesto (p. ej. el id del resultado). */
@@ -34,6 +36,7 @@ export function CreatureAvatar({
   layoutId,
   greet = 0,
   gesture,
+  gestureScale,
   prop,
   gestureKey,
   className,
@@ -67,6 +70,7 @@ export function CreatureAvatar({
         rings={rings}
         greet={greet}
         gesture={gesture}
+        gestureScale={gestureScale}
         prop={prop}
         gestureKey={gestureKey}
         title={title}

@@ -44,9 +44,11 @@ interface Pose {
 }
 
 /** Cuánto dura un gesto antes de relajarse (segundos), salvo «leer», que dura mientras se lee. */
-const GESTURE_SECONDS = 3.2
+const GESTURE_SECONDS = 5
 
 export interface Frame {
+  /** Qué tan marcado es el gesto (0-1): lo dudoso se hace suave, el peligro completo. */
+  gestureScale: number
   /** Objeto que flota sobre la cabeza y dice de qué trata el mensaje. */
   prop: Prop
   /** Gesto de contexto que se está haciendo («ninguno» = ninguno). */
@@ -518,7 +520,9 @@ export function buildMascot(): Mascot {
     const g =
       gesture === 'ninguno'
         ? 0
-        : Math.min(1, ga / 0.25) * Math.max(0, Math.min(1, 1 - (ga - gestureDuration) / 0.5))
+        : f.gestureScale *
+          Math.min(1, ga / 0.25) *
+          Math.max(0, Math.min(1, 1 - (ga - gestureDuration) / 0.5))
 
     // Parpadeo.
     if (animated && t > nextBlink) {

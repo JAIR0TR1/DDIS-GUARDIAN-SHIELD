@@ -123,6 +123,7 @@ export function ThreatResultCard({
           size={104}
           state={creatureByVerdict[result.verdict]}
           gesture={context.gesture}
+          gestureScale={context.intensity}
           prop={context.prop}
           gestureKey={reactionKey ?? `${result.verdict}-${result.score}`}
           halo={

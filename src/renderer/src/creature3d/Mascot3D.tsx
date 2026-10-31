@@ -13,6 +13,8 @@ export interface Mascot3DProps {
   greetFor?: number
   /** Gesto de contexto (celebrar, pensar, alto…). «ninguno» = sin gesto. */
   gesture?: Gesture
+  /** Qué tan marcado es el gesto (0-1). */
+  gestureScale?: number
   /** Objeto que flota sobre la cabeza (regalo, paquete, llave…). */
   prop?: Prop
   /** Cambia cada vez que el gesto debe REINICIARSE (p. ej. el id de un resultado nuevo). */
@@ -33,6 +35,7 @@ export function Mascot3D({
   halo,
   greetFor = 0,
   gesture = 'ninguno',
+  gestureScale = 1,
   prop = 'ninguno',
   gestureKey,
   animated,
@@ -47,6 +50,7 @@ export function Mascot3D({
     animated,
     greetFor,
     gesture,
+    gestureScale,
     prop,
     gestureStart: 0
   })
@@ -62,6 +66,7 @@ export function Mascot3D({
       animated,
       greetFor,
       gesture,
+      gestureScale,
       prop,
       // Un gesto nuevo (o el mismo con otra clave) empieza desde cero.
       gestureStart: restart ? performance.now() : live.current.gestureStart
@@ -129,6 +134,7 @@ export function Mascot3D({
         greetAge: cur.greetFor > 0 ? t + 0.001 : 0,
         greetFor: cur.greetFor,
         gesture: cur.gesture,
+        gestureScale: cur.gestureScale,
         prop: cur.prop,
         gestureAge: cur.gesture === 'ninguno' ? 0 : Math.max(0, (now - cur.gestureStart) / 1000),
         look: cur.animated ? look : { x: 0, y: 0 },

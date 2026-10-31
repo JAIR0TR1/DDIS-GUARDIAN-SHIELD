@@ -26,6 +26,10 @@ export const IPC = {
     dismiss: 'alert:dismiss',
     openDetail: 'alert:open-detail'
   },
+  watcher: {
+    /** Evento: el vigilante revisó (o descartó) algo copiado. */
+    event: 'watcher:event'
+  },
   nav: {
     /** Evento: la ventana principal debe ir a una sección. */
     go: 'nav:go'

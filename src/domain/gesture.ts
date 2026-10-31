@@ -42,10 +42,18 @@ export type Prop = (typeof PROPS)[number]
 export interface Context {
   gesture: Gesture
   prop: Prop
+  /**
+   * Qué tan marcado es el gesto: 1 = peligro (gesto completo), menos = dudoso (gesto suave, para
+   * que no se confunda un «puede ser» con un «es una estafa»).
+   */
+  intensity: number
 }
 
+/** Intensidad de los gestos cuando el mensaje es solo dudoso. */
+export const DOUBTFUL_INTENSITY = 0.65
+
 /** La historia de la estafa, en orden de prioridad. */
-const STORY: ReadonlyArray<{ kind: SignalKind } & Context> = [
+const STORY: readonly Entry[] = [
   { kind: 'cambio-numero', gesture: 'llamar', prop: 'telefono' },
   { kind: 'comprobante', gesture: 'alto', prop: 'documento' },
   { kind: 'paquete', gesture: 'alto', prop: 'paquete' },
@@ -55,33 +63,39 @@ const STORY: ReadonlyArray<{ kind: SignalKind } & Context> = [
 ]
 
 /** Lo que te piden, si no hay una historia más específica. */
-const ASK: ReadonlyArray<{ kind: SignalKind } & Context> = [
+const ASK: readonly Entry[] = [
   { kind: 'pide-clave', gesture: 'proteger', prop: 'llave' },
   { kind: 'soporte', gesture: 'proteger', prop: 'llave' },
   { kind: 'suplanta-marca', gesture: 'proteger', prop: 'banco' }
 ]
 
-function firstPresent(
-  table: ReadonlyArray<{ kind: SignalKind } & Context>,
-  kinds: ReadonlySet<SignalKind>
-): Context | null {
-  const found = table.find((entry) => kinds.has(entry.kind))
-  return found ? { gesture: found.gesture, prop: found.prop } : null
+type Entry = { kind: SignalKind; gesture: Gesture; prop: Prop }
+
+function firstPresent(table: readonly Entry[], kinds: ReadonlySet<SignalKind>): Entry | null {
+  return table.find((entry) => kinds.has(entry.kind)) ?? null
 }
 
-/** El gesto y el objeto que corresponden a un resultado. */
+/**
+ * El gesto y el objeto que corresponden a un resultado.
+ *  - seguro: celebrar con un check.
+ *  - dudoso: el gesto de SU historia (un premio dudoso «niega», un paquete dudoso «frena»), pero
+ *    suave; sin una historia clara, «pensar» con un signo de interrogación.
+ *  - peligroso: el gesto de su historia, completo.
+ */
 export function contextFor(result: Pick<ThreatResult, 'verdict' | 'signals'>): Context {
-  if (result.verdict === 'seguro') return { gesture: 'celebrar', prop: 'check' }
+  if (result.verdict === 'seguro') return { gesture: 'celebrar', prop: 'check', intensity: 1 }
 
   const kinds = new Set(result.signals.map((s) => s.kind))
-  const story = firstPresent(STORY, kinds)
-  const ask = firstPresent(ASK, kinds)
+  const match = firstPresent(STORY, kinds) ?? firstPresent(ASK, kinds)
 
   if (result.verdict === 'sospechoso') {
-    // Dudoso: siempre «pensar», pero el objeto sigue diciendo de qué parece tratarse.
-    return { gesture: 'pensar', prop: story?.prop ?? ask?.prop ?? 'interrogacion' }
+    return match
+      ? { gesture: match.gesture, prop: match.prop, intensity: DOUBTFUL_INTENSITY }
+      : { gesture: 'pensar', prop: 'interrogacion', intensity: DOUBTFUL_INTENSITY }
   }
-  return story ?? ask ?? { gesture: 'alto', prop: 'ninguno' }
+  return match
+    ? { gesture: match.gesture, prop: match.prop, intensity: 1 }
+    : { gesture: 'alto', prop: 'ninguno', intensity: 1 }
 }
 
 export function gestureFor(result: Pick<ThreatResult, 'verdict' | 'signals'>): Gesture {

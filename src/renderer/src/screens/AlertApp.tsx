@@ -141,6 +141,7 @@ function AlertBody({
           size={104}
           state={moodByVerdict[verdict]}
           gesture={context.gesture}
+          gestureScale={context.intensity}
           prop={context.prop}
           gestureKey={payload.entry.id}
           halo={haloByVerdict[verdict]}
