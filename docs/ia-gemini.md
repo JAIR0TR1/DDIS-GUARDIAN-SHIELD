@@ -12,7 +12,7 @@
 | Uso | Modelo por defecto | Variable | Por qué |
 |---|---|---|---|
 | Casos ambiguos y frases de Nilo | `gemini-3.5-flash-lite` | `MODEL_FAST` | Es «el más rápido y económico» de la serie 3.5, con capa gratuita. Verificado con una llamada real. |
-| Capturas (P1) | `gemini-3.8-flash` | `MODEL_VISION` | Flash más capaz, con capa gratuita. Se usará solo si hay imagen. |
+| Capturas | `gemini-3.5-flash-lite` | `MODEL_VISION` | Probado con una captura real: la lee bien y rápido. `gemini-3.8-flash` se probó primero, pero tardó más de lo tolerable y devolvió un 503 por demanda, así que no es el valor por defecto (se puede activar en el `.env`). Solo se usa si hay imagen. |
 
 Los nombres cambian con el tiempo: si Google retira un modelo, basta con poner otro en el `.env`.
 
@@ -39,6 +39,14 @@ Los nombres cambian con el tiempo: si Google retira un modelo, basta con poner o
 | Guardar una clave falsa desde Ajustes | Archivo cifrado de 65 bytes sin la clave en claro; Google la rechazó y la app mostró «La clave de Gemini no es válida». |
 | Pruebas automáticas (`tests/gemini.test.ts`) | Cuota, tiempo agotado, sin red, clave inválida, salida inválida, bloqueo por seguridad y que ningún error contenga la clave. |
 
+## Capturas de pantalla (visión)
+- La imagen viaja en base64 dentro de la petición (`inlineData`), hasta 4 MB; PNG, JPEG o WEBP.
+- El modelo transcribe el texto visible (`extractedText`) y lo analiza. Después, **las reglas locales vuelven a revisar ese texto** y el resultado no puede bajar de lo que ellas marquen como peligroso.
+- Todo lo que está escrito en la imagen es un dato no confiable: las instrucciones del sistema ordenan ignorar cualquier orden dentro de ella.
+- Una captura **siempre** necesita la IA (hay que leerla): sin clave o sin red no hay plan B y se avisa con claridad. En modo demo se devuelve un ejemplo fijo, marcado como tal («no leí tu imagen»), y no se envía nada.
+- La interfaz avisa que la imagen se envía a la IA de Google para leerla.
+- Prueba real: captura generada con un falso premio de Nequi → peligroso, 99/100, texto transcrito correctamente.
+
 ## Qué NO se probó
 - Cuota agotada real (no se forzó): solo con respuestas simuladas.
-- Análisis de capturas con visión: pertenece a P1.
+- Capturas con fotos reales de teléfonos, con poca luz o con texto muy pequeño: solo se probó una captura limpia generada por el equipo.

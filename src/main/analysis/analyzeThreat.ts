@@ -16,9 +16,18 @@ export interface ProviderInput {
  * Proveedor de IA intercambiable (Gemini, demo, un backend futuro). Devuelve un resultado
  * estructurado SIN validar: `analyzeThreat` lo valida con Zod y lo contrasta con las reglas.
  */
+export interface ImageProviderInput {
+  /** Tipo de imagen (PNG, JPEG o WEBP). */
+  mimeType: string
+  /** Contenido en base64, sin el prefijo «data:». */
+  data: string
+}
+
 export interface ThreatProvider {
   readonly name: string
   refine: (input: ProviderInput) => Promise<unknown>
+  /** Analiza una captura. Opcional: no todos los proveedores ven imágenes. */
+  refineImage?: (input: ImageProviderInput) => Promise<unknown>
 }
 
 export interface AnalyzeDeps {
@@ -99,7 +108,7 @@ export async function analyzeThreat(
 }
 
 /** Las señales de la IA no traen posiciones: se reutilizan las de las reglas si coincide el tipo. */
-function mergeSpans(
+export function mergeSpans(
   ai: ThreatResult['signals'],
   local: ThreatResult['signals']
 ): ThreatResult['signals'] {

@@ -13,6 +13,7 @@ import type { Section } from '../components/ui/Sidebar'
 import type { CreatureState } from '../creature/creatureState'
 import { cn } from '../lib/cn'
 import { relativeTime } from '../lib/relativeTime'
+import { firstImage } from '../lib/imageFile'
 
 export interface HomeProps {
   greeting: string
@@ -22,6 +23,8 @@ export interface HomeProps {
   onGo: (section: Section) => void
   /** Texto pegado en el panel «Analizar»: abre el analizador con ese texto. */
   onPasteText: (text: string) => void
+  /** Captura soltada sobre el panel «Analizar»: abre el analizador y la revisa. */
+  onDropImage: (file: File) => void
   /** Atajo global configurado (se muestra junto al botón Analizar). */
   shortcut: string
 }
@@ -40,6 +43,7 @@ export function Home({
   history,
   onGo,
   onPasteText,
+  onDropImage,
   shortcut
 }: HomeProps): React.JSX.Element {
   const lastThreat = history[0] ?? null
@@ -90,10 +94,26 @@ export function Home({
                 }
               }}
               onPaste={(e) => {
+                const file = firstImage(e.clipboardData.files)
+                if (file) {
+                  e.preventDefault()
+                  onDropImage(file)
+                  return
+                }
                 const pasted = e.clipboardData.getData('text')
                 if (pasted.trim()) {
                   e.preventDefault()
                   onPasteText(pasted)
+                }
+              }}
+              onDragOver={(e) => {
+                if (e.dataTransfer.types.includes('Files')) e.preventDefault()
+              }}
+              onDrop={(e) => {
+                const file = firstImage(e.dataTransfer.files)
+                if (file) {
+                  e.preventDefault()
+                  onDropImage(file)
                 }
               }}
               className="app-no-drag grid cursor-pointer place-items-center gap-2 rounded-[14px] border border-dashed border-accent/35 bg-accent/[0.04] px-4 py-7 text-center text-sm text-text-muted transition-[background-color,border-color] duration-[220ms] hover:border-accent/60 hover:bg-accent/[0.08]"

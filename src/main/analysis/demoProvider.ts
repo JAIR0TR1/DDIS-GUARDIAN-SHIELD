@@ -1,4 +1,7 @@
-import type { ProviderInput, ThreatProvider } from './analyzeThreat'
+import type { ThreatProvider, ProviderInput } from './analyzeThreat'
+
+/** Texto que «lee» el modo demo en cualquier captura: un ejemplo claro de estafa. */
+export const DEMO_IMAGE_TEXT = 'Ganaste un premio. Confirma tu clave en bit.ly/premio-nequi'
 
 /**
  * Proveedor de demostración: no usa red ni clave. Responde de forma determinista a los
@@ -23,6 +26,21 @@ export const demoProvider: ThreatProvider = {
       creatureMessage: top
         ? 'Hmm, algo no me cuadra. Verifica antes de responder.'
         : 'Se ve normal, pero verifica si te piden algo.'
+    }
+  },
+
+  /**
+   * En modo demo NO se lee la imagen (no hay IA): se devuelve un ejemplo fijo y la interfaz lo
+   * avisa. Así el flujo de capturas se puede mostrar sin internet.
+   */
+  async refineImage() {
+    return {
+      verdict: 'peligroso',
+      score: 90,
+      signals: [],
+      recommendedAction: 'Bórralo y no respondas. Si dudas, llama al número oficial de tu banco.',
+      creatureMessage: 'No hagas clic. Te pide tu clave y ese link no es oficial.',
+      extractedText: DEMO_IMAGE_TEXT
     }
   }
 }

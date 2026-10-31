@@ -2,6 +2,8 @@ import { app, ipcMain } from 'electron'
 import { IPC } from '../shared/ipc'
 import { creatureSchema, profileSchema, settingsSchema } from '../shared/models'
 import type { AiTestResult, AppConfig } from '../shared/analysis'
+import type { ImageAnalysisResponse } from '../shared/image'
+import { userMessageOf } from './analysis/providerError'
 import { testGemini } from './analysis/aiTest'
 import type { AnalysisService } from './analysis/service'
 import { activeApiKey, type RuntimeConfig } from './config'
@@ -45,6 +47,21 @@ export function registerDataIpc({ data, analysis, keys, config, controller }: Ip
   ipcMain.handle(IPC.data.getHistory, () => data.getHistory())
   ipcMain.handle(IPC.data.clearHistory, () => data.clearHistory())
   ipcMain.handle(IPC.analysis.run, (_e, input: unknown) => analysis.run(input))
+  // Las capturas devuelven un mensaje amable en vez de lanzar: así llega a la pantalla tal cual.
+  ipcMain.handle(
+    IPC.analysis.runImage,
+    async (_e, input: unknown): Promise<ImageAnalysisResponse> => {
+      try {
+        return { ok: true, outcome: await analysis.runImage(input) }
+      } catch (error) {
+        console.warn(
+          '[analysis] Falló el análisis de la captura:',
+          error instanceof Error ? error.message : error
+        )
+        return { ok: false, message: userMessageOf(error) }
+      }
+    }
+  )
 
   ipcMain.handle(IPC.config.get, async (): Promise<AppConfig> => ({
     demoMode: config.demoMode,

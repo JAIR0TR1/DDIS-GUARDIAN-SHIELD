@@ -34,7 +34,8 @@ export const IPC = {
     set: 'shortcut:set'
   },
   analysis: {
-    run: 'analysis:run'
+    run: 'analysis:run',
+    runImage: 'analysis:run-image'
   },
   config: {
     get: 'config:get'

@@ -1,6 +1,7 @@
 import type { AlertPayload, NavigateRequest, ShortcutChange } from './alert'
 import type { AiTestResult, AnalysisOutcome, AnalyzeInput, AppConfig } from './analysis'
 import type { HistoryEntry } from './history'
+import type { AnalyzeImageInput, ImageAnalysisResponse } from './image'
 import type { Creature, Profile, Settings } from './models'
 
 /** Contrato tipado de lo que el preload expone al renderer como `window.guardian`. */
@@ -44,6 +45,8 @@ export interface GuardianApi {
   analysis: {
     /** Analiza un texto. Rechaza con un mensaje claro si la entrada no es válida. */
     run: (input: AnalyzeInput) => Promise<AnalysisOutcome>
+    /** Analiza una captura de pantalla. Si no se puede, devuelve un mensaje amable (no lanza). */
+    runImage: (input: AnalyzeImageInput) => Promise<ImageAnalysisResponse>
   }
   config: {
     get: () => Promise<AppConfig>

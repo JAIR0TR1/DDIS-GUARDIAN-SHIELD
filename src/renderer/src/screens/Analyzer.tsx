@@ -4,11 +4,14 @@ import {
   AlertTriangle,
   CheckCheck,
   FlaskConical,
+  ImagePlus,
+  ImageUp,
   RotateCcw,
   ScanSearch,
   Sparkles
 } from 'lucide-react'
 import { analyzeInputSchema, MAX_TEXT_LENGTH, type AnalysisOutcome } from '@shared/analysis'
+import { IMAGE_TYPES, type AnalyzeImageInput } from '@shared/image'
 import { findLinks } from '@domain/text'
 import { transition } from '@design/motion'
 import demoMessages from '@data/demo-messages.json'
@@ -21,6 +24,7 @@ import { HighlightedText } from '../components/HighlightedText'
 import { Badge } from '../components/ui/Badge'
 import { cn } from '../lib/cn'
 import { reviewLabel } from '../lib/reviewLabel'
+import { firstImage, readImageFile } from '../lib/imageFile'
 
 /** Tiempo mínimo que se muestra el escáner, para que se vea qué hace Nilo aunque sea instantáneo. */
 const SCAN_MS = 1100
@@ -38,6 +42,8 @@ export interface AnalyzerProps {
   variants: Variants
   /** Texto que viene de otra pantalla (p. ej. pegado en Inicio). */
   initialText: string
+  /** Captura que viene de otra pantalla (p. ej. soltada sobre Inicio): se analiza al abrir. */
+  initialFile: File | null
   reduced: boolean
   onAnalyzing: () => void
   onOutcome: (outcome: AnalysisOutcome) => void
@@ -54,6 +60,7 @@ function detectSource(text: string): 'text' | 'link' {
 export function Analyzer({
   variants,
   initialText,
+  initialFile,
   reduced,
   onAnalyzing,
   onOutcome
@@ -62,13 +69,86 @@ export function Analyzer({
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
   const [outcome, setOutcome] = useState<AnalysisOutcome | null>(null)
+  /** Captura en análisis: la imagen (para mostrarla) y lo que se envió (para reintentar). */
+  const [image, setImage] = useState<{ preview: string; input: AnalyzeImageInput } | null>(null)
+  const [dragging, setDragging] = useState(false)
   const areaRef = useRef<HTMLTextAreaElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
   const areaId = useId()
   const errorId = useId()
 
   useEffect(() => {
     if (status === 'idle') areaRef.current?.focus()
   }, [status])
+
+  /** Analiza una captura ya leída. Si falla, deja un mensaje amable y permite reintentar. */
+  const runImage = async (input: AnalyzeImageInput, preview: string): Promise<void> => {
+    setImage({ preview, input })
+    setError(null)
+    setStatus('scanning')
+    onAnalyzing()
+    try {
+      const [response] = await Promise.all([
+        window.guardian.analysis.runImage(input),
+        reduced ? Promise.resolve() : sleep(SCAN_MS)
+      ])
+      if (!response.ok) {
+        setError(response.message)
+        setStatus('error')
+        return
+      }
+      setOutcome(response.outcome)
+      setStatus('done')
+      onOutcome(response.outcome)
+    } catch (cause) {
+      console.error('Falló el análisis de la captura', cause)
+      setError('No pude analizar la captura. Inténtalo de nuevo.')
+      setStatus('error')
+    }
+  }
+
+  const analyzeFile = async (file: File): Promise<void> => {
+    const read = await readImageFile(file)
+    if (!read.ok) {
+      setError(read.message)
+      setStatus('idle')
+      return
+    }
+    await runImage(read.input, read.preview)
+  }
+
+  // Una captura que llega desde Inicio se analiza al abrir (de forma asíncrona, no dentro del efecto).
+  useEffect(() => {
+    if (!initialFile) return
+    const timer = window.setTimeout(() => void analyzeFile(initialFile), 0)
+    return () => window.clearTimeout(timer)
+    // Solo al abrir con ese archivo.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialFile])
+
+  const canDrop = status === 'idle' || status === 'error'
+  const dropHandlers = {
+    onDragEnter: (e: React.DragEvent) => {
+      if (!canDrop || !e.dataTransfer.types.includes('Files')) return
+      e.preventDefault()
+      setDragging(true)
+    },
+    onDragOver: (e: React.DragEvent) => {
+      if (!canDrop || !e.dataTransfer.types.includes('Files')) return
+      e.preventDefault() // sin esto el navegador no permite soltar
+    },
+    onDragLeave: (e: React.DragEvent) => {
+      // Ignora los «leave» que ocurren al pasar sobre elementos hijos.
+      if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false)
+    },
+    onDrop: (e: React.DragEvent) => {
+      if (!canDrop) return
+      e.preventDefault()
+      setDragging(false)
+      const file = firstImage(e.dataTransfer.files)
+      if (file) void analyzeFile(file)
+    }
+  }
 
   const run = async (value: string = text): Promise<void> => {
     const parsed = analyzeInputSchema.safeParse({ text: value, source: detectSource(value) })
@@ -99,7 +179,14 @@ export function Analyzer({
     setStatus('idle')
     setOutcome(null)
     setError(null)
+    setImage(null)
     setText('')
+  }
+
+  /** Reintenta lo último que se intentó: la captura, o el texto. */
+  const retry = (): void => {
+    if (image) void runImage(image.input, image.preview)
+    else void run()
   }
 
   const loadSample = (sample: string): void => {
@@ -117,7 +204,23 @@ export function Analyzer({
         <GlassCard
           title="Mensaje a revisar"
           className="relative flex h-full flex-col overflow-hidden"
+          {...dropHandlers}
         >
+          {/* Estado visual al arrastrar una captura sobre la tarjeta. */}
+          {dragging && (
+            <div
+              role="status"
+              className="absolute inset-3 z-20 grid place-items-center rounded-[16px] border-2 border-dashed border-accent bg-[#06121c]/[0.97] text-center shadow-[0_0_32px_rgb(34_211_238/0.25)]"
+            >
+              <div className="flex flex-col items-center gap-2">
+                <ImageUp aria-hidden className="size-8 text-accent-strong" />
+                <p className="font-display text-lg font-semibold text-text">
+                  Suelta la captura aquí
+                </p>
+                <p className="text-[13px] text-text-muted">PNG, JPG o WEBP, hasta 4 MB</p>
+              </div>
+            </div>
+          )}
           {status === 'idle' || status === 'error' ? (
             <>
               <label htmlFor={areaId} className="sr-only">
@@ -136,6 +239,14 @@ export function Analyzer({
                   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
                     e.preventDefault()
                     void run()
+                  }
+                }}
+                onPaste={(e) => {
+                  // Pegar una captura (Ctrl+V con una imagen copiada) también funciona.
+                  const file = firstImage(e.clipboardData.files)
+                  if (file) {
+                    e.preventDefault()
+                    void analyzeFile(file)
                   }
                 }}
                 placeholder="Pega aquí el mensaje o link que te dio mala espina…"
@@ -160,10 +271,35 @@ export function Analyzer({
                 >
                   Analizar
                 </Button>
-                <span className="flex items-center gap-2 text-[12.5px] text-text-muted">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={() => fileRef.current?.click()}
+                  icon={<ImagePlus aria-hidden className="size-4" />}
+                >
+                  Elegir captura
+                </Button>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept={IMAGE_TYPES.join(',')}
+                  className="sr-only"
+                  tabIndex={-1}
+                  aria-label="Elegir una captura de pantalla"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0]
+                    e.target.value = '' // permite elegir la misma imagen otra vez
+                    if (file) void analyzeFile(file)
+                  }}
+                />
+                <span className="ml-auto flex items-center gap-2 text-[12.5px] text-text-muted">
                   <Kbd keys="Ctrl+Enter" /> para analizar
                 </span>
               </div>
+              <p className="mt-2.5 text-[12.5px] leading-snug text-text-subtle">
+                También puedes arrastrar una captura a esta tarjeta o pegarla con Ctrl+V. La imagen
+                se envía a la IA de Google para leerla (en modo demo no se envía nada).
+              </p>
 
               {/* Modo presentación: ejemplos listos, sin depender de internet. */}
               <div className="mt-5 border-t border-white/10 pt-4">
@@ -191,6 +327,7 @@ export function Analyzer({
               scanning={scanning}
               reduced={reduced}
               result={result}
+              preview={image?.preview}
               onReset={reset}
             />
           )}
@@ -204,8 +341,10 @@ export function Analyzer({
               tone="error"
               icon={<AlertTriangle aria-hidden className="size-5" />}
               title="No salió el análisis"
-              description="Algo falló de mi lado. Tu mensaje sigue ahí: inténtalo otra vez."
-              action={<Button onClick={() => void run()}>Reintentar</Button>}
+              description={
+                error ?? 'Algo falló de mi lado. Tu mensaje sigue ahí: inténtalo otra vez.'
+              }
+              action={<Button onClick={retry}>Reintentar</Button>}
             />
           </GlassCard>
         ) : scanning ? (
@@ -236,17 +375,28 @@ function ScannedMessage({
   scanning,
   reduced,
   result,
+  preview,
   onReset
 }: {
   text: string
   scanning: boolean
   reduced: boolean
   result: AnalysisOutcome['entry']['result'] | undefined
+  /** Captura analizada (data URL). Solo cuando el análisis es de una imagen. */
+  preview: string | undefined
   onReset: () => void
 }): React.JSX.Element {
   return (
     <div className="flex h-full flex-col">
       <div className="relative min-h-[170px] flex-1 overflow-hidden rounded-[12px] border border-white/12 bg-black/25 p-3.5">
+        {preview && (
+          <img
+            src={preview}
+            alt="Captura que estás analizando"
+            draggable={false}
+            className="mb-3 max-h-40 w-auto max-w-full rounded-[10px] border border-white/10 object-contain"
+          />
+        )}
         <HighlightedText
           text={text}
           signals={scanning ? [] : (result?.signals ?? [])}

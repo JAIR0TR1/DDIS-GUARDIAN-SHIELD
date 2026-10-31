@@ -72,6 +72,7 @@ export function Session({
   }
   const [mood, setMood] = useState<CreatureState>('feliz')
   const [pasted, setPasted] = useState('')
+  const [droppedFile, setDroppedFile] = useState<File | null>(null)
   const [savingWatcher, setSavingWatcher] = useState(false)
   const toast = useToast()
   const osReduced = useReducedMotion()
@@ -129,6 +130,11 @@ export function Session({
       .finally(() => setSavingWatcher(false))
   }
 
+  const goAnalyzeImage = (file: File): void => {
+    setDroppedFile(file)
+    setSection('analizar')
+  }
+
   const goAnalyze = (text: string): void => {
     setPasted(text)
     setSection('analizar')
@@ -145,7 +151,10 @@ export function Session({
         <Sidebar
           current={section}
           onSelect={(s) => {
-            if (s !== 'analizar') setPasted('')
+            if (s !== 'analizar') {
+              setPasted('')
+              setDroppedFile(null)
+            }
             setSection(s)
           }}
           creatureSlot={
@@ -216,6 +225,7 @@ export function Session({
                 history={history}
                 onGo={setSection}
                 onPasteText={goAnalyze}
+                onDropImage={goAnalyzeImage}
                 shortcut={settings.shortcut}
               />
             )}
@@ -223,6 +233,7 @@ export function Session({
               <Analyzer
                 variants={itemVariants}
                 initialText={pasted}
+                initialFile={droppedFile}
                 reduced={reduced}
                 onAnalyzing={handleAnalyzing}
                 onOutcome={handleOutcome}

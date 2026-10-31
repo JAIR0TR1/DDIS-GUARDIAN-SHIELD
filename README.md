@@ -47,6 +47,12 @@ Con `DEMO_MODE=true` todo funciona sin internet. En **Analizar** hay tres ejempl
 
 Informe de las reglas sobre 30 mensajes de ejemplo: [docs/corpus-report.md](docs/corpus-report.md).
 
+## Funciones de fondo
+- **Atajo global** (por defecto `Ctrl+Shift+G`, configurable en Ajustes): analiza lo que copiaste desde cualquier programa y muestra una alerta flotante. `Enter` abre el detalle, `Esc` la descarta.
+- **Icono en la bandeja** con un punto de color según el estado; clic para abrir, clic derecho para el menú.
+- **Vigilante del portapapeles** (opcional, apagado por defecto): avisa si copias algo sospechoso. Ignora contraseñas, claves y tarjetas, y nunca envía nada a la IA.
+- **Capturas de pantalla**: arrástralas, pégalas con `Ctrl+V` o elígelas; la IA lee el texto y lo analiza.
+
 ## Datos
 Todo se guarda en archivos JSON en la carpeta de datos del usuario (`%APPDATA%\Escudo Guardián`). No hay base de datos ni módulos nativos.
 

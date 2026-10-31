@@ -26,6 +26,12 @@ export function createProviderResolver(
           'Falta la clave de Gemini, así que usé solo las reglas locales. Agrégala en Ajustes.'
       }
     }
-    return { provider: createGeminiProvider({ apiKey, model: config.modelFast }) }
+    return {
+      provider: createGeminiProvider({
+        apiKey,
+        model: config.modelFast,
+        visionModel: config.modelVision
+      })
+    }
   }
 }

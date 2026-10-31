@@ -12,7 +12,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ## 1. Resultados automáticos (última ejecución)
 | Comprobación | Resultado |
 |---|---|
-| Pruebas (`npm test`) | 118 pasan: contraste AA, reglas, corpus, XP, caché, almacenamiento JSON, Gemini con red simulada, enmascarado |
+| Pruebas (`npm test`) | 154 pasan: contraste AA, reglas, corpus, XP, caché, almacenamiento JSON, Gemini con red simulada, enmascarado, atajos, filtro de privacidad del portapapeles, vigilante, validación de imágenes |
 | Corpus de 30 mensajes | 14 de 15 estafas peligrosas, 1 en zona de IA, 0 estafas dadas por seguras, 0 falsos positivos (`docs/corpus-report.md`) |
 | `typecheck`, `lint`, `build` | Sin errores |
 | Rendimiento de la mascota 3D | 144 fps medidos con 1 y 2 lienzos (pantalla de 144 Hz) |
@@ -68,8 +68,27 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | 6.4 | Desinstalar | Desinstalar desde Windows | No quedan archivos, accesos ni registro | ✅ |
 | 6.5 | La clave no viaja | Inspeccionar el instalador | No hay `.env` ni claves | ✅ (el archivo comprimido no contiene `.env`) |
 
-## 7. Pendientes de las funciones P1 (todavía no implementadas)
-Ventana flotante de alerta · icono en la bandeja · atajo global · vigilante de portapapeles · análisis de capturas.
+## 7. Funciones de fondo (P1)
+| # | Caso | Pasos | Resultado esperado | Verificado |
+|---|---|---|---|---|
+| 7.1 | Atajo global | Copia «Ganaste un premio. Confirma tu clave en bit.ly/x» y presiona `Ctrl+Shift+G` desde OTRO programa | Aparece la alerta flotante arriba, centrada, con el resultado | ✅ flujo simulado de punta a punta · ⬜ con el teclado real |
+| 7.2 | Alerta: teclado | Con la alerta abierta: `Enter` y luego (otra alerta) `Esc` | Enter abre el Historial con esa entrada y oculta la alerta; Esc la descarta | ✅ automático |
+| 7.3 | Alerta: siempre encima | Abre la alerta con otro programa en pantalla completa de fondo | Se ve por encima | ✅ propiedad comprobada · ⬜ vista |
+| 7.4 | Portapapeles vacío | Vacía el portapapeles y presiona el atajo | La alerta dice «No hay nada copiado» y se cierra sola | ✅ |
+| 7.5 | Cambiar el atajo | Ajustes → Cambiar → presiona otra combinación (p. ej. `Ctrl+Alt+K`) | Aviso «Listo: ahora es…»; si está ocupado, avisa y conserva el anterior | ✅ validación (pruebas) · ⬜ interfaz |
+| 7.6 | Icono de bandeja | Mira la bandeja de Windows | Nilo con un punto: cian (vigilando), gris (vigilante apagado), ámbar (duda), rojo (amenaza) | ✅ iconos generados · ⬜ en la barra real |
+| 7.7 | Clic en la bandeja | Clic en el icono; clic derecho | Abre la ventana; el menú tiene Abrir, Analizar el portapapeles, Vigilar y Salir | ⬜ |
+| 7.8 | Vigilante: lo que NO mira | Con el vigilante activo copia una contraseña (`P@ssw0rd-Segura9`), una tarjeta y un mensaje normal | No pasa nada: ni alerta ni historial | ✅ portapapeles real |
+| 7.9 | Vigilante: estafa | Con el vigilante activo copia un mensaje de estafa | Alerta flotante SIN robar el foco, notificación de Windows, entrada en el historial, sin usar la IA | ✅ alerta e historial · ⬜ notificación de Windows |
+| 7.10 | Vigilante: lo ya copiado | Copia algo y DESPUÉS activa el vigilante | No analiza lo que ya estaba copiado | ✅ prueba automática |
+| 7.11 | Interruptor visible | Chip de la cabecera («Vigilando portapapeles») | Enciende o apaga y queda guardado | ✅ |
+| 7.12 | Cerrar con vigilante activo | Cierra la ventana (X) con el vigilante encendido | La app sigue en la bandeja; «Salir» del menú la cierra | ⬜ |
+| 7.13 | Captura: arrastrar | En Analizar arrastra una imagen sobre la tarjeta | «Suelta la captura aquí»; luego resultado con el texto leído resaltado | ✅ simulado (demo y IA real) · ⬜ arrastre real |
+| 7.14 | Captura: archivo inválido | Arrastra un PDF | Mensaje «Ese archivo no es una captura válida…» | ✅ |
+| 7.15 | Captura: pegar y elegir | `Ctrl+V` con una imagen copiada; botón «Elegir captura» | Se analiza | ⬜ |
+| 7.16 | Captura sin IA | Modo real sin clave, soltar una captura | Aviso claro; no se guarda nada | ⬜ |
+
+**Salvedad conocida:** la notificación nativa de Windows puede no mostrarse en modo desarrollo (Windows exige la app instalada). En la app instalada debe verse.
 
 ## 8. Cómo reportar un fallo
 Anota: qué hacías, qué esperabas, qué pasó, y si ocurre siempre. Adjunta una captura. Si es un error de la IA, indica si estabas en modo demo o real.
