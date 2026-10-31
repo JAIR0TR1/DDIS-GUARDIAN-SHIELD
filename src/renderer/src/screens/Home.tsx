@@ -1,0 +1,134 @@
+import { motion, type Variants } from 'framer-motion'
+import { Clock, ImageUp, Inbox, ScanSearch } from 'lucide-react'
+import type { HistoryEntry } from '@shared/history'
+import { excerpt } from '@shared/safeText'
+import { GlassCard } from '../components/ui/GlassCard'
+import { Button } from '../components/ui/Button'
+import { EmptyState } from '../components/ui/EmptyState'
+import { Kbd } from '../components/ui/Kbd'
+import { ThreatResultCard } from '../components/ui/ThreatResultCard'
+import { verdictMeta } from '../components/ui/verdictMeta'
+import { CreatureAvatar } from '../components/ui/CreatureAvatar'
+import type { Section } from '../components/ui/Sidebar'
+import { cn } from '../lib/cn'
+
+export interface HomeProps {
+  greeting: string
+  variants: Variants
+  lastThreat: HistoryEntry | null
+  history: HistoryEntry[]
+  profileName: string
+  onGo: (section: Section) => void
+}
+
+const verdictColor = {
+  seguro: 'text-safe',
+  sospechoso: 'text-warn',
+  peligroso: 'text-danger-text'
+} as const
+
+function relativeTime(iso: string): string {
+  const minutes = Math.round((Date.now() - new Date(iso).getTime()) / 60000)
+  if (minutes < 1) return 'Ahora'
+  if (minutes < 60) return `Hace ${minutes} min`
+  const hours = Math.round(minutes / 60)
+  if (hours < 24) return `Hace ${hours} h`
+  const days = Math.round(hours / 24)
+  return days === 1 ? 'Ayer' : `Hace ${days} d`
+}
+
+/** Inicio: última amenaza, panel para analizar e historial reciente. */
+export function Home({
+  greeting,
+  variants,
+  lastThreat,
+  history,
+  onGo
+}: HomeProps): React.JSX.Element {
+  return (
+    <>
+      <motion.div variants={variants} className="col-span-12">
+        <div className="glass flex items-center gap-4 rounded-[16px] px-4 py-3">
+          <CreatureAvatar size={34} frame="badge" state="feliz" title="Nilo" />
+          <p className="text-[15px] text-text">{greeting}</p>
+        </div>
+      </motion.div>
+
+      <motion.div variants={variants} className="col-span-12 md:col-span-7">
+        {lastThreat ? (
+          <ThreatResultCard
+            result={lastThreat.result}
+            text={lastThreat.excerpt}
+            className="h-full"
+          />
+        ) : (
+          <GlassCard title="Última amenaza" className="h-full">
+            <EmptyState
+              icon={<Inbox aria-hidden className="size-5" />}
+              title="Todo tranquilo por aquí"
+              description="Cuando analices un mensaje, el resultado aparece acá con su semáforo."
+              action={
+                <Button variant="secondary" onClick={() => onGo('analizar')}>
+                  Analizar un mensaje
+                </Button>
+              }
+            />
+          </GlassCard>
+        )}
+      </motion.div>
+
+      <div className="col-span-12 flex flex-col gap-4 md:col-span-5">
+        <motion.div variants={variants}>
+          <GlassCard title="Analizar">
+            <div className="grid place-items-center gap-2 rounded-[14px] border border-dashed border-accent/35 bg-accent/[0.04] px-4 py-7 text-center text-sm text-text-muted">
+              <ImageUp aria-hidden className="size-5 text-accent-strong" />
+              Pega un mensaje o arrastra una captura
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <Button
+                variant="primary"
+                onClick={() => onGo('analizar')}
+                icon={<ScanSearch aria-hidden className="size-4" />}
+              >
+                Analizar
+              </Button>
+              <Kbd keys="Ctrl+Shift+G" />
+            </div>
+          </GlassCard>
+        </motion.div>
+
+        <motion.div variants={variants} className="min-h-0 flex-1">
+          <GlassCard title="Historial" className="h-full">
+            {history.length === 0 ? (
+              <p className="flex items-center gap-2 text-sm text-text-muted">
+                <Clock aria-hidden className="size-4" />
+                Aún no hay análisis. Empieza con el primero.
+              </p>
+            ) : (
+              <ul className="flex flex-col gap-2.5">
+                {history.slice(0, 3).map((entry) => {
+                  const meta = verdictMeta[entry.result.verdict]
+                  const Icon = meta.icon
+                  return (
+                    <li key={entry.id} className="flex items-center gap-3 text-sm">
+                      <Icon
+                        aria-label={meta.label}
+                        className={cn('size-[18px] shrink-0', verdictColor[entry.result.verdict])}
+                      />
+                      <span className="min-w-0 flex-1 truncate text-text">
+                        {excerpt(entry.excerpt, 40)}
+                      </span>
+                      <span className="shrink-0 font-mono text-[12px] text-text-muted">
+                        {relativeTime(entry.at)}
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </GlassCard>
+        </motion.div>
+      </div>
+    </>
+  )
+}

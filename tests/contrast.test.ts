@@ -10,7 +10,8 @@ const AA = 4.5
  */
 export const MESH_MAX_ALPHA_UNDER_PANELS = 0.14
 const brightestMesh = blend(hexToRgb('#22D3EE'), hexToRgb(colors.bg), MESH_MAX_ALPHA_UNDER_PANELS)
-const glassWorst = blend({ r: 255, g: 255, b: 255 }, brightestMesh, 0.1)
+// Blanco máximo del vidrio: destello de esquina (0.06) + degradado vertical (0.07) ≈ 0.13.
+const glassWorst = blend({ r: 255, g: 255, b: 255 }, brightestMesh, 0.13)
 const glassTypical = blend({ r: 255, g: 255, b: 255 }, hexToRgb(colors.bgRaised), 0.07)
 
 const textOnBg = [
@@ -54,7 +55,7 @@ describe('contraste AA de los tokens', () => {
   })
 
   it('los iconos de semáforo cumplen 3:1 sobre vidrio (elementos gráficos)', () => {
-    for (const name of ['safe', 'warn', 'danger'] as const) {
+    for (const name of ['safe', 'warn', 'dangerText'] as const) {
       expect(contrastRatio(hexToRgb(colors[name]), glassWorst)).toBeGreaterThanOrEqual(3)
     }
   })

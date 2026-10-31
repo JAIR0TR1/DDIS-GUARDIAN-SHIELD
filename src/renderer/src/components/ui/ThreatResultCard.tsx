@@ -39,7 +39,7 @@ const signalIcon: Record<SignalKind, LucideIcon> = {
 }
 
 const severityColor: Record<Signal['severity'], string> = {
-  alta: 'text-danger',
+  alta: 'text-danger-text',
   media: 'text-warn',
   baja: 'text-text-muted'
 }

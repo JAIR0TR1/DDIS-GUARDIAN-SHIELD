@@ -14,6 +14,14 @@ const api: GuardianApi = {
       ipcRenderer.on(IPC.window.maximizedChanged, handler)
       return () => ipcRenderer.removeListener(IPC.window.maximizedChanged, handler)
     }
+  },
+  data: {
+    getProfile: () => ipcRenderer.invoke(IPC.data.getProfile),
+    saveProfile: (profile) => ipcRenderer.invoke(IPC.data.saveProfile, profile),
+    getSettings: () => ipcRenderer.invoke(IPC.data.getSettings),
+    saveSettings: (settings) => ipcRenderer.invoke(IPC.data.saveSettings, settings),
+    getCreature: () => ipcRenderer.invoke(IPC.data.getCreature),
+    saveCreature: (creature) => ipcRenderer.invoke(IPC.data.saveCreature, creature)
   }
 }
 

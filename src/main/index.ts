@@ -4,6 +4,8 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../build/icon.png?asset'
 import { registerWindowControls } from './windowControls'
 import { runDevScreenshots } from './devScreenshot'
+import { registerDataIpc } from './dataIpc'
+import { createAppData } from './storage/appData'
 
 const APP_ID = 'com.escudoguardian.app'
 const BACKGROUND = '#05070D'
@@ -56,6 +58,7 @@ void app.whenReady().then(() => {
   })
 
   registerWindowControls()
+  registerDataIpc(createAppData())
   createWindow()
 
   app.on('activate', () => {

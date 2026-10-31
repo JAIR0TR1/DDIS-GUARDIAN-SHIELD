@@ -1,0 +1,27 @@
+{
+  "name": "Nilo",
+  "type": "Guardián felino",
+  "rarity": "rara",
+  "attack": 42,
+  "defense": 68,
+  "xp": 0,
+  "level": 1,
+  "personality": "Curioso, protector y un poco bromista. Habla corto y directo, tutea y nunca asusta de más: avisa claro y deja la decisión en tus manos.",
+  "phrases": {
+    "bienvenida": [
+      "Aquí estoy, {nombre}. Ya estoy vigilando.",
+      "Listo, {nombre}. Yo me encargo de revisar por ti."
+    ],
+    "reposo": ["Pega un mensaje y lo reviso por ti.", "Si algo te huele raro, pásamelo."],
+    "seguro": ["Todo en orden. Este mensaje se ve limpio.", "Tranquilo, no veo nada raro."],
+    "sospechoso": [
+      "Hmm, algo no me cuadra. Verifica antes de responder.",
+      "Ojo: tiene señales raras. No des datos todavía."
+    ],
+    "peligroso": [
+      "No hagas clic. Esto huele a estafa.",
+      "Alto ahí. Es peligroso: no respondas ni pagues."
+    ],
+    "subirNivel": ["¡Subimos de nivel, {nombre}! Cada estafa que paramos nos hace más fuertes."]
+  }
+}

@@ -77,7 +77,9 @@ Algunos terminales de editor definen `ELECTRON_RUN_AS_NODE=1` y Electron arranca
 ## Estado
 - Fase 0 (scaffold, ventana sin marco, CSP, IPC de ventana): completa.
 - Fase 1 (tokens, 14 componentes, criatura SVG, galería, pruebas de contraste y de safeText): completa.
-- Fase 2 (estados A y B, transición, onboarding): pendiente.
+- Rediseño premium (vidrio con borde luminoso, aurora + grano + viñeta, criatura con volumen): hecho antes de la fase 2.
+- Fase 2 (estados A y B, transición con layoutId + ScanBeam, onboarding de 3 pasos, entrada rápida, perfil/ajustes/criatura en JSON, pantallas Inicio, Criatura y Ajustes): completa. Analizar e Historial son marcadores hasta la fase 3.
+- Datos de desarrollo: `GUARDIAN_DATA_DIR` redirige la carpeta de datos; `#sample` carga historial de ejemplo; `#gallery` abre la galería (solo en dev).
 - Fases 3 (analizador, reglas, historial, XP, demo, instalador), 4 (Gemini), 5 (P1), 6 (pulido), 7 (pruebas y docs): pendientes.
 - Material nativo (Mica/Acrylic): descartado por ahora; fondo sólido + malla de gradientes interna.
 Mantener esta sección actualizada.
