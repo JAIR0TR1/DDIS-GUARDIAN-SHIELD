@@ -19,7 +19,11 @@ export function getMainWindow(): BrowserWindow | null {
  * Crea la ventana principal. `shouldHideOnClose` decide si al cerrarla la app se queda en la
  * bandeja (vigilante activo) o termina.
  */
-export function createMainWindow(shouldHideOnClose: () => boolean): BrowserWindow {
+export function createMainWindow(
+  shouldHideOnClose: () => boolean,
+  /** Se llama cuando la ventana se esconde en la bandeja en vez de cerrarse. */
+  onHiddenToTray?: () => void
+): BrowserWindow {
   const win = new BrowserWindow({
     width: 1100,
     height: 720,
@@ -39,6 +43,7 @@ export function createMainWindow(shouldHideOnClose: () => boolean): BrowserWindo
     if (!quitting && shouldHideOnClose()) {
       event.preventDefault()
       win.hide()
+      onHiddenToTray?.()
     }
   })
   win.on('closed', () => {

@@ -8,7 +8,7 @@ import { createAnalysisService } from './analysis/service'
 import { createProviderResolver } from './analysis/providerFactory'
 import { createApiKeyStore } from './secrets/apiKeyStore'
 import { loadEnvironment, resolveConfig } from './config'
-import { createGuardianController } from './guardianController'
+import { createGuardianController, type GuardianController } from './guardianController'
 import { runAlertTest, runWatcherTest } from './devAlertTest'
 import { prepareAlertWindow, registerAlertReady } from './windows/alertWindow'
 import { createMainWindow, showMainWindow } from './windows/mainWindow'
@@ -25,8 +25,11 @@ const gotLock = app.requestSingleInstanceLock()
 if (!gotLock) {
   app.quit()
 } else {
+  let guardian: GuardianController | null = null
   app.on('second-instance', () => {
     showMainWindow()
+    // En desarrollo, abrir otra copia suele ser un intento de recargar el código nuevo: se avisa.
+    if (!app.isPackaged) guardian?.notifyAlreadyRunning()
   })
 
   void app.whenReady().then(async () => {
@@ -46,16 +49,22 @@ if (!gotLock) {
     const analysis = createAnalysisService(data, createProviderResolver(config, keys))
     const controller = createGuardianController({ data, analysis })
     registerDataIpc({ data, analysis, keys, config, controller })
+    guardian = controller
 
-    createMainWindow(() => controller.shouldHideOnClose())
+    const openMain = (): void => {
+      createMainWindow(
+        () => controller.shouldHideOnClose(),
+        () => controller.notifyHiddenInTray()
+      )
+    }
+    openMain()
     prepareAlertWindow()
     await controller.init()
     void runAlertTest(controller)
     void runWatcherTest(data)
 
     app.on('activate', () => {
-      if (BrowserWindow.getAllWindows().length === 0)
-        createMainWindow(() => controller.shouldHideOnClose())
+      if (BrowserWindow.getAllWindows().length === 0) openMain()
     })
     app.on('will-quit', () => controller.dispose())
   })

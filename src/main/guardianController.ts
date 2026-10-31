@@ -29,6 +29,10 @@ export interface GuardianController {
   init: () => Promise<void>
   /** ¿Al cerrar la ventana principal la app debe seguir en la bandeja? */
   shouldHideOnClose: () => boolean
+  /** Avisa (una vez) que la app quedó en la bandeja y cómo cerrarla del todo. */
+  notifyHiddenInTray: () => void
+  /** Una segunda copia intentó abrirse: avisa que ya había una corriendo. */
+  notifyAlreadyRunning: () => void
   onProfileSaved: (profile: Profile) => void
   setShortcut: (shortcut: string) => Promise<ShortcutChange>
   analyzeClipboard: () => Promise<void>
@@ -135,6 +139,18 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
     notifyDataChanged()
   }
 
+  /** Cada ejecución avisa una sola vez que la app se quedó en la bandeja (y cómo cerrarla del todo). */
+  let toldAboutTray = false
+  function notifyHiddenInTray(): void {
+    if (toldAboutTray || !Notification.isSupported()) return
+    toldAboutTray = true
+    new Notification({
+      title: 'Escudo Guardián sigue vigilando',
+      body: 'Está en la bandeja, junto al reloj. Para cerrarla del todo: clic derecho en su icono → Salir.',
+      icon: trayIconFor('activo')
+    }).show()
+  }
+
   /** Notificación nativa de Windows. Al hacer clic abre el detalle. */
   function notify(title: string, body: string, entryId: string): void {
     if (!Notification.isSupported()) return
@@ -179,6 +195,15 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
     },
 
     shouldHideOnClose: () => watcherOn,
+    notifyHiddenInTray,
+    notifyAlreadyRunning() {
+      if (!Notification.isSupported()) return
+      new Notification({
+        title: 'Escudo Guardián ya estaba abierta',
+        body: 'Te traje la que ya corría. Si acabas de cambiar el código, ciérrala desde la bandeja (clic derecho → Salir) y ábrela de nuevo.',
+        icon: trayIconFor('activo')
+      }).show()
+    },
 
     onProfileSaved(profile) {
       if (profile.vigilante !== watcherOn) applyWatcher(profile.vigilante)
