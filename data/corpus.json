@@ -1,0 +1,153 @@
+[
+  {
+    "id": "e01",
+    "label": "estafa",
+    "text": "Bancolombia: Detectamos un ingreso no autorizado a tu cuenta. Confirma tu clave dinámica en https://bancolombia-seguro.co/verifica de inmediato o tu cuenta será bloqueada."
+  },
+  {
+    "id": "e02",
+    "label": "estafa",
+    "text": "¡Ganaste un premio de $2.000.000 en el sorteo Nequi! Reclámalo hoy mismo en bit.ly/premio-nequi y confirma tu clave."
+  },
+  {
+    "id": "e03",
+    "label": "estafa",
+    "text": "Servientrega: Tu paquete está retenido por dirección incorrecta. Paga $3.500 de reenvío en https://servientrega-envios.top/pago para liberarlo."
+  },
+  {
+    "id": "e04",
+    "label": "estafa",
+    "text": "Hola mamá, cambié de número. Guarda este nuevo. ¿Me puedes transferir $150.000 por Nequi? Es urgente, te explico luego."
+  },
+  {
+    "id": "e05",
+    "label": "estafa",
+    "text": "Te consigné de más por error. Por favor devuélveme la plata a este Daviplata, ya te mandé el comprobante: https://tinyurl.com/comprobante-pago"
+  },
+  {
+    "id": "e06",
+    "label": "estafa",
+    "text": "Oferta de empleo: trabaja desde casa y gana $1.500.000 semanales sin experiencia. Solo debes consignar $80.000 de inscripción. Escríbenos por WhatsApp."
+  },
+  {
+    "id": "e07",
+    "label": "estafa",
+    "text": "Soporte técnico Microsoft: su equipo está infectado con un virus. Instale AnyDesk y llame al 601 555 0000 para quitarlo."
+  },
+  {
+    "id": "e08",
+    "label": "estafa",
+    "text": "DIAN: Tienes una devolución del IVA pendiente. Ingresa tus datos y número de tarjeta en dian-devoluciones.xyz antes de 24 horas."
+  },
+  {
+    "id": "e09",
+    "label": "estafa",
+    "text": "Davivienda informa: tu tarjeta fue bloqueada. Para desbloquearla envíanos el código de verificación que te llegó por SMS."
+  },
+  {
+    "id": "e10",
+    "label": "estafa",
+    "text": "Préstamo aprobado inmediato sin papeles ni reporte en centrales. Solo paga la primera cuota por adelantado y te desembolsamos hoy."
+  },
+  {
+    "id": "e11",
+    "label": "estafa",
+    "text": "Subsidio del gobierno: ingresa a subsidios-gov.click y actualiza tus datos para recibir el Ingreso Solidario. Último aviso."
+  },
+  {
+    "id": "e12",
+    "label": "estafa",
+    "text": "URGENTE: Netflix suspenderá tu cuenta. Actualiza tu método de pago aquí: netflix-pagos.online/login"
+  },
+  {
+    "id": "e13",
+    "label": "estafa",
+    "text": "Felicitaciones, fuiste seleccionado para recibir un bono de $500.000. Confirma tu cédula y clave en cutt.ly/bono"
+  },
+  {
+    "id": "e14",
+    "label": "estafa",
+    "text": "Coordinadora: Intento de entrega fallido. Reprograma tu pedido en https://coord1nadora.com/reprogramar y paga el costo de envío."
+  },
+  {
+    "id": "e15",
+    "label": "estafa",
+    "text": "¡Duplica tu dinero en 7 días! Inversión segura con rentabilidad garantizada del 40%. Deposita desde $100.000 y escribe al WhatsApp."
+  },
+
+  {
+    "id": "l01",
+    "label": "legitimo",
+    "text": "Recordatorio: mañana tienes clase de Diseño de Interfaces a las 8:00 a. m. en el salón 204."
+  },
+  {
+    "id": "l02",
+    "label": "legitimo",
+    "text": "Bancolombia: Compra por $85.000 en EXITO CHIPICHAPE. Si no la reconoces, llama a la línea de atención que aparece en el respaldo de tu tarjeta."
+  },
+  {
+    "id": "l03",
+    "label": "legitimo",
+    "text": "Mamá, ya llegué a la casa. Cuando quieras hablamos. Un abrazo."
+  },
+  {
+    "id": "l04",
+    "label": "legitimo",
+    "text": "Tu pedido de Mercado Libre salió de la bodega y llegará el jueves. Sigue el envío en https://www.mercadolibre.com.co/envios"
+  },
+  {
+    "id": "l05",
+    "label": "legitimo",
+    "text": "Hola Jairo, te confirmo la reunión de proyecto este viernes a las 3 p. m. por Meet. Avísame si puedes."
+  },
+  {
+    "id": "l06",
+    "label": "legitimo",
+    "text": "Tu código de verificación de WhatsApp es 482-193. No lo compartas con nadie."
+  },
+  {
+    "id": "l07",
+    "label": "legitimo",
+    "text": "Davivienda: Recuerda que nunca te pediremos tu clave ni códigos por mensaje. Consulta tus movimientos en la app oficial."
+  },
+  {
+    "id": "l08",
+    "label": "legitimo",
+    "text": "Gracias por tu compra en Éxito. Tu factura electrónica está disponible en https://www.exito.com/facturas"
+  },
+  {
+    "id": "l09",
+    "label": "legitimo",
+    "text": "Bro, ya hice el pago de mi parte del almuerzo por Nequi, revisa si te llegó."
+  },
+  {
+    "id": "l10",
+    "label": "legitimo",
+    "text": "Se abre la convocatoria para monitores del departamento. Envía tu hoja de vida a monitorias@universidad.edu.co antes del 15 de noviembre."
+  },
+  {
+    "id": "l11",
+    "label": "legitimo",
+    "text": "¡Feliz cumpleaños! Que tengas un día increíble, te quiero mucho."
+  },
+  {
+    "id": "l12",
+    "label": "legitimo",
+    "text": "Servientrega: tu envío con guía 1234567 fue entregado hoy a las 2:15 p. m. Gracias por usar nuestros servicios."
+  },
+  {
+    "id": "l13",
+    "label": "legitimo",
+    "text": "Tu cita médica quedó programada para el martes 4 de noviembre a las 10:30 a. m. en la clínica. Recuerda llevar tu documento."
+  },
+  {
+    "id": "l14",
+    "label": "legitimo",
+    "text": "Claro: tu factura de noviembre ya está disponible. Puedes consultarla en la app Mi Claro o en https://www.claro.com.co"
+  },
+  {
+    "id": "l15",
+    "label": "legitimo",
+    "text": "Oye, cambié de turno en el trabajo, salgo a las 6. ¿Nos vemos en la biblioteca después?"
+  }
+]
