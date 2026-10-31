@@ -6,8 +6,16 @@ import { registerWindowControls } from './windowControls'
 import { runDevScreenshots } from './devScreenshot'
 import { registerDataIpc } from './dataIpc'
 import { createAppData } from './storage/appData'
+import { createAnalysisService } from './analysis/service'
+import { demoProvider } from './analysis/demoProvider'
+import { loadEnvironment } from './config'
 
 const APP_ID = 'com.escudoguardian.app'
+
+// Solo desarrollo: GUARDIAN_DATA_DIR aísla TODOS los datos (JSON y caché de Chromium) para poder
+// ejecutar pruebas y capturas sin chocar con otra copia de la app abierta.
+const devDataDir = process.env['GUARDIAN_DATA_DIR']
+if (!app.isPackaged && devDataDir) app.setPath('userData', devDataDir)
 const BACKGROUND = '#05070D'
 
 function createWindow(): BrowserWindow {
@@ -58,7 +66,11 @@ void app.whenReady().then(() => {
   })
 
   registerWindowControls()
-  registerDataIpc(createAppData())
+  loadEnvironment()
+  const data = createAppData()
+  // Fase 4: aquí se elegirá Gemini cuando haya clave y DEMO_MODE=false.
+  const analysis = createAnalysisService(data, () => demoProvider)
+  registerDataIpc(data, analysis)
   createWindow()
 
   app.on('activate', () => {

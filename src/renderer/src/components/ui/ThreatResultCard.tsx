@@ -58,8 +58,8 @@ const creatureByVerdict: Record<ThreatResult['verdict'], CreatureState> = {
 
 export interface ThreatResultCardProps {
   result: ThreatResult
-  /** Texto analizado. Se muestra como texto plano y con los links neutralizados. */
-  text: string
+  /** Texto analizado. Se muestra como texto plano y con los links neutralizados. Opcional. */
+  text?: string
   title?: string
   className?: string
 }
@@ -91,9 +91,11 @@ export function ThreatResultCard({
         </p>
       </div>
 
-      <p className="selectable mt-4 line-clamp-2 break-words rounded-[10px] border border-white/8 bg-black/30 px-3 py-2 font-mono text-[13px] text-text-muted">
-        {neutralizeLinks(text)}
-      </p>
+      {text !== undefined && (
+        <p className="selectable mt-4 line-clamp-3 overflow-hidden break-words rounded-[10px] border border-white/8 bg-black/30 px-3 py-2 font-mono text-[13px] text-text-muted">
+          {neutralizeLinks(text)}
+        </p>
+      )}
 
       <ul className="mt-4 flex flex-col gap-2" aria-label="Señales detectadas">
         {result.signals.length === 0 && (

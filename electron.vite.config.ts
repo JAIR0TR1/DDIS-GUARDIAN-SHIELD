@@ -20,7 +20,8 @@ export default defineConfig({
         '@renderer': resolve('src/renderer/src'),
         '@shared': shared,
         '@domain': domain,
-        '@design': design
+        '@design': design,
+        '@data': resolve('data')
       }
     },
     plugins: [react(), tailwindcss()]

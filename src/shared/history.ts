@@ -15,7 +15,9 @@ export const historyEntrySchema = z.object({
   excerpt: z.string().max(200),
   result: threatResultSchema,
   /** `true` si el veredicto final se apoyó en la IA. */
-  usedAI: z.boolean()
+  usedAI: z.boolean(),
+  /** Quién dio la segunda opinión cuando `usedAI` es true (p. ej. "demo" o "gemini"). */
+  provider: z.string().max(24).optional()
 })
 export type HistoryEntry = z.infer<typeof historyEntrySchema>
 

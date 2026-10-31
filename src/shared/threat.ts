@@ -31,7 +31,12 @@ export const signalSchema = z.object({
   id: z.string().min(1).max(60),
   kind: signalKindSchema,
   label: z.string().min(1).max(80),
-  severity: severitySchema
+  severity: severitySchema,
+  /** Posiciones [inicio, fin) en el texto original, para resaltarlo. Solo las reglas locales las dan. */
+  spans: z
+    .array(z.tuple([z.number().int().min(0), z.number().int().min(0)]))
+    .max(8)
+    .optional()
 })
 export type Signal = z.infer<typeof signalSchema>
 

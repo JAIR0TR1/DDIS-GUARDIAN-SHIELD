@@ -1,18 +1,22 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
+import type { AnalysisOutcome } from '@shared/analysis'
 import type { Creature, Profile, Settings } from '@shared/models'
 import type { HistoryEntry } from '@shared/history'
+import type { Verdict } from '@shared/threat'
 import { xpToNext } from '@domain/xp'
 import { pickPhrase } from '@domain/phrases'
 import { fadeOnly, panelContainer, panelItemBlur, transition } from '@design/motion'
 import { CreatureAvatar } from '../components/ui/CreatureAvatar'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { Sidebar, type Section } from '../components/ui/Sidebar'
+import type { Tone } from '../components/AmbientBackground'
+import type { CreatureState } from '../creature/creatureState'
 import { Home } from './Home'
+import { Analyzer } from './Analyzer'
+import { History } from './History'
 import { CreatureScreen } from './CreatureScreen'
 import { SettingsScreen } from './SettingsScreen'
-import { ComingSoon } from './ComingSoon'
-import type { CreatureState } from '../creature/creatureState'
 
 export interface SessionProps {
   profile: Profile
@@ -20,8 +24,23 @@ export interface SessionProps {
   settings: Settings
   history: HistoryEntry[]
   demoMode: boolean
+  onAnalyzed: (outcome: AnalysisOutcome) => void
+  onTone: (tone: Tone) => void
+  onClearHistory: () => Promise<void>
   onSaveSettings: (settings: Settings) => Promise<void>
   onSaveProfile: (profile: Profile) => Promise<void>
+}
+
+const moodByVerdict: Record<Verdict, CreatureState> = {
+  peligroso: 'alerta',
+  sospechoso: 'escaneando',
+  seguro: 'feliz'
+}
+
+const toneByVerdict: Record<Verdict, Tone> = {
+  peligroso: 'danger',
+  sospechoso: 'warn',
+  seguro: 'safe'
 }
 
 /** Estado B «Sesión activa»: barra lateral, cabecera con XP y paneles de vidrio. */
@@ -31,18 +50,28 @@ export function Session({
   settings,
   history,
   demoMode,
+  onAnalyzed,
+  onTone,
+  onClearHistory,
   onSaveSettings,
   onSaveProfile
 }: SessionProps): React.JSX.Element {
   const [section, setSection] = useState<Section>('inicio')
   const [mood, setMood] = useState<CreatureState>('feliz')
+  const [pasted, setPasted] = useState('')
   const osReduced = useReducedMotion()
   const reduced = osReduced === true || settings.reduceMotion
+  const moodTimer = useRef<number>(0)
+
+  const settleMood = (delay: number): void => {
+    window.clearTimeout(moodTimer.current)
+    moodTimer.current = window.setTimeout(() => setMood('reposo'), delay)
+  }
 
   // Nilo reacciona feliz al entrar y luego vuelve al reposo.
   useEffect(() => {
-    const timer = window.setTimeout(() => setMood('reposo'), 2800)
-    return () => window.clearTimeout(timer)
+    settleMood(2800)
+    return () => window.clearTimeout(moodTimer.current)
   }, [])
 
   const greeting = useMemo(
@@ -50,8 +79,26 @@ export function Session({
     [creature.phrases, profile.name]
   )
   const needed = xpToNext(creature.level)
-
   const itemVariants = reduced ? fadeOnly : panelItemBlur
+
+  const handleAnalyzing = (): void => {
+    window.clearTimeout(moodTimer.current)
+    setMood('escaneando')
+    onTone('neutral')
+  }
+
+  const handleOutcome = (outcome: AnalysisOutcome): void => {
+    const verdict = outcome.entry.result.verdict
+    setMood(moodByVerdict[verdict])
+    onTone(toneByVerdict[verdict])
+    settleMood(6000)
+    onAnalyzed(outcome)
+  }
+
+  const goAnalyze = (text: string): void => {
+    setPasted(text)
+    setSection('analizar')
+  }
 
   return (
     <div className="absolute inset-0 flex">
@@ -63,7 +110,10 @@ export function Session({
       >
         <Sidebar
           current={section}
-          onSelect={setSection}
+          onSelect={(s) => {
+            if (s !== 'analizar') setPasted('')
+            setSection(s)
+          }}
           creatureSlot={
             <CreatureAvatar
               layoutId="nilo"
@@ -120,10 +170,27 @@ export function Session({
             {section === 'inicio' && (
               <Home
                 greeting={greeting}
+                mood={mood}
                 variants={itemVariants}
-                lastThreat={history[0] ?? null}
                 history={history}
-                profileName={profile.name}
+                onGo={setSection}
+                onPasteText={goAnalyze}
+              />
+            )}
+            {section === 'analizar' && (
+              <Analyzer
+                variants={itemVariants}
+                initialText={pasted}
+                reduced={reduced}
+                onAnalyzing={handleAnalyzing}
+                onOutcome={handleOutcome}
+              />
+            )}
+            {section === 'historial' && (
+              <History
+                variants={itemVariants}
+                history={history}
+                onClear={onClearHistory}
                 onGo={setSection}
               />
             )}
@@ -139,9 +206,6 @@ export function Session({
                 onSaveSettings={onSaveSettings}
                 onSaveProfile={onSaveProfile}
               />
-            )}
-            {(section === 'analizar' || section === 'historial') && (
-              <ComingSoon section={section} variants={itemVariants} />
             )}
           </motion.div>
         </main>

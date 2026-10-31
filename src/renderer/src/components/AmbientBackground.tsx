@@ -1,5 +1,7 @@
 import { cn } from '../lib/cn'
 
+export type Tone = 'neutral' | 'safe' | 'warn' | 'danger'
+
 export interface AmbientBackgroundProps {
   /**
    * 'open': estado Despertar, más luminoso y centrado en la criatura.
@@ -7,8 +9,19 @@ export interface AmbientBackgroundProps {
    * (el cian nunca pasa del 14 % bajo los paneles; ver tests/contrast.test.ts).
    */
   mode?: 'open' | 'panels'
+  /**
+   * Reacción de Nilo al último análisis: tiñe la aurora de verde, ámbar o rojo.
+   * Intensidad máxima 0.10 para no romper el contraste AA bajo los paneles.
+   */
+  tone?: Tone
   className?: string
 }
+
+const TONE_RGB = {
+  safe: '52 211 153',
+  warn: '251 191 36',
+  danger: '244 63 94'
+} as const
 
 /** Grano de película (SVG embebido, sin red): rompe el degradado plano y da textura. */
 const GRAIN =
@@ -37,6 +50,7 @@ const PARTICLES = [
  */
 export function AmbientBackground({
   mode = 'open',
+  tone = 'neutral',
   className
 }: AmbientBackgroundProps): React.JSX.Element {
   const open = mode === 'open'
@@ -64,6 +78,18 @@ export function AmbientBackground({
           background: `radial-gradient(closest-side, rgb(14 116 144 / ${open ? 0.26 : 0.13}), transparent)`
         }}
       />
+
+      {/* Halo reactivo: el estado de Nilo tiñe toda la escena (solo opacity en la transición). */}
+      {(Object.keys(TONE_RGB) as Array<keyof typeof TONE_RGB>).map((key) => (
+        <div
+          key={key}
+          className="absolute inset-0 transition-opacity duration-[800ms] ease-[var(--ease-guardian)]"
+          style={{
+            opacity: tone === key ? 1 : 0,
+            background: `radial-gradient(70% 60% at 50% 20%, rgb(${TONE_RGB[key]} / 0.1), transparent 70%)`
+          }}
+        />
+      ))}
 
       {/* Formas con borde: algo concreto que el vidrio desenfoca. */}
       <div

@@ -21,7 +21,15 @@ const api: GuardianApi = {
     getSettings: () => ipcRenderer.invoke(IPC.data.getSettings),
     saveSettings: (settings) => ipcRenderer.invoke(IPC.data.saveSettings, settings),
     getCreature: () => ipcRenderer.invoke(IPC.data.getCreature),
-    saveCreature: (creature) => ipcRenderer.invoke(IPC.data.saveCreature, creature)
+    saveCreature: (creature) => ipcRenderer.invoke(IPC.data.saveCreature, creature),
+    getHistory: () => ipcRenderer.invoke(IPC.data.getHistory),
+    clearHistory: () => ipcRenderer.invoke(IPC.data.clearHistory)
+  },
+  analysis: {
+    run: (input) => ipcRenderer.invoke(IPC.analysis.run, input)
+  },
+  config: {
+    get: () => ipcRenderer.invoke(IPC.config.get)
   }
 }
 

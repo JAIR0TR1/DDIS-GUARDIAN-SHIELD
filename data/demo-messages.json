@@ -1,0 +1,20 @@
+[
+  {
+    "id": "clara",
+    "label": "Estafa clara",
+    "hint": "Premio falso con link acortado",
+    "text": "Ganaste un premio. Confirma tu clave en bit.ly/premio-nequi"
+  },
+  {
+    "id": "dudoso",
+    "label": "Dudoso",
+    "hint": "Inversión que promete mucho",
+    "text": "¡Duplica tu dinero en 7 días! Inversión segura con rentabilidad garantizada del 40%. Deposita desde $100.000 y escribe al WhatsApp."
+  },
+  {
+    "id": "legitimo",
+    "label": "Legítimo",
+    "hint": "Recordatorio de clase",
+    "text": "Recordatorio: mañana tienes clase de Diseño de Interfaces a las 8:00 a. m. en el salón 204."
+  }
+]

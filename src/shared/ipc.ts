@@ -13,6 +13,14 @@ export const IPC = {
     getSettings: 'data:get-settings',
     saveSettings: 'data:save-settings',
     getCreature: 'data:get-creature',
-    saveCreature: 'data:save-creature'
+    saveCreature: 'data:save-creature',
+    getHistory: 'data:get-history',
+    clearHistory: 'data:clear-history'
+  },
+  analysis: {
+    run: 'analysis:run'
+  },
+  config: {
+    get: 'config:get'
   }
 } as const

@@ -1,3 +1,5 @@
+import type { AnalysisOutcome, AnalyzeInput, AppConfig } from './analysis'
+import type { HistoryEntry } from './history'
 import type { Creature, Profile, Settings } from './models'
 
 /** Contrato tipado de lo que el preload expone al renderer como `window.guardian`. */
@@ -18,5 +20,14 @@ export interface GuardianApi {
     saveSettings: (settings: Settings) => Promise<Settings>
     getCreature: () => Promise<Creature>
     saveCreature: (creature: Creature) => Promise<Creature>
+    getHistory: () => Promise<HistoryEntry[]>
+    clearHistory: () => Promise<void>
+  }
+  analysis: {
+    /** Analiza un texto. Rechaza con un mensaje claro si la entrada no es válida. */
+    run: (input: AnalyzeInput) => Promise<AnalysisOutcome>
+  }
+  config: {
+    get: () => Promise<AppConfig>
   }
 }

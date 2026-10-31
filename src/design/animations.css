@@ -83,6 +83,36 @@
   animation: ambient-twinkle 5s ease-in-out infinite;
 }
 
+/* Resaltado de señales: aparece tras el escaneo (solo opacity). */
+@keyframes highlight-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.highlight-in {
+  animation: highlight-in 0.5s var(--ease-guardian) both;
+}
+
+/* Líneas de registro del escáner: entran una a una. */
+@keyframes log-in {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.log-line {
+  animation: log-in 0.3s var(--ease-guardian) both;
+}
+
 /* Criatura */
 .creature svg {
   overflow: visible;

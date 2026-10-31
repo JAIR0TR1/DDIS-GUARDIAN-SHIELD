@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, LayoutGroup, MotionConfig } from 'framer-motion'
 import { AlertTriangle } from 'lucide-react'
+import type { AnalysisOutcome } from '@shared/analysis'
 import type { Creature, Profile, Settings } from '@shared/models'
 import type { HistoryEntry } from '@shared/history'
-import { AmbientBackground } from './components/AmbientBackground'
+import { AmbientBackground, type Tone } from './components/AmbientBackground'
 import { Titlebar } from './components/ui/Titlebar'
 import { ToastProvider } from './components/ui/Toast'
+import { useToast } from './components/ui/toastContext'
 import { ScanBeam } from './components/ui/ScanBeam'
 import { EmptyState } from './components/ui/EmptyState'
 import { Button } from './components/ui/Button'
@@ -20,30 +22,43 @@ interface Loaded {
   profile: Profile | null
   settings: Settings
   creature: Creature
+  history: HistoryEntry[]
+  demoMode: boolean
 }
 
 const VERSION = '0.1'
-// Hasta la fase de IA, todo corre en modo demo (sin red ni clave).
-const DEMO_MODE = true
+/** Cuánto dura el color de Nilo en el fondo tras un análisis. */
+const TONE_MS = 9000
 
 function App(): React.JSX.Element {
+  return (
+    <ToastProvider>
+      <Shell />
+    </ToastProvider>
+  )
+}
+
+function Shell(): React.JSX.Element {
+  const toast = useToast()
   const [phase, setPhase] = useState<Phase>('boot')
   const [loaded, setLoaded] = useState<Loaded | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
-  const [history] = useState<HistoryEntry[]>(() =>
-    import.meta.env.DEV && window.location.hash === '#sample' ? sampleHistory : []
-  )
+  const [tone, setTone] = useState<Tone>('neutral')
 
   // Solo actualiza estado dentro de las promesas (nunca de forma síncrona dentro del efecto).
   const load = useCallback(() => {
     return Promise.all([
       window.guardian.data.getProfile(),
       window.guardian.data.getSettings(),
-      window.guardian.data.getCreature()
+      window.guardian.data.getCreature(),
+      window.guardian.data.getHistory(),
+      window.guardian.config.get()
     ])
-      .then(([profile, settings, creature]) => {
-        setLoaded({ profile, settings, creature })
+      .then(([profile, settings, creature, history, config]) => {
+        const seeded =
+          import.meta.env.DEV && window.location.hash === '#sample' ? sampleHistory : history
+        setLoaded({ profile, settings, creature, history: seeded, demoMode: config.demoMode })
         setPhase('awaken')
       })
       .catch((error: unknown) => {
@@ -60,6 +75,13 @@ function App(): React.JSX.Element {
     setLoadError(null)
     void load()
   }
+
+  // El color del fondo vuelve a la normalidad solo, unos segundos después del análisis.
+  useEffect(() => {
+    if (tone === 'neutral') return
+    const timer = window.setTimeout(() => setTone('neutral'), TONE_MS)
+    return () => window.clearTimeout(timer)
+  }, [tone])
 
   // La preferencia «reducir movimiento» también se aplica a las animaciones CSS.
   const reduceMotion = loaded?.settings.reduceMotion ?? false
@@ -89,58 +111,89 @@ function App(): React.JSX.Element {
     setLoaded((prev) => (prev ? { ...prev, profile: saved } : prev))
   }, [])
 
+  const onAnalyzed = useCallback(
+    (outcome: AnalysisOutcome): void => {
+      setLoaded((prev) =>
+        prev
+          ? { ...prev, creature: outcome.creature, history: [outcome.entry, ...prev.history] }
+          : prev
+      )
+      if (outcome.levelsGained > 0) {
+        toast.show(
+          `¡Subimos al nivel ${outcome.creature.level}! Cada estafa que paramos nos hace más fuertes.`,
+          'success'
+        )
+      }
+    },
+    [toast]
+  )
+
+  const clearHistory = useCallback(async (): Promise<void> => {
+    await window.guardian.data.clearHistory()
+    setLoaded((prev) => (prev ? { ...prev, history: [] } : prev))
+    toast.show('Historial borrado.', 'info')
+  }, [toast])
+
   const galleryMode = import.meta.env.DEV && window.location.hash === '#gallery'
+
+  let body: React.JSX.Element
+  if (galleryMode) {
+    body = <Gallery />
+  } else if (loadError) {
+    body = (
+      <div className="grid h-full place-items-center">
+        <EmptyState
+          tone="error"
+          icon={<AlertTriangle aria-hidden className="size-5" />}
+          title="Algo salió mal"
+          description={loadError}
+          action={<Button onClick={retry}>Reintentar</Button>}
+        />
+      </div>
+    )
+  } else {
+    body = (
+      <LayoutGroup>
+        <AnimatePresence>
+          {phase === 'awaken' && loaded && (
+            <Awakening
+              key="awaken"
+              profile={loaded.profile}
+              version={VERSION}
+              demoMode={loaded.demoMode}
+              onEnter={(p) => void enter(p)}
+            />
+          )}
+          {phase === 'session' && loaded?.profile && (
+            <Session
+              key="session"
+              profile={loaded.profile}
+              creature={loaded.creature}
+              settings={loaded.settings}
+              history={loaded.history}
+              demoMode={loaded.demoMode}
+              onAnalyzed={onAnalyzed}
+              onTone={setTone}
+              onClearHistory={clearHistory}
+              onSaveSettings={saveSettings}
+              onSaveProfile={saveProfile}
+            />
+          )}
+        </AnimatePresence>
+      </LayoutGroup>
+    )
+  }
 
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
-      <ToastProvider>
-        <div className="relative flex h-full flex-col overflow-hidden">
-          <AmbientBackground mode={phase === 'session' ? 'panels' : 'open'} />
-          <Titlebar />
-          <main className="relative min-h-0 flex-1 overflow-hidden">
-            {galleryMode ? (
-              <Gallery />
-            ) : loadError ? (
-              <div className="grid h-full place-items-center">
-                <EmptyState
-                  tone="error"
-                  icon={<AlertTriangle aria-hidden className="size-5" />}
-                  title="Algo salió mal"
-                  description={loadError}
-                  action={<Button onClick={retry}>Reintentar</Button>}
-                />
-              </div>
-            ) : (
-              <LayoutGroup>
-                <AnimatePresence>
-                  {phase === 'awaken' && loaded && (
-                    <Awakening
-                      key="awaken"
-                      profile={loaded.profile}
-                      version={VERSION}
-                      demoMode={DEMO_MODE}
-                      onEnter={(p) => void enter(p)}
-                    />
-                  )}
-                  {phase === 'session' && loaded?.profile && (
-                    <Session
-                      key="session"
-                      profile={loaded.profile}
-                      creature={loaded.creature}
-                      settings={loaded.settings}
-                      history={history}
-                      demoMode={DEMO_MODE}
-                      onSaveSettings={saveSettings}
-                      onSaveProfile={saveProfile}
-                    />
-                  )}
-                </AnimatePresence>
-              </LayoutGroup>
-            )}
-            {scanning && !reduceMotion && <ScanBeam onComplete={() => setScanning(false)} />}
-          </main>
-        </div>
-      </ToastProvider>
+      <div className="relative flex h-full flex-col overflow-hidden">
+        <AmbientBackground mode={phase === 'session' ? 'panels' : 'open'} tone={tone} />
+        <Titlebar />
+        <main className="relative min-h-0 flex-1 overflow-hidden">
+          {body}
+          {scanning && !reduceMotion && <ScanBeam onComplete={() => setScanning(false)} />}
+        </main>
+      </div>
     </MotionConfig>
   )
 }
