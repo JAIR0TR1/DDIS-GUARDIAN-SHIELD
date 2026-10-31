@@ -1,7 +1,7 @@
 import { app, ipcMain } from 'electron'
 import { IPC } from '../shared/ipc'
 import { creatureSchema, profileSchema, settingsSchema } from '../shared/models'
-import type { AiTestResult, AppConfig } from '../shared/analysis'
+import { analyzeInputSchema, type AiTestResult, type AppConfig } from '../shared/analysis'
 import type { ImageAnalysisResponse } from '../shared/image'
 import { userMessageOf } from './analysis/providerError'
 import { testGemini } from './analysis/aiTest'
@@ -47,6 +47,10 @@ export function registerDataIpc({ data, analysis, keys, config, controller }: Ip
   ipcMain.handle(IPC.data.getHistory, () => data.getHistory())
   ipcMain.handle(IPC.data.clearHistory, () => data.clearHistory())
   ipcMain.handle(IPC.analysis.run, (_e, input: unknown) => analysis.run(input))
+  ipcMain.handle(IPC.analysis.peek, (_e, text: unknown) =>
+    // El texto se valida igual que en un análisis completo (tamaño máximo incluido).
+    analysis.peek(analyzeInputSchema.shape.text.parse(text))
+  )
   // Las capturas devuelven un mensaje amable en vez de lanzar: así llega a la pantalla tal cual.
   ipcMain.handle(
     IPC.analysis.runImage,

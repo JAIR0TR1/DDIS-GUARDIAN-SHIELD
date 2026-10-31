@@ -20,6 +20,7 @@ import { cn } from '../../lib/cn'
 import { GlassCard } from './GlassCard'
 import { VerdictBadge } from './Badge'
 import { CreatureAvatar } from './CreatureAvatar'
+import { gestureFor } from '@domain/gesture'
 import type { CreatureState } from '../../creature/creatureState'
 
 const signalIcon: Record<SignalKind, LucideIcon> = {
@@ -62,6 +63,8 @@ export interface ThreatResultCardProps {
   text?: string
   title?: string
   className?: string
+  /** Cambia para que Nilo repita su gesto (p. ej. el id del análisis). */
+  reactionKey?: string | number
 }
 
 /** Resultado de un análisis: semáforo, puntaje, mensaje, señales, acción y voz de la criatura. */
@@ -69,7 +72,8 @@ export function ThreatResultCard({
   result,
   text,
   title = 'Última amenaza',
-  className
+  className,
+  reactionKey
 }: ThreatResultCardProps): React.JSX.Element {
   return (
     <GlassCard
@@ -112,11 +116,13 @@ export function ThreatResultCard({
         })}
       </ul>
 
-      <div className="mt-4 flex items-start gap-3 border-t border-white/10 pt-4">
+      <div className="mt-4 flex items-center gap-3 border-t border-white/10 pt-3">
+        {/* Nilo reacciona con un gesto según el CONTEXTO del resultado (ver domain/gesture.ts). */}
         <CreatureAvatar
-          size={36}
-          frame="badge"
+          size={104}
           state={creatureByVerdict[result.verdict]}
+          gesture={gestureFor(result)}
+          gestureKey={reactionKey ?? `${result.verdict}-${result.score}`}
           halo={
             result.verdict === 'peligroso'
               ? 'amenaza'

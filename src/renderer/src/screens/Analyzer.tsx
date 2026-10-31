@@ -7,12 +7,13 @@ import {
   ImagePlus,
   ImageUp,
   RotateCcw,
-  ScanSearch,
-  Sparkles
+  ScanSearch
 } from 'lucide-react'
 import { analyzeInputSchema, MAX_TEXT_LENGTH, type AnalysisOutcome } from '@shared/analysis'
 import { IMAGE_TYPES, type AnalyzeImageInput } from '@shared/image'
 import { findLinks } from '@domain/text'
+import { preReaction, type Gesture } from '@domain/gesture'
+import type { Verdict } from '@shared/threat'
 import { transition } from '@design/motion'
 import demoMessages from '@data/demo-messages.json'
 import { GlassCard } from '../components/ui/GlassCard'
@@ -25,6 +26,12 @@ import { Badge } from '../components/ui/Badge'
 import { cn } from '../lib/cn'
 import { reviewLabel } from '../lib/reviewLabel'
 import { firstImage, readImageFile } from '../lib/imageFile'
+import { CreatureAvatar } from '../components/ui/CreatureAvatar'
+import type { CreatureState } from '../creature/creatureState'
+
+/** Texto mínimo para que Nilo lo «lea» en vivo, y cuánto esperar tras la última tecla. */
+const MIN_PEEK_LENGTH = 12
+const PEEK_DELAY_MS = 450
 
 /** Tiempo mínimo que se muestra el escáner, para que se vea qué hace Nilo aunque sea instantáneo. */
 const SCAN_MS = 1100
@@ -125,6 +132,27 @@ export function Analyzer({
     // Solo al abrir con ese archivo.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialFile])
+
+  // Primer vistazo en vivo: cuando hay texto, Nilo lo lee y reacciona con las reglas locales
+  // (sin IA, sin costo, sin guardar nada). Solo se actualiza cuando dejas de escribir.
+  const [peeked, setPeeked] = useState<{ forText: string; verdict: Verdict } | null>(null)
+  const typed = text.trim()
+  useEffect(() => {
+    if (status !== 'idle' || typed.length < MIN_PEEK_LENGTH) return
+    const timer = window.setTimeout(() => {
+      window.guardian.analysis
+        .peek(typed)
+        .then((r) => setPeeked({ forText: typed, verdict: r.verdict }))
+        .catch(() => undefined) // el primer vistazo es opcional: si falla, no se muestra nada
+    }, PEEK_DELAY_MS)
+    return () => window.clearTimeout(timer)
+  }, [typed, status])
+  const reading = status === 'idle' && typed.length >= MIN_PEEK_LENGTH
+  const peek = reading && peeked?.forText === typed ? preReaction(peeked.verdict) : null
+  const liveReaction: { mood: CreatureState; bubble: string } = peek ?? {
+    mood: 'reposo',
+    bubble: reading ? 'Déjame leerlo…' : 'Pega un mensaje y lo reviso por ti.'
+  }
 
   const canDrop = status === 'idle' || status === 'error'
   const dropHandlers = {
@@ -349,24 +377,53 @@ export function Analyzer({
           </GlassCard>
         ) : scanning ? (
           <GlassCard title="Resultado" className="h-full">
+            <NiloStage mood="escaneando" gesture="ninguno" bubble="" />
             <ScanLog />
           </GlassCard>
         ) : outcome && result ? (
           <div className="flex flex-col gap-3">
-            <ThreatResultCard result={result} title="Resultado" />
+            <ThreatResultCard result={result} title="Resultado" reactionKey={outcome.entry.id} />
             <Gains outcome={outcome} />
           </div>
         ) : (
-          <GlassCard title="Resultado" className="h-full">
-            <EmptyState
-              icon={<Sparkles aria-hidden className="size-5" />}
-              title="Esperando tu mensaje"
-              description="Pega algo sospechoso y Nilo lo revisa en segundos."
+          <GlassCard title="Nilo" className="h-full">
+            <NiloStage
+              mood={liveReaction.mood}
+              gesture={reading ? 'leer' : 'ninguno'}
+              bubble={liveReaction.bubble}
             />
           </GlassCard>
         )}
       </motion.div>
     </>
+  )
+}
+
+/**
+ * Nilo en grande dentro del panel de resultado. Mientras escribes o pegas, lo lee y reacciona
+ * (esto es solo un primer vistazo con las reglas locales; el resultado completo llega al analizar).
+ */
+function NiloStage({
+  mood,
+  gesture,
+  bubble
+}: {
+  mood: CreatureState
+  gesture: Gesture
+  bubble: string
+}): React.JSX.Element {
+  return (
+    <div className="flex flex-col items-center gap-3 pb-2 pt-1">
+      <CreatureAvatar size={190} state={mood} gesture={gesture} gestureKey="leer" title="Nilo" />
+      {bubble && (
+        <p
+          aria-live="polite"
+          className="glass max-w-[320px] rounded-[16px] rounded-tl-[4px] px-4 py-2.5 text-center text-sm text-text"
+        >
+          {bubble}
+        </p>
+      )}
+    </div>
   )
 }
 

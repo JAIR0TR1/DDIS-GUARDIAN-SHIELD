@@ -64,7 +64,7 @@ export function SettingsScreen({
           />
           <Switch
             label="Avisar también cuando todo está bien"
-            description="El vigilante te confirma con un aviso breve que revisó lo que copiaste. Si te cansa, apágalo."
+            description="Con el vigilante encendido, te confirma con un aviso breve que revisó lo que copiaste. Si te cansa, apágalo."
             checked={settings.notifySafe}
             disabled={busy || !profile.vigilante}
             onChange={(notifySafe) => run(() => onSaveSettings({ ...settings, notifySafe }))}

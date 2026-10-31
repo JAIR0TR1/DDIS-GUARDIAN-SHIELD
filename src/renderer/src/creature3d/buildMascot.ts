@@ -1,6 +1,7 @@
 import {
   AdditiveBlending,
   AmbientLight,
+  BackSide,
   CanvasTexture,
   CapsuleGeometry,
   CatmullRomCurve3,
@@ -31,10 +32,24 @@ import {
 } from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { haloColors, type HaloState } from '@design/tokens'
+import type { Gesture } from '@domain/gesture'
 import type { CreatureState } from '../creature/creatureState'
 
 /** Datos de cada fotograma: los entrega el bucle de animación (o la foto fija). */
+/** Rotación de un brazo: hacia adelante (x) y hacia el costado (z). */
+interface Pose {
+  x: number
+  z: number
+}
+
+/** Cuánto dura un gesto antes de relajarse (segundos), salvo «leer», que dura mientras se lee. */
+const GESTURE_SECONDS = 3.2
+
 export interface Frame {
+  /** Gesto de contexto que se está haciendo («ninguno» = ninguno). */
+  gesture: Gesture
+  /** Segundos desde que empezó el gesto. */
+  gestureAge: number
   /** Segundos desde que arrancó la escena. */
   t: number
   /** Segundos desde el fotograma anterior. */
@@ -416,6 +431,32 @@ export function buildMascot(): Mascot {
   scanRing.visible = false
   root.add(scanRing)
 
+  // Burbuja protectora (gesto «proteger»): una esfera de luz que envuelve a Nilo.
+  const barrierMat = mat(
+    new MeshBasicMaterial({
+      color: CYAN,
+      transparent: true,
+      opacity: 0,
+      blending: AdditiveBlending,
+      depthWrite: false,
+      side: BackSide,
+      toneMapped: false
+    })
+  )
+  const barrier = new Mesh(track(new SphereGeometry(2.35, 40, 24)), barrierMat)
+  barrier.position.y = 0.35
+  barrier.visible = false
+  scene.add(barrier)
+  const barrierRing = new Mesh(
+    track(new TorusGeometry(2.35, 0.025, 8, 80)),
+    mat(
+      new MeshBasicMaterial({ color: '#A5F3FC', transparent: true, opacity: 0, toneMapped: false })
+    )
+  )
+  barrierRing.position.y = 0.35
+  barrierRing.visible = false
+  scene.add(barrierRing)
+
   // Chispas que orbitan (la «aura» del guardián).
   const orbGeo = track(new SphereGeometry(0.06, 8, 8))
   const orbs = Array.from({ length: 6 }, (_, i) => {
@@ -440,6 +481,10 @@ export function buildMascot(): Mascot {
   let rotY = -0.28
   let rotX = 0
   let smoothArmR = 0.18
+  const armNow: Pose[] = [
+    { x: 0, z: -0.18 },
+    { x: 0, z: 0.18 }
+  ]
   let capLift = 0
 
   function update(f: Frame): void {
@@ -458,6 +503,15 @@ export function buildMascot(): Mascot {
     haloMat.opacity = 0.5 + live * Math.sin(t * 1.4) * 0.08
     halo.scale.setScalar(1 + live * Math.sin(t * 1.4) * 0.03)
 
+    // Gesto de contexto (celebrar, pensar, alto…): intensidad 0-1 con entrada y salida suaves.
+    const gesture: Gesture = animated ? f.gesture : 'ninguno'
+    const ga = f.gestureAge
+    const gestureDuration = gesture === 'leer' ? Number.POSITIVE_INFINITY : GESTURE_SECONDS
+    const g =
+      gesture === 'ninguno'
+        ? 0
+        : Math.min(1, ga / 0.25) * Math.max(0, Math.min(1, 1 - (ga - gestureDuration) / 0.5))
+
     // Parpadeo.
     if (animated && t > nextBlink) {
       blinkUntil = t + 0.13
@@ -471,7 +525,10 @@ export function buildMascot(): Mascot {
     const scanning = f.state === 'escaneando'
     eyeTarget.sy = blinking ? 0.08 : alarmed ? 1.18 : 1
     eyeTarget.sx = alarmed ? 1.15 : 1
-    eyeTarget.shift = scanning && animated ? Math.sin(t * 3) * 0.16 : f.look.x * 0.1
+    eyeTarget.shift =
+      (scanning && animated ? Math.sin(t * 3) * 0.16 : f.look.x * 0.1) +
+      (gesture === 'leer' ? Math.sin(ga * 3.5) * 0.2 * g : 0) +
+      (gesture === 'pensar' ? 0.14 * g : 0)
     eyeNow.sy = damp(eyeNow.sy, eyeTarget.sy, blinking ? 40 : 14, dt)
     eyeNow.sx = damp(eyeNow.sx, eyeTarget.sx, 12, dt)
     eyeNow.shift = damp(eyeNow.shift, eyeTarget.shift, 10, dt)
@@ -493,14 +550,27 @@ export function buildMascot(): Mascot {
       hop = Math.abs(Math.sin(since * 7)) * 0.2 * (1 - since / 1.6)
     let shake = 0
     if (animated && alarmed && since < 1.2) shake = Math.sin(t * 55) * 0.035 * (1 - since / 1.2)
-    root.position.set(shake, hop, 0)
+    // Gestos: celebrar salta; llamar se balancea; alto da un paso atrás.
+    if (gesture === 'celebrar')
+      hop += Math.abs(Math.sin(ga * 7)) * 0.24 * g * (1 - Math.min(1, ga / 3.2))
+    if (gesture === 'llamar') hop += Math.abs(Math.sin(ga * 5)) * 0.05 * g
+    root.position.set(shake, hop, gesture === 'alto' ? -0.35 * g : 0)
 
     // Mirada del puntero: gira el cuerpo con suavidad.
     const targetY = -0.28 + f.look.x * 0.45 * live
     const targetX = -f.look.y * 0.18 * live
     rotY = damp(rotY, targetY, 5, dt)
     rotX = damp(rotX, targetX, 5, dt)
-    root.rotation.set(rotX, rotY, Math.sin(t * 0.9) * 0.012 * live)
+    root.rotation.set(
+      // leer: se inclina hacia adelante, como acercándose al texto.
+      rotX + (gesture === 'leer' ? 0.16 * g : 0),
+      // negar: mueve el cuerpo de lado a lado, como diciendo «no».
+      rotY + (gesture === 'negar' ? Math.sin(ga * 10) * 0.55 * g : 0),
+      // pensar y llamar: ladea la cabeza.
+      Math.sin(t * 0.9) * 0.012 * live +
+        (gesture === 'pensar' ? 0.15 * g : 0) +
+        (gesture === 'llamar' ? -0.09 * g : 0)
+    )
 
     // Tenis: bailan al estar feliz o al saludar; el resto del tiempo, apenas respiran.
     const dancing = animated && (happy || (f.greetAge > 0 && f.greetAge < f.greetFor))
@@ -523,15 +593,66 @@ export function buildMascot(): Mascot {
     })
     tail.rotation.y = Math.sin(t * (happy ? 7 : 2.2)) * (happy ? 0.5 : 0.22) * live
     shield.rotation.y = Math.sin(t * 1.1) * 0.12 * live
+    // proteger: el escudo de la gorra late grande y brillante («no des tus datos»).
+    const shieldPulse = gesture === 'proteger' ? g * (0.5 + 0.5 * Math.sin(ga * 8)) : 0
+    shield.scale.setScalar(0.3 * (1 + 0.45 * shieldPulse))
+    // La burbuja aparece y late; el anillo gira alrededor como un escáner protector.
+    barrier.visible = barrierRing.visible =
+      shieldPulse > 0.001 || (gesture === 'proteger' && g > 0.01)
+    if (barrier.visible) {
+      barrierMat.opacity = 0.22 * g * (0.65 + 0.35 * Math.sin(ga * 6))
+      barrierRing.rotation.set(Math.PI / 2 + Math.sin(ga * 1.6) * 0.5, 0, ga * 1.2)
+      ;(barrierRing.material as MeshBasicMaterial).opacity = 0.7 * g
+    }
     violetGlow.emissiveIntensity =
-      1.0 + (alarmed ? 0.8 : 0.25) * Math.sin(t * (alarmed ? 9 : 2)) * live
+      1.0 + (alarmed ? 0.8 : 0.25) * Math.sin(t * (alarmed ? 9 : 2)) * live + 1.4 * shieldPulse
 
     // Brazos: el derecho del espectador saluda; el izquierdo respira.
     const greeting = f.greetAge > 0 && f.greetAge < f.greetFor
     const wave = greeting ? 2.35 + Math.sin(f.greetAge * 11) * 0.38 * live : 0.18 + breathe * 3
     smoothArmR = damp(smoothArmR, wave, greeting ? 18 : 8, dt)
-    arms[1].rotation.z = smoothArmR
-    arms[0].rotation.z = -(0.18 + breathe * 3 + (happy ? 0.5 : 0) * Math.min(1, since * 4))
+    // Pose base de cada brazo; los gestos la mezclan con su propia pose según la intensidad `g`.
+    const target = [
+      { x: 0, z: -(0.18 + breathe * 3 + (happy ? 0.5 : 0) * Math.min(1, since * 4)) },
+      { x: 0, z: smoothArmR }
+    ]
+    const GESTURE_ARMS: Partial<Record<Gesture, [Pose, Pose]>> = {
+      celebrar: [
+        { x: 0, z: -(2.5 + Math.sin(ga * 12) * 0.15) },
+        { x: 0, z: 2.5 + Math.sin(ga * 12 + 1) * 0.15 }
+      ],
+      // Los brazos se leen mejor de frente cuando se mueven hacia los lados o arriba (no hacia la cámara).
+      pensar: [
+        { x: 0, z: -0.25 },
+        { x: -1.35, z: -0.7 }
+      ],
+      // «¡Alto!»: una mano bien arriba, que se agita un poco.
+      alto: [
+        { x: 0, z: -0.6 },
+        { x: 0, z: 2.85 + Math.sin(ga * 9) * 0.1 }
+      ],
+      negar: [
+        { x: -0.8, z: -0.9 },
+        { x: -0.8, z: 0.9 }
+      ],
+      // Escudo: brazos arriba y doblados, mientras la burbuja protectora envuelve a Nilo.
+      proteger: [
+        { x: 0, z: -1.85 },
+        { x: 0, z: 1.85 }
+      ],
+      llamar: [target[0], { x: -0.7, z: 2.0 + Math.sin(ga * 8) * 0.08 }],
+      leer: [target[0], { x: -0.3, z: 0.2 }]
+    }
+    const pose = GESTURE_ARMS[gesture]
+    arms.forEach((arm, i) => {
+      const goal = pose ? pose[i] : target[i]
+      const mix = pose ? g : 0
+      const x = MathUtils.lerp(target[i].x, goal.x, mix)
+      const z = MathUtils.lerp(target[i].z, goal.z, mix)
+      armNow[i].x = damp(armNow[i].x, x, 16, dt)
+      armNow[i].z = damp(armNow[i].z, z, 16, dt)
+      arm.rotation.set(armNow[i].x, 0, armNow[i].z)
+    })
 
     // Saludo: un saltito al empezar.
     if (animated && greeting) {

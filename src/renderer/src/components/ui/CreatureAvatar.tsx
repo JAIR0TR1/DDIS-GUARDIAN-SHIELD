@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import type { CreatureProps } from '../../creature/Creature'
 import { CreatureView } from '../../creature3d/CreatureView'
+import type { Gesture } from '@domain/gesture'
 import { cn } from '../../lib/cn'
 import { transition } from '@design/motion'
 
@@ -13,6 +14,10 @@ export interface CreatureAvatarProps extends Omit<CreatureProps, 'className'> {
   layoutId?: string
   /** Segundos de saludo (la mascota 3D saluda con la mano al aparecer). 0 = no saluda. */
   greet?: number
+  /** Gesto de contexto: Nilo reacciona con el cuerpo a lo que se analizó. */
+  gesture?: Gesture
+  /** Cambia para reiniciar el gesto (p. ej. el id del resultado). */
+  gestureKey?: string | number
   className?: string
 }
 
@@ -26,6 +31,8 @@ export function CreatureAvatar({
   frame = 'hero',
   layoutId,
   greet = 0,
+  gesture,
+  gestureKey,
   className,
   state,
   halo,
@@ -56,6 +63,8 @@ export function CreatureAvatar({
         halo={halo}
         rings={rings}
         greet={greet}
+        gesture={gesture}
+        gestureKey={gestureKey}
         title={title}
       />
     </motion.div>

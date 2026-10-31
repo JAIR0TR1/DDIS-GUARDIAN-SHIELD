@@ -16,6 +16,8 @@ Nilo, el Guardián, es la cara de la app. Se eligió una criatura (y no un panel
 - **Memorabilidad e identidad** (ley de Prägnanz): una forma simple y reconocible (cuerpo de bloque, orejas, visor con ojos, escudo) se recuerda y diferencia a la app de «otro dashboard oscuro».
 - **Retroalimentación continua.** Su postura comunica estado sin texto: reposo, escaneando, alerta o feliz.
 
+- **Reacciones con significado, no decorativas.** Nilo no hace gestos al azar: cada gesto corresponde al *tipo* de amenaza (protege cuando piden claves o suplantan una marca, niega ante cebos de premios y dinero, «llama» ante un falso familiar, celebra cuando todo está bien). Así el cuerpo de la criatura *enseña* el patrón de la estafa antes de leer el texto (reconocer en vez de recordar), y mientras el usuario pega un mensaje, Nilo lo lee y da un primer vistazo (visibilidad del estado del sistema).
+
 **Límite asumido:** el tono lúdico no debe infantilizar. Por eso los mensajes de peligro son concretos («No hagas clic. Te pide tu clave…») y el atuendo (gorra, tenis, cadena) da personalidad sin convertirlo en juguete.
 
 ## 3. Heurísticas de Nielsen aplicadas

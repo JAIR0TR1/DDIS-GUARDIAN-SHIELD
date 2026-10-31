@@ -89,6 +89,15 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | 7.15 | Captura: pegar y elegir | `Ctrl+V` con una imagen copiada; botón «Elegir captura» | Se analiza | ⬜ |
 | 7.16 | Captura sin IA | Modo real sin clave, soltar una captura | Aviso claro; no se guarda nada | ⬜ |
 
+### Gestos de Nilo según el contexto
+| # | Caso | Pasos | Resultado esperado | Verificado |
+|---|---|---|---|---|
+| 8.1 | Gesto por tipo de amenaza | Analiza: banco que pide la clave · premio · «cambié de número» · mensaje normal | Proteger (burbuja de escudo) · negar (mueve el cuerpo) · llamar (mano junto a la cabeza) · celebrar (brazos arriba) | ✅ reglas probadas con el corpus real · ✅ vistos los 7 gestos en pantalla · ⬜ probarlos tú |
+| 8.2 | Primer vistazo al pegar | En Analizar pega un mensaje de estafa y espera medio segundo | Nilo se inclina a leer y su globo dice «Uy… esto no me gusta nada. Dale a Analizar…» | ✅ |
+| 8.3 | Sin IA ni costo | Lo mismo en modo real | El primer vistazo no consume cuota (solo reglas locales) | ✅ por diseño (usa `peek`) |
+| 8.4 | Gesto en la alerta flotante | Atajo con un mensaje de estafa | Nilo de la alerta hace el gesto del contexto | ✅ cableado · ⬜ verlo |
+| 8.5 | Movimiento reducido | «Reducir movimiento» activo | Nilo no hace gestos (pose fija) | ⬜ |
+
 **Salvedad conocida:** la notificación nativa de Windows puede no mostrarse en modo desarrollo (Windows exige la app instalada). En la app instalada debe verse.
 
 ## 8. Cómo reportar un fallo

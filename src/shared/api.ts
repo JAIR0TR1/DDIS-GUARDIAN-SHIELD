@@ -3,6 +3,7 @@ import type { AiTestResult, AnalysisOutcome, AnalyzeInput, AppConfig } from './a
 import type { HistoryEntry } from './history'
 import type { AnalyzeImageInput, ImageAnalysisResponse } from './image'
 import type { Creature, Profile, Settings } from './models'
+import type { ThreatResult } from './threat'
 
 /** Contrato tipado de lo que el preload expone al renderer como `window.guardian`. */
 export interface GuardianApi {
@@ -47,6 +48,8 @@ export interface GuardianApi {
     run: (input: AnalyzeInput) => Promise<AnalysisOutcome>
     /** Analiza una captura de pantalla. Si no se puede, devuelve un mensaje amable (no lanza). */
     runImage: (input: AnalyzeImageInput) => Promise<ImageAnalysisResponse>
+    /** Primer vistazo con las reglas locales (sin IA, sin guardar nada). */
+    peek: (text: string) => Promise<ThreatResult>
   }
   config: {
     get: () => Promise<AppConfig>

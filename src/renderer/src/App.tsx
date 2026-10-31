@@ -17,6 +17,7 @@ import { Awakening } from './screens/Awakening'
 import { Session } from './screens/Session'
 import { Gallery } from './screens/Gallery'
 import { IconStage } from './screens/IconStage'
+import { GestureStage } from './screens/GestureStage'
 import { sampleHistory } from './lib/sampleHistory'
 
 type Phase = 'boot' | 'awaken' | 'session'
@@ -164,10 +165,13 @@ function Shell(): React.JSX.Element {
 
   const galleryMode = import.meta.env.DEV && window.location.hash === '#gallery'
   const iconMode = import.meta.env.DEV && window.location.hash === '#icon'
+  const gesturesMode = import.meta.env.DEV && window.location.hash === '#gestos'
 
   let body: React.JSX.Element
   if (iconMode) {
     body = <IconStage />
+  } else if (gesturesMode) {
+    body = <GestureStage />
   } else if (galleryMode) {
     body = <Gallery />
   } else if (loadError) {

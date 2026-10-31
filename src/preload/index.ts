@@ -47,7 +47,8 @@ const api: GuardianApi = {
   },
   analysis: {
     run: (input) => ipcRenderer.invoke(IPC.analysis.run, input),
-    runImage: (input) => ipcRenderer.invoke(IPC.analysis.runImage, input)
+    runImage: (input) => ipcRenderer.invoke(IPC.analysis.runImage, input),
+    peek: (text) => ipcRenderer.invoke(IPC.analysis.peek, text)
   },
   config: {
     get: () => ipcRenderer.invoke(IPC.config.get)

@@ -35,7 +35,9 @@ export const IPC = {
   },
   analysis: {
     run: 'analysis:run',
-    runImage: 'analysis:run-image'
+    runImage: 'analysis:run-image',
+    /** Primer vistazo con reglas locales: no guarda nada ni usa la IA. */
+    peek: 'analysis:peek'
   },
   config: {
     get: 'config:get'

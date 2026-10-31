@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { ACESFilmicToneMapping, SRGBColorSpace, WebGLRenderer } from 'three'
 import type { HaloState } from '@design/tokens'
+import type { Gesture } from '@domain/gesture'
 import type { CreatureState } from '../creature/creatureState'
 import { defaultHalo } from '../creature/creatureState'
 import { buildMascot, type Frame } from './buildMascot'
@@ -10,6 +11,10 @@ export interface Mascot3DProps {
   halo?: HaloState
   /** Segundos de saludo desde que se monta (0 = no saluda). */
   greetFor?: number
+  /** Gesto de contexto (celebrar, pensar, alto…). «ninguno» = sin gesto. */
+  gesture?: Gesture
+  /** Cambia cada vez que el gesto debe REINICIARSE (p. ej. el id de un resultado nuevo). */
+  gestureKey?: string | number
   /** `false`: pose fija, sin bucle (movimiento reducido). */
   animated: boolean
   /** Se llama si WebGL falla, para que el padre muestre el respaldo en SVG. */
@@ -25,17 +30,37 @@ export function Mascot3D({
   state,
   halo,
   greetFor = 0,
+  gesture = 'ninguno',
+  gestureKey,
   animated,
   onUnavailable,
   title
 }: Mascot3DProps): React.JSX.Element {
   const hostRef = useRef<HTMLDivElement>(null)
   // Los valores que cambian con el tiempo viajan por una referencia: no reconstruyen la escena.
-  const live = useRef({ state, halo: halo ?? defaultHalo[state], animated, greetFor })
+  const live = useRef({
+    state,
+    halo: halo ?? defaultHalo[state],
+    animated,
+    greetFor,
+    gesture,
+    gestureStart: 0
+  })
   const unavailable = useRef(onUnavailable)
+  const lastGestureKey = useRef<string | number | undefined>(undefined)
   // Las referencias se ponen al día tras cada dibujado (no durante), sin reconstruir la escena.
   useEffect(() => {
-    live.current = { state, halo: halo ?? defaultHalo[state], animated, greetFor }
+    const restart = lastGestureKey.current !== gestureKey || live.current.gesture !== gesture
+    lastGestureKey.current = gestureKey
+    live.current = {
+      state,
+      halo: halo ?? defaultHalo[state],
+      animated,
+      greetFor,
+      gesture,
+      // Un gesto nuevo (o el mismo con otra clave) empieza desde cero.
+      gestureStart: restart ? performance.now() : live.current.gestureStart
+    }
     unavailable.current = onUnavailable
   })
 
@@ -98,6 +123,8 @@ export function Mascot3D({
         // El saludo empieza al montar: dura `greetFor` segundos.
         greetAge: cur.greetFor > 0 ? t + 0.001 : 0,
         greetFor: cur.greetFor,
+        gesture: cur.gesture,
+        gestureAge: cur.gesture === 'ninguno' ? 0 : Math.max(0, (now - cur.gestureStart) / 1000),
         look: cur.animated ? look : { x: 0, y: 0 },
         animated: cur.animated
       }
