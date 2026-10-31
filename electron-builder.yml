@@ -1,43 +1,36 @@
-appId: com.electron.app
-productName: app
+appId: com.escudoguardian.app
+productName: Escudo Guardián
+copyright: Proyecto universitario · Diseño de Interfaces
 directories:
   buildResources: build
+  output: release
+# Solo viaja lo compilado (out/) y package.json. Nada de claves, pruebas ni documentación.
 files:
+  - out/**
+  - package.json
   - '!**/.vscode/*'
-  - '!src/*'
-  - '!electron.vite.config.{js,ts,mjs,cjs}'
-  - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
-  - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
-  - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-asarUnpack:
-  - resources/**
+  - '!{.env,.env.*,.npmrc}'
+asar: true
 win:
-  executableName: app
-nsis:
-  artifactName: ${name}-${version}-setup.${ext}
-  shortcutName: ${productName}
-  uninstallDisplayName: ${productName}
-  createDesktopShortcut: always
-mac:
-  entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
-  notarize: false
-dmg:
-  artifactName: ${name}-${version}.${ext}
-linux:
+  executableName: EscudoGuardian
+  icon: build/icon.ico
   target:
-    - AppImage
-    - snap
-    - deb
-  maintainer: electronjs.org
-  category: Utility
-appImage:
-  artifactName: ${name}-${version}.${ext}
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Escudo Guardián
+  uninstallDisplayName: Escudo Guardián
+  deleteAppDataOnUninstall: false
+  artifactName: EscudoGuardian-${version}-setup.${ext}
+  language: '3082'
+mac:
+  category: public.app-category.utilities
+  icon: build/icon.icns
+  notarize: false
 npmRebuild: false
-publish:
-  provider: generic
-  url: https://example.com/auto-updates

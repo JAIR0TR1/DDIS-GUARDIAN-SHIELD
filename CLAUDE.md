@@ -80,6 +80,8 @@ Algunos terminales de editor definen `ELECTRON_RUN_AS_NODE=1` y Electron arranca
 - Rediseño premium (vidrio con borde luminoso, aurora + grano + viñeta, criatura con volumen): hecho antes de la fase 2.
 - Fase 2 (estados A y B, transición con layoutId + ScanBeam, onboarding de 3 pasos, entrada rápida, perfil/ajustes/criatura en JSON, pantallas Inicio, Criatura y Ajustes): completa. Analizar e Historial son marcadores hasta la fase 3.
 - Datos de desarrollo: `GUARDIAN_DATA_DIR` redirige la carpeta de datos; `#sample` carga historial de ejemplo; `#gallery` abre la galería (solo en dev).
-- Fases 3 (analizador, reglas, historial, XP, demo, instalador), 4 (Gemini), 5 (P1), 6 (pulido), 7 (pruebas y docs): pendientes.
+- Fase 3 (reglas locales para Colombia + corpus de 30 mensajes, analyzeThreat con proveedor intercambiable, caché, historial, XP, modo presentación, DEMO_MODE, escáner con resaltado de señales, fondo reactivo, instalador NSIS con icono de Nilo): completa. `npm run build:win` → `release/EscudoGuardian-0.1.0-setup.exe` (sin firmar).
+- Identidad acordada con el usuario: (1) halo de Nilo tiñe la escena, (2) escáner como lenguaje visual — hechos; (3) tarjeta coleccionable con holograma y (4) tipografía más atrevida — pendientes de pulido; **mascota 3D con Three.js** — pendiente (cambio de stack pedido por el usuario; con respaldo SVG).
+- Fases 4 (Gemini), 5 (P1), 6 (pulido), 7 (pruebas y docs): pendientes. `docs/corpus-report.md` se regenera con `npm test`.
 - Material nativo (Mica/Acrylic): descartado por ahora; fondo sólido + malla de gradientes interna.
 Mantener esta sección actualizada.
