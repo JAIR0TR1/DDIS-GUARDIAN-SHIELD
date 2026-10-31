@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { AnimatePresence, LayoutGroup, MotionConfig } from 'framer-motion'
+import { AnimatePresence, LayoutGroup, MotionConfig, useReducedMotion } from 'framer-motion'
+import { ReducedMotionContext } from './lib/motionPref'
 import { AlertTriangle } from 'lucide-react'
 import type { AnalysisOutcome } from '@shared/analysis'
 import type { Creature, Profile, Settings } from '@shared/models'
@@ -40,6 +41,7 @@ function App(): React.JSX.Element {
 
 function Shell(): React.JSX.Element {
   const toast = useToast()
+  const osReduced = useReducedMotion()
   const [phase, setPhase] = useState<Phase>('boot')
   const [loaded, setLoaded] = useState<Loaded | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -186,14 +188,16 @@ function Shell(): React.JSX.Element {
 
   return (
     <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
-      <div className="relative flex h-full flex-col overflow-hidden">
-        <AmbientBackground mode={phase === 'session' ? 'panels' : 'open'} tone={tone} />
-        <Titlebar />
-        <main className="relative min-h-0 flex-1 overflow-hidden">
-          {body}
-          {scanning && !reduceMotion && <ScanBeam onComplete={() => setScanning(false)} />}
-        </main>
-      </div>
+      <ReducedMotionContext.Provider value={reduceMotion || osReduced === true}>
+        <div className="relative flex h-full flex-col overflow-hidden">
+          <AmbientBackground mode={phase === 'session' ? 'panels' : 'open'} tone={tone} />
+          <Titlebar />
+          <main className="relative min-h-0 flex-1 overflow-hidden">
+            {body}
+            {scanning && !reduceMotion && <ScanBeam onComplete={() => setScanning(false)} />}
+          </main>
+        </div>
+      </ReducedMotionContext.Provider>
     </MotionConfig>
   )
 }

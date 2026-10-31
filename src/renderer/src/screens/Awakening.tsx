@@ -33,7 +33,7 @@ export function Awakening({
   const height = useViewportHeight()
   // La criatura se adapta a la altura libre: ventana − barra de título − HUD − bloque de texto.
   const heroSize = Math.round(
-    Math.min(300, Math.max(140, height - 44 - 44 - TEXT_BLOCK_HEIGHT - 56))
+    Math.min(340, Math.max(150, height - 44 - 44 - TEXT_BLOCK_HEIGHT - 56))
   )
 
   return (
@@ -56,13 +56,17 @@ export function Awakening({
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-6 px-6 pb-4">
-        <CreatureAvatar
-          layoutId="nilo"
-          size={heroSize}
-          state="reposo"
-          rings
-          title="Nilo despierta"
-        />
+        <div className="relative">
+          <CreatureAvatar
+            layoutId="nilo"
+            size={heroSize}
+            state="reposo"
+            rings
+            greet={returning ? 1 : 2.8}
+            title="Nilo despierta"
+          />
+          <GreetingBubble text={returning ? '¡Hola de nuevo!' : '¡Hola!'} />
+        </div>
         <div
           className="flex w-full flex-col items-center justify-start"
           style={{ height: TEXT_BLOCK_HEIGHT }}
@@ -75,6 +79,32 @@ export function Awakening({
         </div>
       </div>
     </motion.div>
+  )
+}
+
+/** Globo de saludo que aparece junto a la mano levantada de Nilo y se va solo. */
+function GreetingBubble({ text }: { text: string }): React.JSX.Element {
+  const [visible, setVisible] = useState(true)
+  useEffect(() => {
+    const timer = window.setTimeout(() => setVisible(false), 2600)
+    return () => window.clearTimeout(timer)
+  }, [])
+  return (
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          aria-hidden
+          initial={{ opacity: 0, scale: 0.6, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.9, transition: transition.base }}
+          transition={{ ...transition.base, delay: 0.25 }}
+          style={{ originX: 0, originY: 1 }}
+          className="glass absolute -right-[14%] top-[6%] rounded-[16px] rounded-bl-[4px] px-4 py-2 font-display text-[17px] font-semibold text-text"
+        >
+          {text}
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 

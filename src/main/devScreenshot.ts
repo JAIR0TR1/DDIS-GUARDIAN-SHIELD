@@ -42,7 +42,11 @@ export function runDevScreenshots(win: BrowserWindow): void {
         await sleep(600)
         for (const shot of shots) {
           if (shot.size) win.setSize(shot.size[0], shot.size[1])
-          if (shot.js) await win.webContents.executeJavaScript(shot.js)
+          if (shot.js) {
+            const result: unknown = await win.webContents.executeJavaScript(shot.js)
+            // Si el script devuelve un valor (p. ej. una medición), se imprime para poder leerlo.
+            if (result !== undefined) console.log(`[shot:${shot.name}]`, JSON.stringify(result))
+          }
           await sleep(shot.wait)
           const image = await win.webContents.capturePage()
           writeFileSync(join(dir, `${shot.name}.png`), image.toPNG())
