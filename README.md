@@ -15,7 +15,8 @@ npm run dev
 ## Scripts
 | Comando | Qué hace |
 |---|---|
-| `npm run dev` | Abre la app en modo desarrollo |
+| `npm run dev` | Abre la app en modo desarrollo (usa lo que diga tu `.env`) |
+| `npm run dev:real` | Igual, pero con la IA real (Gemini) solo en esa ejecución, sin editar el `.env` |
 | `npm run build` | Revisa los tipos y compila |
 | `npm run build:win` | Genera el instalador de Windows en `release/` |
 | `npm run build:unpack` | Genera la app sin instalador en `release/win-unpacked/` |
