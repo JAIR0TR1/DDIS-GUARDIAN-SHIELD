@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/explicit-function-return-type */
 // Genera build/icon.png y build/icon.ico con Nilo. Se ejecuta con Electron (renderiza el SVG):
 //   node scripts/run-electron.mjs scripts/make-icon.cjs
 const { app, BrowserWindow, nativeImage } = require('electron')
