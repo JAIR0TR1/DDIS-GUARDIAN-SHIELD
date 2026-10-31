@@ -78,7 +78,7 @@ No es un adorno: resuelve un problema de **orientación**. Al pasar de «present
 - **Limitación honesta:** la app es solo oscura; no se implementó modo claro.
 
 ### 9.3 Semáforo con icono y texto
-Un tercio de los usuarios puede tener dificultad con el rojo/verde y la gente de estrés alto lee de forma superficial. Icono + palabra + color redundan la señal (WCAG 1.4.1) y hacen el veredicto legible de un vistazo.
+Una parte de las personas (alrededor de un 8 % de los hombres y un 0,5 % de las mujeres, según las cifras habituales sobre daltonismo rojo-verde) no distingue bien el rojo del verde, y quien está bajo presión lee de forma superficial. Icono + palabra + color repiten la misma señal por tres vías (WCAG 1.4.1) y hacen el veredicto legible de un vistazo.
 
 ### 9.4 El escáner y el resaltado de señales
 Mostrar **por qué** se emitió un veredicto genera confianza: el texto analizado se marca con las partes que dispararon cada señal. Convierte una «caja negra» en una explicación verificable y enseña al usuario a reconocer patrones por sí mismo.
