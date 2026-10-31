@@ -22,5 +22,13 @@ export const IPC = {
   },
   config: {
     get: 'config:get'
+  },
+  ai: {
+    saveKey: 'ai:save-key',
+    clearKey: 'ai:clear-key',
+    test: 'ai:test'
+  },
+  app: {
+    relaunch: 'app:relaunch'
   }
 } as const

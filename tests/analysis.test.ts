@@ -210,7 +210,7 @@ function fakeData(initial: Pick<Creature, 'level' | 'xp'> = { level: 1, xp: 0 })
 describe('servicio de análisis', () => {
   it('guarda en el historial y suma XP según el veredicto', async () => {
     const data = fakeData()
-    const service = createAnalysisService(data, () => demoProvider)
+    const service = createAnalysisService(data, async () => ({ provider: demoProvider }))
     const out = await service.run({ text: SCAM, source: 'text' })
     expect(out.entry.result.verdict).toBe('peligroso')
     expect(out.xpGained).toBe(30)
@@ -219,7 +219,7 @@ describe('servicio de análisis', () => {
   })
 
   it('el mismo mensaje no suma XP dos veces', async () => {
-    const service = createAnalysisService(fakeData(), () => demoProvider)
+    const service = createAnalysisService(fakeData(), async () => ({ provider: demoProvider }))
     await service.run({ text: SCAM, source: 'text' })
     const again = await service.run({ text: SCAM.toUpperCase(), source: 'text' })
     expect(again.fromCache).toBe(true)
@@ -228,7 +228,9 @@ describe('servicio de análisis', () => {
   })
 
   it('sube de nivel cuando la XP alcanza', async () => {
-    const service = createAnalysisService(fakeData({ level: 1, xp: 190 }), () => demoProvider)
+    const service = createAnalysisService(fakeData({ level: 1, xp: 190 }), async () => ({
+      provider: demoProvider
+    }))
     const out = await service.run({ text: SCAM, source: 'text' })
     expect(out.levelsGained).toBe(1)
     expect(out.creature.level).toBe(2)
@@ -236,7 +238,7 @@ describe('servicio de análisis', () => {
   })
 
   it('rechaza entradas inválidas (vacías o enormes)', async () => {
-    const service = createAnalysisService(fakeData(), () => null)
+    const service = createAnalysisService(fakeData(), async () => ({ provider: null }))
     await expect(service.run({ text: '   ', source: 'text' })).rejects.toThrow()
     await expect(service.run({ text: 'a'.repeat(6000), source: 'text' })).rejects.toThrow()
     await expect(service.run({ text: 'hola', source: 'video' })).rejects.toThrow()
@@ -244,7 +246,7 @@ describe('servicio de análisis', () => {
 
   it('el texto completo no se guarda en el historial, solo un fragmento', async () => {
     const data = fakeData()
-    const service = createAnalysisService(data, () => null)
+    const service = createAnalysisService(data, async () => ({ provider: null }))
     await service.run({ text: 'x'.repeat(1000), source: 'text' })
     expect(data.history[0].excerpt.length).toBeLessThanOrEqual(200)
   })

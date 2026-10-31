@@ -82,6 +82,7 @@ Algunos terminales de editor definen `ELECTRON_RUN_AS_NODE=1` y Electron arranca
 - Datos de desarrollo: `GUARDIAN_DATA_DIR` redirige la carpeta de datos; `#sample` carga historial de ejemplo; `#gallery` abre la galería (solo en dev).
 - Fase 3 (reglas locales para Colombia + corpus de 30 mensajes, analyzeThreat con proveedor intercambiable, caché, historial, XP, modo presentación, DEMO_MODE, escáner con resaltado de señales, fondo reactivo, instalador NSIS con icono de Nilo): completa. `npm run build:win` → `release/EscudoGuardian-0.1.0-setup.exe` (sin firmar).
 - Identidad acordada con el usuario: (1) halo de Nilo tiñe la escena, (2) escáner como lenguaje visual — hechos; (3) tarjeta coleccionable con holograma y (4) tipografía más atrevida — pendientes de pulido; **mascota 3D con Three.js** — pendiente (cambio de stack pedido por el usuario; con respaldo SVG).
-- Fases 4 (Gemini), 5 (P1), 6 (pulido), 7 (pruebas y docs): pendientes. `docs/corpus-report.md` se regenera con `npm test`.
+- Fase 4 (Gemini real vía `generateContent`, `gemini-3.5-flash-lite`, salida JSON con esquema + Zod, enmascarado de datos sensibles, reintentos 429/salida inválida, clave cifrada con `safeStorage` desde Ajustes, prueba de conexión): completa y verificada con llamadas reales. Ver `docs/ia-gemini.md`. Para usar IA real en desarrollo el usuario debe poner `DEMO_MODE=false` en su `.env` (no editarlo desde aquí).
+- Fases 5 (P1), 6 (pulido), 7 (pruebas y docs) y la mascota 3D: pendientes. `docs/corpus-report.md` se regenera con `npm test`.
 - Material nativo (Mica/Acrylic): descartado por ahora; fondo sólido + malla de gradientes interna.
 Mantener esta sección actualizada.

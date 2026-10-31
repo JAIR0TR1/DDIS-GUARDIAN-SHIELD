@@ -1,9 +1,12 @@
 import { analyzeLocal, type LocalAnalysis, type Thresholds } from '../../domain/rules'
 import { guardScore, guardVerdict, toThreatResult } from '../../domain/explain'
+import { maskSensitive } from '../../domain/mask'
 import { threatResultSchema, type ThreatResult } from '../../shared/threat'
+import { userMessageOf } from './providerError'
 
 /** Lo que recibe un proveedor de IA para casos ambiguos. */
 export interface ProviderInput {
+  /** Texto YA enmascarado (sin tarjetas, claves ni códigos). */
   text: string
   source: 'text' | 'link' | 'image'
   local: LocalAnalysis
@@ -22,6 +25,8 @@ export interface AnalyzeDeps {
   thresholds: Thresholds
   /** `null` = sin IA (solo reglas locales). */
   provider: ThreatProvider | null
+  /** Aviso a mostrar cuando el caso era ambiguo pero no hay proveedor (p. ej. falta la clave). */
+  noProviderNotice?: string
 }
 
 export interface AnalyzeOutput {
@@ -35,10 +40,11 @@ export interface AnalyzeOutput {
 
 /**
  * Punto único de análisis. Cambiar de proveedor o pasar a un backend no toca la interfaz.
- *  1. Reglas locales (siempre). Fuera de la zona ambigua se responde sin IA.
- *  2. En la zona ambigua se consulta al proveedor; su salida se valida con Zod.
- *  3. La IA nunca baja un «peligroso» de las reglas locales.
- *  4. Si la IA falla o responde algo inválido, se usa el resultado de las reglas.
+ *  1. Reglas locales (siempre, sobre el texto original, que no sale del equipo).
+ *  2. Fuera de la zona ambigua se responde sin IA (ahorra cuota y privacidad).
+ *  3. En la zona ambigua se envía al proveedor el texto ENMASCARADO; su salida se valida con Zod.
+ *  4. La IA nunca baja un «peligroso» de las reglas locales.
+ *  5. Si la IA falla o responde algo inválido, se usa el resultado de las reglas con un aviso.
  */
 export async function analyzeThreat(
   input: Omit<ProviderInput, 'local'>,
@@ -47,10 +53,16 @@ export async function analyzeThreat(
   const local = analyzeLocal(input.text, deps.thresholds)
   const localResult = toThreatResult(local)
   if (!local.needsAI) return { result: localResult, usedAI: false }
-  if (!deps.provider) return { result: localResult, usedAI: false }
+  if (!deps.provider) {
+    return { result: localResult, usedAI: false, notice: deps.noProviderNotice }
+  }
 
   try {
-    const raw = await deps.provider.refine({ ...input, local })
+    const raw = await deps.provider.refine({
+      ...input,
+      text: maskSensitive(input.text).text,
+      local
+    })
     const parsed = threatResultSchema.safeParse(raw)
     if (!parsed.success) {
       console.warn(
@@ -64,24 +76,35 @@ export async function analyzeThreat(
       }
     }
     const ai = parsed.data
-    const verdict = guardVerdict(local.verdict, ai.verdict)
     return {
       usedAI: true,
       provider: deps.provider.name,
       result: {
         ...ai,
-        verdict,
+        verdict: guardVerdict(local.verdict, ai.verdict),
         score: guardScore(local, ai.score),
         // Las posiciones de resaltado las calculan siempre las reglas locales.
-        signals: ai.signals.length > 0 ? ai.signals : localResult.signals
+        signals:
+          ai.signals.length > 0 ? mergeSpans(ai.signals, localResult.signals) : localResult.signals
       }
     }
   } catch (error) {
-    console.warn(`[analysis] ${deps.provider.name} falló`, error)
-    return {
-      result: localResult,
-      usedAI: false,
-      notice: 'No pude consultar a la IA. Usé las reglas locales.'
-    }
+    // Se registra solo el mensaje técnico; nunca la petición, que lleva la clave.
+    console.warn(
+      `[analysis] ${deps.provider.name} falló:`,
+      error instanceof Error ? error.message : error
+    )
+    return { result: localResult, usedAI: false, notice: userMessageOf(error) }
   }
+}
+
+/** Las señales de la IA no traen posiciones: se reutilizan las de las reglas si coincide el tipo. */
+function mergeSpans(
+  ai: ThreatResult['signals'],
+  local: ThreatResult['signals']
+): ThreatResult['signals'] {
+  return ai.map((signal) => {
+    const match = local.find((l) => l.kind === signal.kind && l.spans && l.spans.length > 0)
+    return match && !signal.spans ? { ...signal, spans: match.spans } : signal
+  })
 }

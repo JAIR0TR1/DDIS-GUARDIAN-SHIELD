@@ -30,6 +30,17 @@ export const analysisOutcomeSchema = z.object({
 export type AnalysisOutcome = z.infer<typeof analysisOutcomeSchema>
 
 export interface AppConfig {
-  /** `true`: respuestas de ejemplo, sin internet ni clave. */
+  /** `true`: respuestas de ejemplo, sin internet ni clave. Se decide al arrancar. */
   demoMode: boolean
+  /** Hay una clave de Gemini disponible (guardada o en el .env de desarrollo). */
+  hasKey: boolean
+  /** `true` en la app instalada (no en desarrollo). */
+  packaged: boolean
+}
+
+/** Resultado de probar la conexión con la IA desde Ajustes. */
+export interface AiTestResult {
+  ok: boolean
+  /** Frase lista para mostrar. Nunca incluye la clave. */
+  message: string
 }

@@ -1,4 +1,4 @@
-import type { AnalysisOutcome, AnalyzeInput, AppConfig } from './analysis'
+import type { AiTestResult, AnalysisOutcome, AnalyzeInput, AppConfig } from './analysis'
 import type { HistoryEntry } from './history'
 import type { Creature, Profile, Settings } from './models'
 
@@ -29,5 +29,15 @@ export interface GuardianApi {
   }
   config: {
     get: () => Promise<AppConfig>
+  }
+  ai: {
+    /** Guarda la clave cifrada. La clave nunca vuelve al renderer. */
+    saveKey: (key: string) => Promise<void>
+    clearKey: () => Promise<void>
+    test: () => Promise<AiTestResult>
+  }
+  app: {
+    /** Reinicia la app (solo en la versión instalada). */
+    relaunch: () => Promise<void>
   }
 }

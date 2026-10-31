@@ -26,7 +26,7 @@ export function cacheKey(text: string, safeBelow: number, dangerAbove: number): 
  */
 export function createAnalysisService(
   data: AppData,
-  getProvider: () => ThreatProvider | null
+  getProvider: () => Promise<{ provider: ThreatProvider | null; notice?: string }>
 ): AnalysisService {
   const cache = new LruCache<AnalyzeOutput>(200, ONE_HOUR)
 
@@ -38,11 +38,13 @@ export function createAnalysisService(
       const key = cacheKey(input.text, safeBelow, dangerAbove)
 
       const cached = cache.get(key)
+      const choice = cached ? null : await getProvider()
       const output =
         cached ??
         (await analyzeThreat(input, {
           thresholds: settings.thresholds,
-          provider: getProvider()
+          provider: choice?.provider ?? null,
+          noProviderNotice: choice?.notice
         }))
       if (!cached && !output.notice) cache.set(key, output)
 

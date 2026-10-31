@@ -7,8 +7,9 @@ import { runDevScreenshots } from './devScreenshot'
 import { registerDataIpc } from './dataIpc'
 import { createAppData } from './storage/appData'
 import { createAnalysisService } from './analysis/service'
-import { demoProvider } from './analysis/demoProvider'
-import { loadEnvironment } from './config'
+import { createProviderResolver } from './analysis/providerFactory'
+import { createApiKeyStore } from './secrets/apiKeyStore'
+import { loadEnvironment, resolveConfig } from './config'
 
 const APP_ID = 'com.escudoguardian.app'
 
@@ -58,7 +59,7 @@ function createWindow(): BrowserWindow {
   return mainWindow
 }
 
-void app.whenReady().then(() => {
+void app.whenReady().then(async () => {
   electronApp.setAppUserModelId(APP_ID)
 
   app.on('browser-window-created', (_, window) => {
@@ -68,9 +69,11 @@ void app.whenReady().then(() => {
   registerWindowControls()
   loadEnvironment()
   const data = createAppData()
-  // Fase 4: aquí se elegirá Gemini cuando haya clave y DEMO_MODE=false.
-  const analysis = createAnalysisService(data, () => demoProvider)
-  registerDataIpc(data, analysis)
+  const keys = createApiKeyStore(join(app.getPath('userData'), 'gemini.key.bin'))
+  // Demo o real se decide una sola vez al arrancar (cambiarlo requiere reiniciar).
+  const config = await resolveConfig(keys)
+  const analysis = createAnalysisService(data, createProviderResolver(config, keys))
+  registerDataIpc({ data, analysis, keys, config })
   createWindow()
 
   app.on('activate', () => {

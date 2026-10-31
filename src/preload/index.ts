@@ -30,6 +30,14 @@ const api: GuardianApi = {
   },
   config: {
     get: () => ipcRenderer.invoke(IPC.config.get)
+  },
+  ai: {
+    saveKey: (key) => ipcRenderer.invoke(IPC.ai.saveKey, key),
+    clearKey: () => ipcRenderer.invoke(IPC.ai.clearKey),
+    test: () => ipcRenderer.invoke(IPC.ai.test)
+  },
+  app: {
+    relaunch: () => ipcRenderer.invoke(IPC.app.relaunch)
   }
 }
 
