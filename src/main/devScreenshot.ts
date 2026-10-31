@@ -9,6 +9,8 @@ interface Shot {
   wait: number
   /** JavaScript opcional a ejecutar en la página antes de esperar (clics, cambios de ruta). */
   js?: string
+  /** Captura solo este rectángulo de la ventana (en píxeles de la página). */
+  rect?: { x: number; y: number; width: number; height: number }
   /** Redimensiona la ventana antes de capturar. */
   size?: [number, number]
 }
@@ -48,7 +50,7 @@ export function runDevScreenshots(win: BrowserWindow): void {
             if (result !== undefined) console.log(`[shot:${shot.name}]`, JSON.stringify(result))
           }
           await sleep(shot.wait)
-          const image = await win.webContents.capturePage()
+          const image = await win.webContents.capturePage(shot.rect)
           writeFileSync(join(dir, `${shot.name}.png`), image.toPNG())
         }
       } catch (error) {

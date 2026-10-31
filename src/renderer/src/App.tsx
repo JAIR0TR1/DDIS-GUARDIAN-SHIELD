@@ -15,6 +15,7 @@ import { Button } from './components/ui/Button'
 import { Awakening } from './screens/Awakening'
 import { Session } from './screens/Session'
 import { Gallery } from './screens/Gallery'
+import { IconStage } from './screens/IconStage'
 import { sampleHistory } from './lib/sampleHistory'
 
 type Phase = 'boot' | 'awaken' | 'session'
@@ -137,9 +138,12 @@ function Shell(): React.JSX.Element {
   }, [toast])
 
   const galleryMode = import.meta.env.DEV && window.location.hash === '#gallery'
+  const iconMode = import.meta.env.DEV && window.location.hash === '#icon'
 
   let body: React.JSX.Element
-  if (galleryMode) {
+  if (iconMode) {
+    body = <IconStage />
+  } else if (galleryMode) {
     body = <Gallery />
   } else if (loadError) {
     body = (
