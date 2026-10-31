@@ -1,0 +1,188 @@
+import { app, clipboard, globalShortcut } from 'electron'
+import { normalizeShortcut } from '../domain/shortcut'
+import type { AlertPayload, NavigateRequest, ShortcutChange } from '../shared/alert'
+import type { AnalysisOutcome } from '../shared/analysis'
+import { IPC } from '../shared/ipc'
+import type { Profile } from '../shared/models'
+import type { Verdict } from '../shared/threat'
+import type { AnalysisService } from './analysis/service'
+import type { AppData } from './storage/appData'
+import { createTray, type TrayController, type TrayState } from './tray'
+import { hideAlert, showAlert } from './windows/alertWindow'
+import { sendToMain, showMainWindow } from './windows/mainWindow'
+
+/** Cuánto tiempo el icono de la bandeja recuerda un hallazgo antes de volver a «activo». */
+const TRAY_MEMORY_MS = 90_000
+
+const trayByVerdict: Record<Verdict, TrayState> = {
+  peligroso: 'amenaza',
+  sospechoso: 'duda',
+  seguro: 'activo'
+}
+
+export interface GuardianController {
+  /** Prepara bandeja y atajo con los datos guardados. */
+  init: () => Promise<void>
+  /** ¿Al cerrar la ventana principal la app debe seguir en la bandeja? */
+  shouldHideOnClose: () => boolean
+  onProfileSaved: (profile: Profile) => void
+  setShortcut: (shortcut: string) => Promise<ShortcutChange>
+  analyzeClipboard: () => Promise<void>
+  openDetail: (entryId?: string) => void
+  dismissAlert: () => void
+  dispose: () => void
+}
+
+export interface ControllerDeps {
+  data: AppData
+  analysis: AnalysisService
+  /** Se llama al activar o apagar el vigilante (la implementación llega en el siguiente paso). */
+  onWatcherChange?: (enabled: boolean) => void
+}
+
+/**
+ * Une las piezas «de fondo»: atajo global, ventana flotante de alerta, icono de bandeja y la
+ * ventana principal. Vive en el proceso principal y nunca expone la clave ni el contenido.
+ */
+export function createGuardianController(deps: ControllerDeps): GuardianController {
+  const { data, analysis } = deps
+  let tray: TrayController | null = null
+  let watcherOn = false
+  let shortcutDisplay = 'Ctrl+Shift+G'
+  let registeredAccelerator: string | null = null
+  let decay: NodeJS.Timeout | null = null
+
+  const baseState = (): TrayState => (watcherOn ? 'activo' : 'dormida')
+
+  function setTray(state: TrayState, remember: boolean): void {
+    tray?.setState(state)
+    if (decay) clearTimeout(decay)
+    // Un hallazgo se recuerda un rato; luego el icono vuelve a su estado normal.
+    if (remember) decay = setTimeout(() => tray?.setState(baseState()), TRAY_MEMORY_MS)
+  }
+
+  function notifyDataChanged(): void {
+    sendToMain(IPC.data.changed)
+  }
+
+  function register(accelerator: string): boolean {
+    return globalShortcut.register(accelerator, () => void analyzeClipboard())
+  }
+
+  async function analyzeClipboard(): Promise<void> {
+    const text = (await clipboard.readText()).trim()
+    if (!text) {
+      showAlert({ kind: 'empty' }, { focus: true })
+      return
+    }
+    showAlert({ kind: 'scanning', passive: false }, { focus: true })
+    try {
+      const outcome = await analysis.run({ text, source: 'text' })
+      showAlert(resultPayload(outcome, false), { focus: true })
+      setTray(trayByVerdict[outcome.entry.result.verdict], true)
+      notifyDataChanged()
+    } catch (error) {
+      console.error('[guardian] No pude analizar el portapapeles', error)
+      showAlert(
+        { kind: 'error', message: 'No pude revisar lo que copiaste. Inténtalo de nuevo.' },
+        { focus: true }
+      )
+    }
+  }
+
+  function openDetail(entryId?: string): void {
+    hideAlert()
+    showMainWindow()
+    const request: NavigateRequest = { section: 'historial', entryId }
+    sendToMain(IPC.nav.go, request)
+  }
+
+  function applyWatcher(enabled: boolean): void {
+    watcherOn = enabled
+    tray?.setWatcher(enabled, shortcutDisplay)
+    setTray(baseState(), false)
+    deps.onWatcherChange?.(enabled)
+  }
+
+  return {
+    async init() {
+      const [profile, settings] = await Promise.all([data.getProfile(), data.getSettings()])
+      const parsed = normalizeShortcut(settings.shortcut)
+      shortcutDisplay = parsed.ok ? parsed.display : 'Ctrl+Shift+G'
+      const accelerator = parsed.ok ? parsed.accelerator : 'CommandOrControl+Shift+G'
+      if (register(accelerator)) registeredAccelerator = accelerator
+      else console.warn(`[guardian] El atajo ${shortcutDisplay} está ocupado por otra aplicación`)
+
+      tray = createTray(
+        {
+          onOpen: () => showMainWindow(),
+          onAnalyzeClipboard: () => void analyzeClipboard(),
+          onToggleWatcher: (enabled) => void toggleWatcher(enabled),
+          onQuit: () => app.quit()
+        },
+        shortcutDisplay
+      )
+      applyWatcher(profile?.vigilante === true)
+    },
+
+    shouldHideOnClose: () => watcherOn,
+
+    onProfileSaved(profile) {
+      if (profile.vigilante !== watcherOn) applyWatcher(profile.vigilante)
+    },
+
+    async setShortcut(shortcut) {
+      const parsed = normalizeShortcut(shortcut)
+      if (!parsed.ok) return { ok: false, message: parsed.reason, shortcut: shortcutDisplay }
+      if (registeredAccelerator === parsed.accelerator) {
+        return { ok: true, message: 'Ese ya es tu atajo.', shortcut: shortcutDisplay }
+      }
+      const previous = registeredAccelerator
+      if (previous) globalShortcut.unregister(previous)
+      if (!register(parsed.accelerator)) {
+        // Otra aplicación lo usa: se recupera el anterior para no quedar sin atajo.
+        if (previous) register(previous)
+        return {
+          ok: false,
+          message: `${parsed.display} ya lo usa otra aplicación. Prueba con otra combinación.`,
+          shortcut: shortcutDisplay
+        }
+      }
+      registeredAccelerator = parsed.accelerator
+      shortcutDisplay = parsed.display
+      const settings = await data.getSettings()
+      await data.saveSettings({ ...settings, shortcut: parsed.display })
+      tray?.setWatcher(watcherOn, shortcutDisplay)
+      return { ok: true, message: `Listo: ahora es ${parsed.display}.`, shortcut: parsed.display }
+    },
+
+    analyzeClipboard,
+    openDetail,
+    dismissAlert: hideAlert,
+
+    dispose() {
+      if (decay) clearTimeout(decay)
+      globalShortcut.unregisterAll()
+      tray?.destroy()
+    }
+  }
+
+  async function toggleWatcher(enabled: boolean): Promise<void> {
+    // Cambiar el vigilante desde la bandeja también se guarda en el perfil.
+    const profile = await data.getProfile()
+    if (profile) await data.saveProfile({ ...profile, vigilante: enabled })
+    applyWatcher(enabled)
+    notifyDataChanged()
+  }
+}
+
+/** Convierte el resultado de un análisis en lo que muestra la ventana flotante. */
+export function resultPayload(outcome: AnalysisOutcome, passive: boolean): AlertPayload {
+  return {
+    kind: 'result',
+    entry: outcome.entry,
+    xpGained: outcome.xpGained,
+    passive,
+    notice: outcome.notice
+  }
+}

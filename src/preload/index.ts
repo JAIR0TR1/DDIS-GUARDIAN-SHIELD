@@ -2,6 +2,13 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from '../shared/ipc'
 import type { GuardianApi } from '../shared/api'
 
+/** Escucha un evento del proceso principal y devuelve la función para dejar de escucharlo. */
+function subscribe<T>(channel: string, listener: (payload: T) => void): () => void {
+  const handler = (_event: unknown, payload: T): void => listener(payload)
+  ipcRenderer.on(channel, handler)
+  return () => ipcRenderer.removeListener(channel, handler)
+}
+
 /** Preload mínimo: solo expone funciones concretas, nunca ipcRenderer completo. */
 const api: GuardianApi = {
   window: {
@@ -23,7 +30,20 @@ const api: GuardianApi = {
     getCreature: () => ipcRenderer.invoke(IPC.data.getCreature),
     saveCreature: (creature) => ipcRenderer.invoke(IPC.data.saveCreature, creature),
     getHistory: () => ipcRenderer.invoke(IPC.data.getHistory),
-    clearHistory: () => ipcRenderer.invoke(IPC.data.clearHistory)
+    clearHistory: () => ipcRenderer.invoke(IPC.data.clearHistory),
+    onChanged: (listener) => subscribe(IPC.data.changed, () => listener())
+  },
+  alert: {
+    onShow: (listener) => subscribe(IPC.alert.show, listener),
+    ready: () => ipcRenderer.send(IPC.alert.ready),
+    dismiss: () => ipcRenderer.send(IPC.alert.dismiss),
+    openDetail: (entryId) => ipcRenderer.send(IPC.alert.openDetail, entryId)
+  },
+  nav: {
+    onGo: (listener) => subscribe(IPC.nav.go, listener)
+  },
+  shortcut: {
+    set: (shortcut) => ipcRenderer.invoke(IPC.shortcut.set, shortcut)
   },
   analysis: {
     run: (input) => ipcRenderer.invoke(IPC.analysis.run, input)

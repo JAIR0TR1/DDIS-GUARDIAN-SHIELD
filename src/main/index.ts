@@ -1,15 +1,17 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, BrowserWindow } from 'electron'
 import { join } from 'node:path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../build/icon.png?asset'
+import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { registerWindowControls } from './windowControls'
-import { runDevScreenshots } from './devScreenshot'
 import { registerDataIpc } from './dataIpc'
 import { createAppData } from './storage/appData'
 import { createAnalysisService } from './analysis/service'
 import { createProviderResolver } from './analysis/providerFactory'
 import { createApiKeyStore } from './secrets/apiKeyStore'
 import { loadEnvironment, resolveConfig } from './config'
+import { createGuardianController } from './guardianController'
+import { runAlertTest } from './devAlertTest'
+import { prepareAlertWindow, registerAlertReady } from './windows/alertWindow'
+import { createMainWindow, showMainWindow } from './windows/mainWindow'
 
 const APP_ID = 'com.escudoguardian.app'
 
@@ -17,70 +19,47 @@ const APP_ID = 'com.escudoguardian.app'
 // ejecutar pruebas y capturas sin chocar con otra copia de la app abierta.
 const devDataDir = process.env['GUARDIAN_DATA_DIR']
 if (!app.isPackaged && devDataDir) app.setPath('userData', devDataDir)
-const BACKGROUND = '#05070D'
 
-function createWindow(): BrowserWindow {
-  const mainWindow = new BrowserWindow({
-    width: 1100,
-    height: 720,
-    minWidth: 900,
-    minHeight: 600,
-    show: false,
-    frame: false,
-    backgroundColor: BACKGROUND,
-    title: 'Escudo Guardián',
-    icon,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true
-    }
+// Una sola copia a la vez: abrirla de nuevo trae la existente al frente (útil con la bandeja).
+const gotLock = app.requestSingleInstanceLock()
+if (!gotLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    showMainWindow()
   })
 
-  mainWindow.on('ready-to-show', () => mainWindow.show())
+  void app.whenReady().then(async () => {
+    electronApp.setAppUserModelId(APP_ID)
 
-  // Los enlaces nunca se abren dentro de la app ni automáticamente.
-  mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }))
-  mainWindow.webContents.on('will-navigate', (event, url) => {
-    const current = mainWindow.webContents.getURL()
-    if (url !== current) {
-      event.preventDefault()
-      if (/^https:\/\//i.test(url)) void shell.openExternal(url)
-    }
+    app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
+
+    registerWindowControls()
+    registerAlertReady()
+    loadEnvironment()
+    const data = createAppData()
+    const keys = createApiKeyStore(join(app.getPath('userData'), 'gemini.key.bin'))
+    // Demo o real se decide una sola vez al arrancar (cambiarlo requiere reiniciar).
+    const config = await resolveConfig(keys)
+    const analysis = createAnalysisService(data, createProviderResolver(config, keys))
+    const controller = createGuardianController({ data, analysis })
+    registerDataIpc({ data, analysis, keys, config, controller })
+
+    createMainWindow(() => controller.shouldHideOnClose())
+    prepareAlertWindow()
+    await controller.init()
+    void runAlertTest(controller)
+
+    app.on('activate', () => {
+      if (BrowserWindow.getAllWindows().length === 0)
+        createMainWindow(() => controller.shouldHideOnClose())
+    })
+    app.on('will-quit', () => controller.dispose())
   })
 
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    void mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-  } else {
-    void mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-  }
-  runDevScreenshots(mainWindow)
-  return mainWindow
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit()
+  })
 }
-
-void app.whenReady().then(async () => {
-  electronApp.setAppUserModelId(APP_ID)
-
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
-
-  registerWindowControls()
-  loadEnvironment()
-  const data = createAppData()
-  const keys = createApiKeyStore(join(app.getPath('userData'), 'gemini.key.bin'))
-  // Demo o real se decide una sola vez al arrancar (cambiarlo requiere reiniciar).
-  const config = await resolveConfig(keys)
-  const analysis = createAnalysisService(data, createProviderResolver(config, keys))
-  registerDataIpc({ data, analysis, keys, config })
-  createWindow()
-
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
-})

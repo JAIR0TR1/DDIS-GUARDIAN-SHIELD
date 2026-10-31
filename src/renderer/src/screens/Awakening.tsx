@@ -14,6 +14,8 @@ export interface AwakeningProps {
   profile: Profile | null
   version: string
   demoMode: boolean
+  /** Atajo global configurado (se muestra en el último paso del onboarding). */
+  shortcut: string
   onEnter: (profile: Profile) => void
 }
 
@@ -27,6 +29,7 @@ export function Awakening({
   profile,
   version,
   demoMode,
+  shortcut,
   onEnter
 }: AwakeningProps): React.JSX.Element {
   const returning = profile?.onboardingDone === true
@@ -74,7 +77,7 @@ export function Awakening({
           {returning && profile ? (
             <Returning profile={profile} onEnter={onEnter} />
           ) : (
-            <Onboarding onEnter={onEnter} />
+            <Onboarding onEnter={onEnter} shortcut={shortcut} />
           )}
         </div>
       </div>
@@ -150,7 +153,13 @@ const stepVariants = {
 }
 
 /** Primer arranque: qué hace → privacidad → atajo y nombre. */
-function Onboarding({ onEnter }: { onEnter: (p: Profile) => void }): React.JSX.Element {
+function Onboarding({
+  onEnter,
+  shortcut
+}: {
+  onEnter: (p: Profile) => void
+  shortcut: string
+}): React.JSX.Element {
   const [step, setStep] = useState(0)
   const [vigilante, setVigilante] = useState(false)
   const [name, setName] = useState('')
@@ -205,7 +214,7 @@ function Onboarding({ onEnter }: { onEnter: (p: Profile) => void }): React.JSX.E
                 Un atajo y ya casi
               </h1>
               <p className="mt-1.5 text-[15px] text-text-muted">
-                Con <Kbd keys="Ctrl+Shift+G" className="mx-0.5 align-middle" /> me llamas desde
+                Con <Kbd keys={shortcut} className="mx-0.5 align-middle" /> me llamas desde
                 cualquier programa.
               </p>
               <label htmlFor={inputId} className="sr-only">

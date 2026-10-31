@@ -137,6 +137,13 @@
   }
 }
 
+/* La ventana flotante de alerta es transparente: sin fondo propio. */
+html.alert-window,
+html.alert-window body,
+html.alert-window #root {
+  background: transparent;
+}
+
 @layer components {
   /*
    * Vidrio premium: relleno en capas (destello en la esquina + degradado vertical), borde

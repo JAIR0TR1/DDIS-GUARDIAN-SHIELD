@@ -18,6 +18,8 @@ export interface HistoryProps {
   history: HistoryEntry[]
   onClear: () => Promise<void>
   onGo: (section: 'analizar') => void
+  /** Entrada que debe aparecer seleccionada al abrir (viene de la alerta flotante). */
+  selectId?: string
 }
 
 const verdictColor = {
@@ -27,8 +29,14 @@ const verdictColor = {
 } as const
 
 /** Historial local: lista a la izquierda, detalle a la derecha. */
-export function History({ variants, history, onClear, onGo }: HistoryProps): React.JSX.Element {
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+export function History({
+  variants,
+  history,
+  onClear,
+  onGo,
+  selectId
+}: HistoryProps): React.JSX.Element {
+  const [selectedId, setSelectedId] = useState<string | null>(selectId ?? null)
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
 

@@ -6,6 +6,7 @@ import { testGemini } from './analysis/aiTest'
 import type { AnalysisService } from './analysis/service'
 import { activeApiKey, type RuntimeConfig } from './config'
 import type { ApiKeyStore } from './secrets/apiKeyStore'
+import type { GuardianController } from './guardianController'
 import type { AppData } from './storage/appData'
 
 export interface IpcDeps {
@@ -13,13 +14,25 @@ export interface IpcDeps {
   analysis: AnalysisService
   keys: ApiKeyStore
   config: RuntimeConfig
+  controller: GuardianController
 }
 
 /** Los datos que llegan del renderer se validan siempre en main: no se confía en el renderer. */
-export function registerDataIpc({ data, analysis, keys, config }: IpcDeps): void {
+export function registerDataIpc({ data, analysis, keys, config, controller }: IpcDeps): void {
   ipcMain.handle(IPC.data.getProfile, () => data.getProfile())
-  ipcMain.handle(IPC.data.saveProfile, (_e, value: unknown) =>
-    data.saveProfile(profileSchema.parse(value))
+  ipcMain.handle(IPC.data.saveProfile, async (_e, value: unknown) => {
+    const saved = await data.saveProfile(profileSchema.parse(value))
+    controller.onProfileSaved(saved)
+    return saved
+  })
+
+  // Ventana flotante de alerta y atajo global.
+  ipcMain.on(IPC.alert.dismiss, () => controller.dismissAlert())
+  ipcMain.on(IPC.alert.openDetail, (_e, entryId: unknown) =>
+    controller.openDetail(typeof entryId === 'string' ? entryId : undefined)
+  )
+  ipcMain.handle(IPC.shortcut.set, (_e, shortcut: unknown) =>
+    controller.setShortcut(typeof shortcut === 'string' ? shortcut : '')
   )
   ipcMain.handle(IPC.data.getSettings, () => data.getSettings())
   ipcMain.handle(IPC.data.saveSettings, (_e, value: unknown) =>

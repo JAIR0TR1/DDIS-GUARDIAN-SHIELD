@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, LayoutGroup, MotionConfig, useReducedMotion } from 'framer-motion'
 import { ReducedMotionContext } from './lib/motionPref'
 import { AlertTriangle } from 'lucide-react'
+import type { NavigateRequest } from '@shared/alert'
 import type { AnalysisOutcome } from '@shared/analysis'
 import type { Creature, Profile, Settings } from '@shared/models'
 import type { HistoryEntry } from '@shared/history'
@@ -19,6 +20,9 @@ import { IconStage } from './screens/IconStage'
 import { sampleHistory } from './lib/sampleHistory'
 
 type Phase = 'boot' | 'awaken' | 'session'
+
+/** Pedido de navegación con un número único, para reaccionar aunque se repita la sección. */
+type NavRequest = NavigateRequest & { nonce: number }
 
 interface Loaded {
   profile: Profile | null
@@ -48,6 +52,7 @@ function Shell(): React.JSX.Element {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [scanning, setScanning] = useState(false)
   const [tone, setTone] = useState<Tone>('neutral')
+  const [navRequest, setNavRequest] = useState<NavRequest | null>(null)
 
   // Solo actualiza estado dentro de las promesas (nunca de forma síncrona dentro del efecto).
   const load = useCallback(() => {
@@ -73,6 +78,26 @@ function Shell(): React.JSX.Element {
   useEffect(() => {
     void load()
   }, [load])
+
+  // Cosas que pasan en segundo plano: el atajo global, la alerta flotante y la bandeja.
+  useEffect(() => {
+    const offNav = window.guardian.nav.onGo((request) =>
+      setNavRequest({ ...request, nonce: Date.now() })
+    )
+    const offData = window.guardian.data.onChanged(() => {
+      void Promise.all([
+        window.guardian.data.getProfile(),
+        window.guardian.data.getCreature(),
+        window.guardian.data.getHistory()
+      ]).then(([profile, creature, history]) =>
+        setLoaded((prev) => (prev ? { ...prev, profile, creature, history } : prev))
+      )
+    })
+    return () => {
+      offNav()
+      offData()
+    }
+  }, [])
 
   const retry = (): void => {
     setLoadError(null)
@@ -167,6 +192,7 @@ function Shell(): React.JSX.Element {
               profile={loaded.profile}
               version={VERSION}
               demoMode={loaded.demoMode}
+              shortcut={loaded.settings.shortcut}
               onEnter={(p) => void enter(p)}
             />
           )}
@@ -178,6 +204,7 @@ function Shell(): React.JSX.Element {
               settings={loaded.settings}
               history={loaded.history}
               demoMode={loaded.demoMode}
+              navRequest={navRequest}
               onAnalyzed={onAnalyzed}
               onTone={setTone}
               onClearHistory={clearHistory}

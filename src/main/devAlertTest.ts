@@ -1,0 +1,75 @@
+import { app, clipboard } from 'electron'
+import { mkdirSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
+import type { GuardianController } from './guardianController'
+import { trayIconFor } from './tray'
+import { getAlertWindow } from './windows/alertWindow'
+import { getMainWindow } from './windows/mainWindow'
+
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * SOLO DESARROLLO. Si GUARDIAN_ALERT_TEST trae un texto, simula de punta a punta el flujo del
+ * atajo global: copiar → atajo → alerta flotante → Enter (detalle) y Esc (descartar), guarda capturas
+ * en GUARDIAN_SHOTS_DIR e imprime el resultado de cada comprobación.
+ */
+export async function runAlertTest(controller: GuardianController): Promise<void> {
+  const text = process.env['GUARDIAN_ALERT_TEST']
+  if (!text || app.isPackaged) return
+  const dir = process.env['GUARDIAN_SHOTS_DIR'] ?? join(app.getAppPath(), '.screenshots')
+  mkdirSync(dir, { recursive: true })
+  const log = (name: string, ok: boolean): void =>
+    console.log(`[alert-test] ${name}: ${ok ? 'OK' : 'FALLÓ'}`)
+  const shoot = async (name: string, which: 'alert' | 'main'): Promise<void> => {
+    const win = which === 'alert' ? getAlertWindow() : getMainWindow()
+    if (!win) return
+    const image = await win.webContents.capturePage()
+    writeFileSync(join(dir, `${name}.png`), image.toPNG())
+  }
+
+  try {
+    // 0) Iconos de la bandeja de cada estado (ampliados para poder verlos).
+    for (const state of ['activo', 'duda', 'amenaza', 'dormida'] as const) {
+      const big = trayIconFor(state).resize({ width: 192, height: 192, quality: 'best' })
+      writeFileSync(join(dir, `tray-${state}.png`), big.toPNG())
+    }
+    log('iconos de bandeja generados', true)
+
+    await sleep(5000) // deja que la ventana principal cargue y entre a la sesión
+
+    // 1) Atajo con algo copiado: aparece la alerta con el resultado.
+    clipboard.writeText(text)
+    await controller.analyzeClipboard()
+    await sleep(2200)
+    const alert = getAlertWindow()
+    log('la alerta flotante está visible', alert?.isVisible() === true)
+    log('la alerta está siempre encima', alert?.isAlwaysOnTop() === true)
+    await shoot('alert-result', 'alert')
+
+    // 2) Enter: abre el detalle en la ventana principal y esconde la alerta.
+    alert?.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Enter' })
+    await sleep(1800)
+    log('Enter oculta la alerta', getAlertWindow()?.isVisible() === false)
+    log('Enter trae la ventana principal', getMainWindow()?.isVisible() === true)
+    await shoot('alert-detail', 'main')
+
+    // 3) Esc: descarta la alerta sin abrir nada.
+    await controller.analyzeClipboard()
+    await sleep(2000)
+    log('la alerta vuelve a aparecer', getAlertWindow()?.isVisible() === true)
+    getAlertWindow()?.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Escape' })
+    await sleep(800)
+    log('Esc descarta la alerta', getAlertWindow()?.isVisible() === false)
+
+    // 4) Portapapeles vacío: avisa con claridad.
+    clipboard.clear()
+    await controller.analyzeClipboard()
+    await sleep(1500)
+    log('portapapeles vacío muestra aviso', getAlertWindow()?.isVisible() === true)
+    await shoot('alert-empty', 'alert')
+  } catch (error) {
+    console.error('[alert-test] Error inesperado', error)
+  } finally {
+    app.quit()
+  }
+}

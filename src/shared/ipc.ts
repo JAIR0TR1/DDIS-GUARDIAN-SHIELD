@@ -15,7 +15,23 @@ export const IPC = {
     getCreature: 'data:get-creature',
     saveCreature: 'data:save-creature',
     getHistory: 'data:get-history',
-    clearHistory: 'data:clear-history'
+    clearHistory: 'data:clear-history',
+    /** Evento: el historial, el perfil o la criatura cambiaron en segundo plano. */
+    changed: 'data:changed'
+  },
+  alert: {
+    /** Evento: mostrar contenido en la ventana flotante. */
+    show: 'alert:show',
+    ready: 'alert:ready',
+    dismiss: 'alert:dismiss',
+    openDetail: 'alert:open-detail'
+  },
+  nav: {
+    /** Evento: la ventana principal debe ir a una sección. */
+    go: 'nav:go'
+  },
+  shortcut: {
+    set: 'shortcut:set'
   },
   analysis: {
     run: 'analysis:run'

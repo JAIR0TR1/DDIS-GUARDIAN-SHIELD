@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
+import type { NavigateRequest } from '@shared/alert'
 import type { AnalysisOutcome } from '@shared/analysis'
 import type { Creature, Profile, Settings } from '@shared/models'
 import type { HistoryEntry } from '@shared/history'
@@ -24,6 +25,8 @@ export interface SessionProps {
   settings: Settings
   history: HistoryEntry[]
   demoMode: boolean
+  /** Pedido de la alerta flotante o la bandeja: ir a una sección (y a una entrada del historial). */
+  navRequest: (NavigateRequest & { nonce: number }) | null
   onAnalyzed: (outcome: AnalysisOutcome) => void
   onTone: (tone: Tone) => void
   onClearHistory: () => Promise<void>
@@ -50,13 +53,21 @@ export function Session({
   settings,
   history,
   demoMode,
+  navRequest,
   onAnalyzed,
   onTone,
   onClearHistory,
   onSaveSettings,
   onSaveProfile
 }: SessionProps): React.JSX.Element {
-  const [section, setSection] = useState<Section>('inicio')
+  const [section, setSection] = useState<Section>(navRequest?.section ?? 'inicio')
+  // Un pedido nuevo (alerta flotante, bandeja) cambia de sección. Se ajusta durante el dibujado,
+  // que es el patrón recomendado por React para reaccionar a un cambio de propiedades.
+  const [seenNonce, setSeenNonce] = useState(navRequest?.nonce)
+  if (navRequest && navRequest.nonce !== seenNonce) {
+    setSeenNonce(navRequest.nonce)
+    setSection(navRequest.section)
+  }
   const [mood, setMood] = useState<CreatureState>('feliz')
   const [pasted, setPasted] = useState('')
   const osReduced = useReducedMotion()
@@ -175,6 +186,7 @@ export function Session({
                 history={history}
                 onGo={setSection}
                 onPasteText={goAnalyze}
+                shortcut={settings.shortcut}
               />
             )}
             {section === 'analizar' && (
@@ -188,6 +200,8 @@ export function Session({
             )}
             {section === 'historial' && (
               <History
+                key={navRequest?.nonce ?? 'history'}
+                selectId={navRequest?.section === 'historial' ? navRequest.entryId : undefined}
                 variants={itemVariants}
                 history={history}
                 onClear={onClearHistory}

@@ -1,3 +1,4 @@
+import type { AlertPayload, NavigateRequest, ShortcutChange } from './alert'
 import type { AiTestResult, AnalysisOutcome, AnalyzeInput, AppConfig } from './analysis'
 import type { HistoryEntry } from './history'
 import type { Creature, Profile, Settings } from './models'
@@ -22,6 +23,23 @@ export interface GuardianApi {
     saveCreature: (creature: Creature) => Promise<Creature>
     getHistory: () => Promise<HistoryEntry[]>
     clearHistory: () => Promise<void>
+    /** Avisa cuando algo cambió en segundo plano (atajo, vigilante). Devuelve cómo dejar de escuchar. */
+    onChanged: (listener: () => void) => () => void
+  }
+  alert: {
+    onShow: (listener: (payload: AlertPayload) => void) => () => void
+    /** La ventana flotante avisa que ya puede recibir contenido. */
+    ready: () => void
+    dismiss: () => void
+    /** Abre la ventana principal en el historial, en esa entrada. */
+    openDetail: (entryId: string) => void
+  }
+  nav: {
+    onGo: (listener: (request: NavigateRequest) => void) => () => void
+  }
+  shortcut: {
+    /** Valida, registra y guarda un atajo global nuevo. */
+    set: (shortcut: string) => Promise<ShortcutChange>
   }
   analysis: {
     /** Analiza un texto. Rechaza con un mensaje claro si la entrada no es válida. */

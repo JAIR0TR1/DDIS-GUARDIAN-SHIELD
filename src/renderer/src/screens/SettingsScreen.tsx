@@ -2,6 +2,7 @@ import { useEffect, useId, useState, type FormEvent } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { KeyRound, LockKeyhole, PlugZap, RotateCw, Trash2 } from 'lucide-react'
 import type { AppConfig } from '@shared/analysis'
+import { shortcutFromKeyEvent } from '@domain/shortcut'
 import type { Profile, Settings } from '@shared/models'
 import { GlassCard } from '../components/ui/GlassCard'
 import { Switch } from '../components/ui/Switch'
@@ -61,15 +62,10 @@ export function SettingsScreen({
             disabled={busy}
             onChange={(vigilante) => run(() => onSaveProfile({ ...profile, vigilante }))}
           />
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-medium text-text">Atajo global</p>
-              <p className="text-[13px] text-text-muted">
-                Para llamar a Nilo desde cualquier lugar.
-              </p>
-            </div>
-            <Kbd keys={settings.shortcut} />
-          </div>
+          <ShortcutField
+            shortcut={settings.shortcut}
+            onChanged={(shortcut) => run(() => onSaveSettings({ ...settings, shortcut }))}
+          />
         </GlassCard>
       </motion.div>
 
@@ -88,6 +84,86 @@ export function SettingsScreen({
         <AiKeyCard demoMode={demoMode} />
       </motion.div>
     </>
+  )
+}
+
+/**
+ * Atajo global editable: «Cambiar» → presionas la combinación → se valida y se registra en el
+ * sistema. Esc cancela. Si otra aplicación ya usa esa combinación, se avisa y se conserva la anterior.
+ */
+function ShortcutField({
+  shortcut,
+  onChanged
+}: {
+  shortcut: string
+  onChanged: (shortcut: string) => Promise<void>
+}): React.JSX.Element {
+  const toast = useToast()
+  const [capturing, setCapturing] = useState(false)
+  const [hint, setHint] = useState('')
+
+  useEffect(() => {
+    if (!capturing) return
+    const onKey = (event: KeyboardEvent): void => {
+      event.preventDefault()
+      event.stopPropagation()
+      if (event.key === 'Escape') {
+        setCapturing(false)
+        setHint('')
+        return
+      }
+      const combo = shortcutFromKeyEvent(event)
+      if (combo === null) {
+        setHint('Mantén Ctrl o Alt y presiona una letra, un número o F1 a F12.')
+        return
+      }
+      setCapturing(false)
+      setHint('')
+      void window.guardian.shortcut
+        .set(combo)
+        .then(async (result) => {
+          toast.show(result.message, result.ok ? 'success' : 'error')
+          if (result.ok) await onChanged(result.shortcut)
+        })
+        .catch((error: unknown) => {
+          console.error('No se pudo cambiar el atajo', error)
+          toast.show('No pude cambiar el atajo. Inténtalo de nuevo.', 'error')
+        })
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [capturing, onChanged, toast])
+
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-text">Atajo global</p>
+        <p className="text-[13px] text-text-muted" role="status">
+          {capturing
+            ? hint || 'Presiona la nueva combinación… (Esc para cancelar)'
+            : 'Analiza lo que copiaste, desde cualquier programa.'}
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        {capturing ? (
+          <span className="rounded-[8px] border border-accent/50 bg-accent/10 px-2.5 py-1 text-[12px] text-accent-strong">
+            Esperando…
+          </span>
+        ) : (
+          <Kbd keys={shortcut} />
+        )}
+        <Button
+          variant="secondary"
+          onClick={() => {
+            setHint('')
+            setCapturing((c) => !c)
+          }}
+          aria-pressed={capturing}
+        >
+          {capturing ? 'Cancelar' : 'Cambiar'}
+        </Button>
+      </div>
+    </div>
   )
 }
 

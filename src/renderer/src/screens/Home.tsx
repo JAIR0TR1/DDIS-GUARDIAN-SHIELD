@@ -22,6 +22,8 @@ export interface HomeProps {
   onGo: (section: Section) => void
   /** Texto pegado en el panel «Analizar»: abre el analizador con ese texto. */
   onPasteText: (text: string) => void
+  /** Atajo global configurado (se muestra junto al botón Analizar). */
+  shortcut: string
 }
 
 const verdictColor = {
@@ -37,7 +39,8 @@ export function Home({
   variants,
   history,
   onGo,
-  onPasteText
+  onPasteText,
+  shortcut
 }: HomeProps): React.JSX.Element {
   const lastThreat = history[0] ?? null
   return (
@@ -106,7 +109,7 @@ export function Home({
               >
                 Analizar
               </Button>
-              <Kbd keys="Ctrl+Shift+G" />
+              <Kbd keys={shortcut} />
             </div>
           </GlassCard>
         </motion.div>
