@@ -92,7 +92,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ### Gestos de Nilo según el contexto
 | # | Caso | Pasos | Resultado esperado | Verificado |
 |---|---|---|---|---|
-| 8.1 | Gesto por tipo de amenaza | Analiza: banco que pide la clave · premio · «cambié de número» · mensaje normal | Proteger (burbuja de escudo) · negar (mueve el cuerpo) · llamar (mano junto a la cabeza) · celebrar (brazos arriba) | ✅ reglas probadas con el corpus real · ✅ vistos los 7 gestos en pantalla · ⬜ probarlos tú |
+| 8.1 | Gesto y objeto por tipo de estafa | Analiza, uno por uno: premio · paquete retenido · empleo que cobra · préstamo con pago adelantado · «cambié de número» · banco que pide la clave · mensaje normal | Cada uno con SU objeto sobre la cabeza: regalo · caja · maletín · moneda · teléfono · llave/banco · check verde; y su gesto (negar, alto, proteger, llamar, celebrar) | ✅ reglas probadas con el corpus (≥ 4 gestos y ≥ 5 objetos distintos; ningún gesto pasa de la mitad) · ✅ vistos en pantalla · ⬜ probarlos tú |
 | 8.2 | Primer vistazo al pegar | En Analizar pega un mensaje de estafa y espera medio segundo | Nilo se inclina a leer y su globo dice «Uy… esto no me gusta nada. Dale a Analizar…» | ✅ |
 | 8.3 | Sin IA ni costo | Lo mismo en modo real | El primer vistazo no consume cuota (solo reglas locales) | ✅ por diseño (usa `peek`) |
 | 8.4 | Gesto en la alerta flotante | Atajo con un mensaje de estafa | Nilo de la alerta hace el gesto del contexto | ✅ cableado · ⬜ verlo |

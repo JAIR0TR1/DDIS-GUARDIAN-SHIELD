@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { HaloState } from '@design/tokens'
-import type { Gesture } from '@domain/gesture'
+import type { Gesture, Prop } from '@domain/gesture'
 import { Creature } from '../creature/Creature'
 import { defaultHalo, type CreatureState } from '../creature/creatureState'
 import { useReducedMotionPref } from '../lib/motionPref'
@@ -19,6 +19,8 @@ export interface CreatureViewProps {
   greet?: number
   /** Gesto de contexto. Solo lo hace el 3D vivo (en foto fija o SVG se ignora). */
   gesture?: Gesture
+  /** Objeto flotante sobre la cabeza (solo 3D vivo). */
+  prop?: Prop
   /** Cambia para reiniciar el gesto (p. ej. el id del resultado). */
   gestureKey?: string | number
   title?: string
@@ -40,6 +42,7 @@ export function CreatureView({
   rings = false,
   greet = 0,
   gesture = 'ninguno',
+  prop = 'ninguno',
   gestureKey,
   title = 'Nilo, tu Guardián'
 }: CreatureViewProps): React.JSX.Element {
@@ -57,6 +60,7 @@ export function CreatureView({
           halo={haloState}
           greetFor={reduced ? 0 : greet}
           gesture={reduced ? 'ninguno' : gesture}
+          prop={reduced ? 'ninguno' : prop}
           gestureKey={gestureKey}
           animated={!reduced}
           onUnavailable={() => setLive3dFailed(true)}

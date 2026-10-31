@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import type { CreatureProps } from '../../creature/Creature'
 import { CreatureView } from '../../creature3d/CreatureView'
-import type { Gesture } from '@domain/gesture'
+import type { Gesture, Prop } from '@domain/gesture'
 import { cn } from '../../lib/cn'
 import { transition } from '@design/motion'
 
@@ -16,6 +16,8 @@ export interface CreatureAvatarProps extends Omit<CreatureProps, 'className'> {
   greet?: number
   /** Gesto de contexto: Nilo reacciona con el cuerpo a lo que se analizó. */
   gesture?: Gesture
+  /** Objeto que flota sobre la cabeza y dice de qué trata el mensaje. */
+  prop?: Prop
   /** Cambia para reiniciar el gesto (p. ej. el id del resultado). */
   gestureKey?: string | number
   className?: string
@@ -32,6 +34,7 @@ export function CreatureAvatar({
   layoutId,
   greet = 0,
   gesture,
+  prop,
   gestureKey,
   className,
   state,
@@ -64,6 +67,7 @@ export function CreatureAvatar({
         rings={rings}
         greet={greet}
         gesture={gesture}
+        prop={prop}
         gestureKey={gestureKey}
         title={title}
       />

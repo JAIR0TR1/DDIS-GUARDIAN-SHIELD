@@ -1,9 +1,16 @@
 import { describe, expect, it } from 'vitest'
-import { gestureFor, preReaction, GESTURES } from '../src/domain/gesture'
+import {
+  contextFor,
+  gestureFor,
+  GESTURES,
+  preReaction,
+  PROPS,
+  propFor
+} from '../src/domain/gesture'
 import { analyzeLocal } from '../src/domain/rules'
 import { toThreatResult } from '../src/domain/explain'
 import corpusData from '../data/corpus.json'
-import type { Signal, SignalKind } from '../src/shared/threat'
+import type { Signal, SignalKind, Verdict } from '../src/shared/threat'
 
 const signal = (kind: SignalKind, severity: Signal['severity'] = 'alta'): Signal => ({
   id: kind,
@@ -11,78 +18,139 @@ const signal = (kind: SignalKind, severity: Signal['severity'] = 'alta'): Signal
   label: kind,
   severity
 })
+const result = (verdict: Verdict, ...kinds: SignalKind[]): Parameters<typeof contextFor>[0] => ({
+  verdict,
+  signals: kinds.map((k) => signal(k))
+})
 
-describe('gestureFor: el gesto depende del contexto', () => {
-  it('seguro → celebrar', () => {
-    expect(gestureFor({ verdict: 'seguro', signals: [] })).toBe('celebrar')
+describe('contextFor: el gesto y el objeto dependen de la HISTORIA de la estafa', () => {
+  it('seguro → celebrar con un check', () => {
+    expect(contextFor(result('seguro'))).toEqual({ gesture: 'celebrar', prop: 'check' })
   })
 
-  it('sospechoso → pensar, sin importar las señales', () => {
-    expect(gestureFor({ verdict: 'sospechoso', signals: [signal('premio')] })).toBe('pensar')
+  it('sospechoso → siempre pensar, pero el objeto dice de qué parece tratarse', () => {
+    expect(contextFor(result('sospechoso'))).toEqual({ gesture: 'pensar', prop: 'interrogacion' })
+    expect(contextFor(result('sospechoso', 'dinero'))).toEqual({
+      gesture: 'pensar',
+      prop: 'moneda'
+    })
+    expect(contextFor(result('sospechoso', 'pide-clave'))).toEqual({
+      gesture: 'pensar',
+      prop: 'llave'
+    })
+  })
+
+  it.each<[SignalKind, string, string]>([
+    ['cambio-numero', 'llamar', 'telefono'],
+    ['comprobante', 'alto', 'documento'],
+    ['paquete', 'alto', 'paquete'],
+    ['empleo', 'negar', 'maletin'],
+    ['dinero', 'proteger', 'moneda'],
+    ['premio', 'negar', 'regalo']
+  ])('historia %s → %s con %s', (kind, gesture, prop) => {
+    expect(contextFor(result('peligroso', kind))).toEqual({ gesture, prop })
   })
 
   it.each<[SignalKind, string]>([
-    ['pide-clave', 'proteger'],
-    ['suplanta-marca', 'proteger'],
-    ['soporte', 'proteger'],
-    ['premio', 'negar'],
-    ['paquete', 'negar'],
-    ['empleo', 'negar'],
-    ['dinero', 'negar'],
-    ['comprobante', 'negar'],
-    ['cambio-numero', 'llamar'],
-    ['urgencia', 'alto']
-  ])('peligroso con %s → %s', (kind, expected) => {
-    expect(gestureFor({ verdict: 'peligroso', signals: [signal(kind)] })).toBe(expected)
+    ['pide-clave', 'llave'],
+    ['soporte', 'llave'],
+    ['suplanta-marca', 'banco']
+  ])('sin historia, el pedido %s → proteger con %s', (kind, prop) => {
+    expect(contextFor(result('peligroso', kind))).toEqual({ gesture: 'proteger', prop })
   })
 
-  it('peligroso sin señales → alto', () => {
-    expect(gestureFor({ verdict: 'peligroso', signals: [] })).toBe('alto')
+  it('la HISTORIA manda sobre el pedido: un premio que pide la clave sigue siendo un premio', () => {
+    expect(contextFor(result('peligroso', 'suplanta-marca', 'pide-clave', 'premio'))).toEqual({
+      gesture: 'negar',
+      prop: 'regalo'
+    })
   })
 
-  it('manda la señal más grave, no la primera', () => {
-    const signals = [
-      signal('urgencia', 'baja'),
-      signal('pide-clave', 'alta'),
-      signal('premio', 'media')
-    ]
-    expect(gestureFor({ verdict: 'peligroso', signals })).toBe('proteger')
+  it('un paquete que suplanta una transportadora es un paquete', () => {
+    expect(
+      contextFor(result('peligroso', 'suplanta-marca', 'paquete', 'dominio-sospechoso'))
+    ).toEqual({ gesture: 'alto', prop: 'paquete' })
   })
 
-  it('a igual gravedad manda la primera (las reglas ya ordenan por peso)', () => {
-    const signals = [signal('premio', 'alta'), signal('pide-clave', 'alta')]
-    expect(gestureFor({ verdict: 'peligroso', signals })).toBe('negar')
+  it('entre dos historias gana la de mayor prioridad (el falso familiar antes que el premio)', () => {
+    expect(contextFor(result('peligroso', 'premio', 'cambio-numero')).gesture).toBe('llamar')
   })
 
-  it('todos los gestos posibles están definidos', () => {
-    expect(GESTURES).toContain('leer')
+  it('peligroso solo con señales genéricas (urgencia, link) → alto, sin objeto', () => {
+    expect(contextFor(result('peligroso', 'urgencia', 'link-acortado'))).toEqual({
+      gesture: 'alto',
+      prop: 'ninguno'
+    })
+    expect(contextFor(result('peligroso'))).toEqual({ gesture: 'alto', prop: 'ninguno' })
+  })
+
+  it('gestureFor y propFor son atajos de contextFor', () => {
+    const r = result('peligroso', 'empleo')
+    expect(gestureFor(r)).toBe('negar')
+    expect(propFor(r)).toBe('maletin')
+  })
+
+  it('los catálogos no tienen repetidos', () => {
     expect(new Set(GESTURES).size).toBe(GESTURES.length)
+    expect(new Set(PROPS).size).toBe(PROPS.length)
   })
 })
 
-describe('gestos sobre el corpus real de mensajes', () => {
+describe('contexto sobre el corpus real: hay variedad y es el correcto', () => {
   interface Sample {
     id: string
+    label: string
     text: string
   }
-  const gestureOf = (id: string): string => {
-    const sample = (corpusData as Sample[]).find((s) => s.id === id)
+  const samples = corpusData as Sample[]
+  const ctx = (id: string): { gesture: string; prop: string } => {
+    const sample = samples.find((s) => s.id === id)
     if (!sample) throw new Error(`No existe ${id}`)
-    return gestureFor(toThreatResult(analyzeLocal(sample.text)))
+    return contextFor(toThreatResult(analyzeLocal(sample.text)))
   }
 
-  it('el banco que pide la clave → proteger', () => {
-    expect(gestureOf('e01')).toBe('proteger')
+  it('el banco que pide la clave → proteger con el banco o la llave', () => {
+    expect(ctx('e01').gesture).toBe('proteger')
   })
-  it('el premio con link acortado y clave → proteger (lo más grave es pedir la clave)', () => {
-    expect(gestureOf('e02')).toBe('proteger')
+  it('el premio de Nequi → regalo, aunque pida la clave', () => {
+    expect(ctx('e02')).toEqual({ gesture: 'negar', prop: 'regalo' })
   })
-  it('«cambié de número» y pide plata → llamar', () => {
-    expect(gestureOf('e04')).toBe('llamar')
+  it('el paquete de Servientrega → paquete', () => {
+    expect(ctx('e03')).toEqual({ gesture: 'alto', prop: 'paquete' })
   })
-  it('un mensaje legítimo → celebrar', () => {
-    expect(gestureOf('l01')).toBe('celebrar')
-    expect(gestureOf('l03')).toBe('celebrar')
+  it('el falso familiar → teléfono', () => {
+    expect(ctx('e04')).toEqual({ gesture: 'llamar', prop: 'telefono' })
+  })
+  it('el empleo que cobra → maletín', () => {
+    expect(ctx('e06')).toEqual({ gesture: 'negar', prop: 'maletin' })
+  })
+  it('el préstamo con pago adelantado → moneda', () => {
+    expect(ctx('e10')).toEqual({ gesture: 'proteger', prop: 'moneda' })
+  })
+
+  it('las 14 estafas peligrosas usan al menos 4 gestos y 5 objetos distintos', () => {
+    const dangerous = samples
+      .filter((s) => s.label === 'estafa')
+      .map((s) => ({ s, r: toThreatResult(analyzeLocal(s.text)) }))
+      .filter(({ r }) => r.verdict === 'peligroso')
+      .map(({ r }) => contextFor(r))
+    expect(new Set(dangerous.map((c) => c.gesture)).size).toBeGreaterThanOrEqual(4)
+    expect(new Set(dangerous.map((c) => c.prop)).size).toBeGreaterThanOrEqual(5)
+  })
+
+  it('ningún gesto acapara más de la mitad de las estafas peligrosas', () => {
+    const dangerous = samples
+      .filter((s) => s.label === 'estafa')
+      .map((s) => toThreatResult(analyzeLocal(s.text)))
+      .filter((r) => r.verdict === 'peligroso')
+      .map((r) => contextFor(r).gesture)
+    const counts = new Map<string, number>()
+    for (const g of dangerous) counts.set(g, (counts.get(g) ?? 0) + 1)
+    expect(Math.max(...counts.values())).toBeLessThanOrEqual(Math.ceil(dangerous.length / 2))
+  })
+
+  it('un mensaje legítimo → celebrar con check', () => {
+    expect(ctx('l01')).toEqual({ gesture: 'celebrar', prop: 'check' })
   })
 })
 

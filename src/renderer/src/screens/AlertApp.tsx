@@ -4,7 +4,7 @@ import { X } from 'lucide-react'
 import type { AlertPayload } from '@shared/alert'
 import type { Verdict } from '@shared/threat'
 import { transition } from '@design/motion'
-import { gestureFor } from '@domain/gesture'
+import { contextFor } from '@domain/gesture'
 import { Button } from '../components/ui/Button'
 import { CreatureAvatar } from '../components/ui/CreatureAvatar'
 import { Kbd } from '../components/ui/Kbd'
@@ -134,12 +134,14 @@ function AlertBody({
   if (payload.kind === 'result') {
     const { result } = payload.entry
     const verdict = result.verdict
+    const context = contextFor(result)
     return (
       <>
         <CreatureAvatar
           size={104}
           state={moodByVerdict[verdict]}
-          gesture={gestureFor(result)}
+          gesture={context.gesture}
+          prop={context.prop}
           gestureKey={payload.entry.id}
           halo={haloByVerdict[verdict]}
           title="Nilo"

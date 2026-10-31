@@ -20,7 +20,7 @@ import { cn } from '../../lib/cn'
 import { GlassCard } from './GlassCard'
 import { VerdictBadge } from './Badge'
 import { CreatureAvatar } from './CreatureAvatar'
-import { gestureFor } from '@domain/gesture'
+import { contextFor } from '@domain/gesture'
 import type { CreatureState } from '../../creature/creatureState'
 
 const signalIcon: Record<SignalKind, LucideIcon> = {
@@ -75,6 +75,7 @@ export function ThreatResultCard({
   className,
   reactionKey
 }: ThreatResultCardProps): React.JSX.Element {
+  const context = contextFor(result)
   return (
     <GlassCard
       title={title}
@@ -121,7 +122,8 @@ export function ThreatResultCard({
         <CreatureAvatar
           size={104}
           state={creatureByVerdict[result.verdict]}
-          gesture={gestureFor(result)}
+          gesture={context.gesture}
+          prop={context.prop}
           gestureKey={reactionKey ?? `${result.verdict}-${result.score}`}
           halo={
             result.verdict === 'peligroso'

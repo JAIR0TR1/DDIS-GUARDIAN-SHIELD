@@ -32,7 +32,8 @@ import {
 } from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { haloColors, type HaloState } from '@design/tokens'
-import type { Gesture } from '@domain/gesture'
+import type { Gesture, Prop } from '@domain/gesture'
+import { buildProps } from './props'
 import type { CreatureState } from '../creature/creatureState'
 
 /** Datos de cada fotograma: los entrega el bucle de animación (o la foto fija). */
@@ -46,6 +47,8 @@ interface Pose {
 const GESTURE_SECONDS = 3.2
 
 export interface Frame {
+  /** Objeto que flota sobre la cabeza y dice de qué trata el mensaje. */
+  prop: Prop
   /** Gesto de contexto que se está haciendo («ninguno» = ninguno). */
   gesture: Gesture
   /** Segundos desde que empezó el gesto. */
@@ -124,8 +127,9 @@ export function buildMascot(): Mascot {
 
   const scene = new Scene()
   const camera = new PerspectiveCamera(30, 1, 0.1, 50)
-  camera.position.set(0, 0.8, 9.3)
-  camera.lookAt(0, 0.5, 0)
+  // Un poco más atrás y más arriba que antes: deja espacio al objeto que flota sobre la cabeza.
+  camera.position.set(0, 1.0, 10.1)
+  camera.lookAt(0, 0.85, 0)
 
   // ---------- Luces ----------
   scene.add(new AmbientLight('#9bbcff', 0.8))
@@ -431,6 +435,10 @@ export function buildMascot(): Mascot {
   scanRing.visible = false
   root.add(scanRing)
 
+  // Objeto flotante sobre la cabeza: dice de qué trata el mensaje (regalo, paquete, llave…).
+  const props = buildProps()
+  scene.add(props.group)
+
   // Burbuja protectora (gesto «proteger»): una esfera de luz que envuelve a Nilo.
   const barrierMat = mat(
     new MeshBasicMaterial({
@@ -596,6 +604,9 @@ export function buildMascot(): Mascot {
     // proteger: el escudo de la gorra late grande y brillante («no des tus datos»).
     const shieldPulse = gesture === 'proteger' ? g * (0.5 + 0.5 * Math.sin(ga * 8)) : 0
     shield.scale.setScalar(0.3 * (1 + 0.45 * shieldPulse))
+    // Objeto del contexto sobre la cabeza (regalo, paquete, llave…).
+    props.update(animated ? f.prop : 'ninguno', f.gestureAge, t, live, dt)
+
     // La burbuja aparece y late; el anillo gira alrededor como un escáner protector.
     barrier.visible = barrierRing.visible =
       shieldPulse > 0.001 || (gesture === 'proteger' && g > 0.01)
@@ -682,6 +693,7 @@ export function buildMascot(): Mascot {
     geometries.forEach((g) => g.dispose())
     materials.forEach((m) => m.dispose())
     textures.forEach((x) => x.dispose())
+    props.dispose()
   }
 
   return { scene, camera, update, dispose }
