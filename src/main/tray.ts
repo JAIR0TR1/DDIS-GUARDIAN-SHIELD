@@ -2,10 +2,11 @@ import { Menu, nativeImage, Tray, type NativeImage } from 'electron'
 import icon from '../../build/icon.png?asset'
 
 /** Estado que comunica el icono: cian activo, ámbar duda, rojo amenaza, gris apagado. */
-export type TrayState = 'activo' | 'duda' | 'amenaza' | 'dormida'
+export type TrayState = 'activo' | 'segura' | 'duda' | 'amenaza' | 'dormida'
 
 const DOT_RGB: Record<TrayState, [number, number, number]> = {
   activo: [34, 211, 238],
+  segura: [52, 211, 153],
   duda: [251, 191, 36],
   amenaza: [244, 63, 94],
   dormida: [107, 114, 128]
@@ -13,6 +14,7 @@ const DOT_RGB: Record<TrayState, [number, number, number]> = {
 
 const TOOLTIP: Record<TrayState, string> = {
   activo: 'Escudo Guardián · vigilando',
+  segura: 'Escudo Guardián · todo en orden',
   duda: 'Escudo Guardián · algo dudoso',
   amenaza: 'Escudo Guardián · ¡amenaza detectada!',
   dormida: 'Escudo Guardián · vigilante apagado'

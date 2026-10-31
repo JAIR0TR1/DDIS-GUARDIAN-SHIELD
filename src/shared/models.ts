@@ -23,6 +23,8 @@ export const thresholdsSchema = z
 
 export const settingsSchema = z.object({
   reduceMotion: z.boolean().default(false),
+  /** El vigilante confirma con un aviso breve cuando lo copiado está bien (no solo si es peligroso). */
+  notifySafe: z.boolean().default(true),
   shortcut: z.string().min(1).max(40).default('Ctrl+Shift+G'),
   thresholds: thresholdsSchema.default({ safeBelow: 30, dangerAbove: 70 })
 })

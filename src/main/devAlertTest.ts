@@ -26,11 +26,19 @@ export async function runWatcherTest(data: AppData): Promise<void> {
     log('una contraseña NO dispara alerta', getAlertWindow()?.isVisible() !== true)
     log('una contraseña NO se guarda', (await data.getHistory()).length === 0)
 
-    // 2) Un mensaje legítimo: tampoco.
+    // 2) Un mensaje legítimo: confirmación breve («todo en orden»), pero sin guardarse.
     clipboard.writeText('Recordatorio: mañana tienes clase a las 8 en el salón 204.')
     await sleep(2200)
-    log('un mensaje legítimo NO dispara alerta', getAlertWindow()?.isVisible() !== true)
+    const safeAlert = getAlertWindow()
+    log('un mensaje legítimo muestra «todo en orden»', safeAlert?.isVisible() === true)
+    log('la confirmación NO roba el foco', safeAlert?.isFocused() === false)
     log('un mensaje legítimo NO se guarda', (await data.getHistory()).length === 0)
+    if (safeAlert) {
+      const image = await safeAlert.webContents.capturePage()
+      const dir = process.env['GUARDIAN_SHOTS_DIR'] ?? join(app.getAppPath(), '.screenshots')
+      mkdirSync(dir, { recursive: true })
+      writeFileSync(join(dir, 'watcher-safe.png'), image.toPNG())
+    }
 
     // 3) Una estafa: alerta sin robar el foco, notificación e historial.
     clipboard.writeText(scam)

@@ -62,6 +62,13 @@ export function SettingsScreen({
             disabled={busy}
             onChange={(vigilante) => run(() => onSaveProfile({ ...profile, vigilante }))}
           />
+          <Switch
+            label="Avisar también cuando todo está bien"
+            description="El vigilante te confirma con un aviso breve que revisó lo que copiaste. Si te cansa, apágalo."
+            checked={settings.notifySafe}
+            disabled={busy || !profile.vigilante}
+            onChange={(notifySafe) => run(() => onSaveSettings({ ...settings, notifySafe }))}
+          />
           <ShortcutField
             shortcut={settings.shortcut}
             onChanged={(shortcut) => run(() => onSaveSettings({ ...settings, shortcut }))}

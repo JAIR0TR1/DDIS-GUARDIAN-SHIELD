@@ -35,6 +35,7 @@ const scoreColor: Record<Verdict, string> = {
 /** Tiempo tras el cual la alerta se retira sola si nadie la atiende. */
 function autoDismissMs(payload: AlertPayload): number | null {
   if (payload.kind === 'empty') return 3500
+  if (payload.kind === 'safe') return 4000
   if (payload.kind === 'error') return 6000
   if (payload.kind === 'result') {
     if (payload.entry.result.verdict === 'seguro') return 7000
@@ -183,6 +184,11 @@ function AlertBody({
   }
 
   const simple = {
+    safe: {
+      mood: 'feliz' as const,
+      title: 'Revisé lo que copiaste',
+      text: payload.kind === 'safe' ? `${payload.message} Riesgo: ${payload.score}/100.` : ''
+    },
     scanning: {
       mood: 'escaneando' as const,
       title: 'Revisando lo que copiaste…',
@@ -210,8 +216,14 @@ function AlertBody({
         <p className="mt-1 text-sm text-text-muted">{simple.text}</p>
         {payload.kind !== 'scanning' && (
           <div className="mt-3.5">
-            <Button variant="ghost" onClick={onDismiss} autoFocus className="-ml-3">
-              <X aria-hidden className="size-4" /> Cerrar <Kbd keys="Esc" className="ml-1" />
+            <Button
+              variant="ghost"
+              onClick={onDismiss}
+              autoFocus
+              className="-ml-3"
+              icon={<X aria-hidden className="size-4" />}
+            >
+              Cerrar <Kbd keys="Esc" className="ml-1" />
             </Button>
           </div>
         )}

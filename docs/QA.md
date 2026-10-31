@@ -80,6 +80,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | 7.7 | Clic en la bandeja | Clic en el icono; clic derecho | Abre la ventana; el menú tiene Abrir, Analizar el portapapeles, Vigilar y Salir | ⬜ |
 | 7.8 | Vigilante: lo que NO mira | Con el vigilante activo copia una contraseña (`P@ssw0rd-Segura9`), una tarjeta y un mensaje normal | No pasa nada: ni alerta ni historial | ✅ portapapeles real |
 | 7.9 | Vigilante: estafa | Con el vigilante activo copia un mensaje de estafa | Alerta flotante SIN robar el foco, notificación de Windows, entrada en el historial, sin usar la IA | ✅ alerta e historial · ⬜ notificación de Windows |
+| 7.9b | Vigilante: todo bien | Con el vigilante activo copia un mensaje normal (p. ej. un recordatorio de clase) | Aviso breve «Revisé lo que copiaste: todo en orden», sin robar el foco, que se va solo (4 s); el icono de bandeja se pone verde unos segundos. No se guarda en el historial. Se puede apagar en Ajustes («Avisar también cuando todo está bien») | ✅ aviso, foco e historial · ⬜ icono verde en la barra real |
 | 7.10 | Vigilante: lo ya copiado | Copia algo y DESPUÉS activa el vigilante | No analiza lo que ya estaba copiado | ✅ prueba automática |
 | 7.11 | Interruptor visible | Chip de la cabecera («Vigilando portapapeles») | Enciende o apaga y queda guardado | ✅ |
 | 7.12 | Cerrar con vigilante activo | Cierra la ventana (X) con el vigilante encendido | La app sigue en la bandeja; «Salir» del menú la cierra | ⬜ |

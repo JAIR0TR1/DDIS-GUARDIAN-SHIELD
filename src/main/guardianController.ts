@@ -15,11 +15,13 @@ import { sendToMain, showMainWindow } from './windows/mainWindow'
 
 /** Cuánto tiempo el icono de la bandeja recuerda un hallazgo antes de volver a «activo». */
 const TRAY_MEMORY_MS = 90_000
+/** El verde de «todo en orden» dura poco: es una confirmación, no una alarma. */
+const SAFE_MEMORY_MS = 6_000
 
 const trayByVerdict: Record<Verdict, TrayState> = {
   peligroso: 'amenaza',
   sospechoso: 'duda',
-  seguro: 'activo'
+  seguro: 'segura'
 }
 
 export interface GuardianController {
@@ -56,11 +58,11 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
 
   const baseState = (): TrayState => (watcherOn ? 'activo' : 'dormida')
 
-  function setTray(state: TrayState, remember: boolean): void {
+  function setTray(state: TrayState, remember: boolean, memoryMs = TRAY_MEMORY_MS): void {
     tray?.setState(state)
     if (decay) clearTimeout(decay)
     // Un hallazgo se recuerda un rato; luego el icono vuelve a su estado normal.
-    if (remember) decay = setTimeout(() => tray?.setState(baseState()), TRAY_MEMORY_MS)
+    if (remember) decay = setTimeout(() => tray?.setState(baseState()), memoryMs)
   }
 
   function notifyDataChanged(): void {
@@ -81,7 +83,8 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
     try {
       const outcome = await analysis.run({ text, source: 'text' })
       showAlert(resultPayload(outcome, false), { focus: true })
-      setTray(trayByVerdict[outcome.entry.result.verdict], true)
+      const verdict = outcome.entry.result.verdict
+      setTray(trayByVerdict[verdict], true, verdict === 'seguro' ? SAFE_MEMORY_MS : TRAY_MEMORY_MS)
       notifyDataChanged()
     } catch (error) {
       console.error('[guardian] No pude analizar el portapapeles', error)
@@ -107,7 +110,19 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
   async function handleCopiedText(text: string): Promise<void> {
     if (!decideClipboard(text).analyze) return
     const peek = await analysis.peek(text)
-    if (peek.verdict === 'seguro') return
+    if (peek.verdict === 'seguro') {
+      // Todo bien: una confirmación breve y discreta (si el usuario no la apagó en Ajustes).
+      // No se guarda en el historial ni suma XP, para que copiar mucho no llene nada.
+      const settings = await data.getSettings()
+      if (settings.notifySafe) {
+        showAlert(
+          { kind: 'safe', score: peek.score, message: peek.creatureMessage },
+          { focus: false }
+        )
+        setTray('segura', true, SAFE_MEMORY_MS)
+      }
+      return
+    }
     const outcome = await analysis.run({ text, source: 'text' }, { useAI: false })
     const { verdict, creatureMessage } = outcome.entry.result
     showAlert(resultPayload(outcome, true), { focus: false })

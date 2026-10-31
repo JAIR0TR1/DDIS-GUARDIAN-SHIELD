@@ -11,6 +11,8 @@ export type AlertPayload =
       passive: boolean
       notice?: string
     }
+  /** Confirmación breve del vigilante: lo copiado está bien. No se guarda en el historial. */
+  | { kind: 'safe'; score: number; message: string }
   | { kind: 'empty' }
   | { kind: 'error'; message: string }
 
