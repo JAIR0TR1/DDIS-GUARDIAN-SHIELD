@@ -6,6 +6,7 @@ import {
   CatmullRomCurve3,
   Color,
   ConeGeometry,
+  CylinderGeometry,
   DirectionalLight,
   ExtrudeGeometry,
   Group,
@@ -108,8 +109,8 @@ export function buildMascot(): Mascot {
 
   const scene = new Scene()
   const camera = new PerspectiveCamera(30, 1, 0.1, 50)
-  camera.position.set(0, 0.6, 9.4)
-  camera.lookAt(0, 0.3, 0)
+  camera.position.set(0, 0.8, 9.3)
+  camera.lookAt(0, 0.5, 0)
 
   // ---------- Luces ----------
   scene.add(new AmbientLight('#9bbcff', 0.8))
@@ -199,7 +200,8 @@ export function buildMascot(): Mascot {
     inner.rotation.y = Math.PI / 4
     inner.position.set(0, -0.08, 0.14)
     ear.add(outer, inner)
-    ear.position.set(side * 0.88, 1.55, 0.05)
+    // Las orejas asoman por encima de la gorra.
+    ear.position.set(side * 0.88, 1.86, 0.05)
     ear.rotation.z = -side * 0.2
     root.add(ear)
     ears.push(ear)
@@ -263,9 +265,71 @@ export function buildMascot(): Mascot {
   gem.scale.set(0.7, 1.4, 0.5)
   gem.position.set(0, 0.04, 0.17)
   shield.add(gem)
-  shield.scale.setScalar(0.4)
-  shield.position.set(0, 1.02, 0.96)
+  // El escudo es el logo de Nilo: va bordado en el frente de la gorra.
+  shield.scale.setScalar(0.3)
+  shield.position.set(0, 1.42, 0.93)
+  shield.rotation.x = -0.38
   root.add(shield)
+
+  // ---------- Gorra snapback (genérica, sin logos de marcas) ----------
+  const capMat = mat(new MeshPhysicalMaterial({ color: '#5B21B6', roughness: 0.5, clearcoat: 0.4 }))
+  const brimMat = mat(
+    new MeshStandardMaterial({ color: '#19B8D1', roughness: 0.45, metalness: 0.1 })
+  )
+  const cap = new Group()
+  const crown = new Mesh(
+    track(new SphereGeometry(1, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2)),
+    capMat
+  )
+  crown.scale.set(1.14, 0.64, 1.0)
+  crown.position.y = 1.18
+  cap.add(crown)
+  const band = new Mesh(track(new TorusGeometry(1.0, 0.045, 8, 48)), brimMat)
+  band.rotation.x = Math.PI / 2
+  band.scale.set(1.14, 1.0, 1.0)
+  band.position.y = 1.2
+  cap.add(band)
+  const button = new Mesh(track(new SphereGeometry(0.1, 12, 12)), brimMat)
+  button.position.set(0, 1.82, 0)
+  cap.add(button)
+  // Visera plana, un poco hacia abajo, que sobresale por el frente.
+  const brim = new Mesh(
+    track(new CylinderGeometry(1.02, 1.02, 0.07, 40, 1, false, -Math.PI / 2, Math.PI)),
+    brimMat
+  )
+  brim.scale.set(1.12, 1, 0.82)
+  brim.position.set(0, 1.2, 0.55)
+  brim.rotation.x = 0.14
+  cap.add(brim)
+  // Un poco ladeada, con actitud.
+  cap.rotation.z = -0.06
+  root.add(cap)
+
+  // ---------- Cadena dorada con dije ----------
+  const goldMat = mat(
+    new MeshStandardMaterial({
+      color: '#F4C95D',
+      metalness: 0.9,
+      roughness: 0.3,
+      emissive: '#7A5410',
+      emissiveIntensity: 0.6
+    })
+  )
+  const chainCurve = new CatmullRomCurve3([
+    new Vector3(-0.62, -0.34, 0.99),
+    new Vector3(-0.3, -0.55, 0.96),
+    new Vector3(0, -0.63, 0.94),
+    new Vector3(0.3, -0.55, 0.96),
+    new Vector3(0.62, -0.34, 0.99)
+  ])
+  root.add(new Mesh(track(new TubeGeometry(chainCurve, 28, 0.035, 8, false)), goldMat))
+  const pendant = new Group()
+  pendant.position.set(0, -0.66, 0.95)
+  pendant.add(new Mesh(track(new SphereGeometry(0.1, 14, 14)), goldMat))
+  const pendantGem = new Mesh(track(new SphereGeometry(0.05, 10, 10)), violetGlow)
+  pendantGem.position.z = 0.08
+  pendant.add(pendantGem)
+  root.add(pendant)
 
   // Bracitos con pivote en el hombro (el derecho del espectador saluda).
   const armGeo = track(new CapsuleGeometry(0.17, 0.5, 6, 12))
@@ -283,13 +347,48 @@ export function buildMascot(): Mascot {
     arms.push(pivot)
   }
 
-  // Patas.
-  const legGeo = track(new RoundedBoxGeometry(0.5, 0.45, 0.55, 3, 0.14))
+  // Tenis deportivos (genéricos): suela con luz, cuerpo blanco, puntera, cordones y franja cian.
+  const shoeWhite = mat(new MeshStandardMaterial({ color: '#F4F7FF', roughness: 0.5 }))
+  const soleMat = mat(new MeshStandardMaterial({ color: '#DCE4F7', roughness: 0.6 }))
+  const accent = mat(new MeshBasicMaterial({ color: CYAN, toneMapped: false }))
+  const soleGeo = track(new RoundedBoxGeometry(0.62, 0.14, 1.0, 3, 0.06))
+  const upperGeo = track(new RoundedBoxGeometry(0.54, 0.3, 0.78, 3, 0.13))
+  const toeGeo = track(new RoundedBoxGeometry(0.5, 0.2, 0.36, 3, 0.1))
+  const lacesGeo = track(new RoundedBoxGeometry(0.3, 0.03, 0.05, 2, 0.015))
+  const glowStripGeo = track(new RoundedBoxGeometry(0.5, 0.03, 0.85, 2, 0.012))
+  const feet: Group[] = []
+  const makeSneaker = (side: number): Group => {
+    const shoe = new Group()
+    shoe.add(new Mesh(soleGeo, soleMat))
+    const glowStrip = new Mesh(glowStripGeo, accent)
+    glowStrip.position.y = -0.075
+    shoe.add(glowStrip)
+    const upper = new Mesh(upperGeo, shoeWhite)
+    upper.position.set(0, 0.2, -0.06)
+    shoe.add(upper)
+    const toe = new Mesh(toeGeo, shoeWhite)
+    toe.position.set(0, 0.13, 0.33)
+    shoe.add(toe)
+    for (const z of [-0.12, 0.02, 0.16]) {
+      const lace = new Mesh(lacesGeo, accent)
+      lace.position.set(0, 0.36, z)
+      shoe.add(lace)
+    }
+    // Franja lateral curva (diseño propio, no es el logo de ninguna marca).
+    const stripe = new CatmullRomCurve3([
+      new Vector3(side * 0.275, 0.1, -0.3),
+      new Vector3(side * 0.285, 0.2, -0.05),
+      new Vector3(side * 0.27, 0.12, 0.25)
+    ])
+    shoe.add(new Mesh(track(new TubeGeometry(stripe, 12, 0.025, 6, false)), accent))
+    return shoe
+  }
   for (const x of [-0.8, 0.8]) {
     for (const z of [-0.45, 0.5]) {
-      const leg = new Mesh(legGeo, body)
-      leg.position.set(x, -1.05, z)
-      root.add(leg)
+      const shoe = makeSneaker(x < 0 ? -1 : 1)
+      shoe.position.set(x, -1.19, z)
+      root.add(shoe)
+      feet.push(shoe)
     }
   }
 
@@ -341,6 +440,7 @@ export function buildMascot(): Mascot {
   let rotY = -0.28
   let rotX = 0
   let smoothArmR = 0.18
+  let capLift = 0
 
   function update(f: Frame): void {
     const { t, dt, animated } = f
@@ -402,6 +502,20 @@ export function buildMascot(): Mascot {
     rotX = damp(rotX, targetX, 5, dt)
     root.rotation.set(rotX, rotY, Math.sin(t * 0.9) * 0.012 * live)
 
+    // Tenis: bailan al estar feliz o al saludar; el resto del tiempo, apenas respiran.
+    const dancing = animated && (happy || (f.greetAge > 0 && f.greetAge < f.greetFor))
+    feet.forEach((shoe, i) => {
+      const lift = dancing ? Math.max(0, Math.sin(t * 10 + (i % 2) * Math.PI)) * 0.1 : 0
+      shoe.position.y = damp(shoe.position.y, -1.19 + lift, 30, dt)
+    })
+
+    // Gorra: salta de susto en alerta y se asienta con un rebote.
+    capLift = damp(capLift, alarmed && animated ? 0.16 : 0, alarmed ? 22 : 7, dt)
+    cap.position.y = capLift + (animated ? Math.sin(t * 1.7) * 0.01 : 0)
+    cap.rotation.z = -0.06 + (alarmed && animated ? Math.sin(t * 40) * 0.03 : 0)
+    // Dije de la cadena: se balancea con el cuerpo.
+    pendant.rotation.z = Math.sin(t * 2.4) * 0.12 * live
+
     // Orejas y cola.
     ears.forEach((ear, i) => {
       const side = i === 0 ? -1 : 1
@@ -429,7 +543,7 @@ export function buildMascot(): Mascot {
 
     // Anillo de escaneo (sube y baja por el cuerpo).
     scanRing.visible = scanning && animated
-    if (scanRing.visible) scanRing.position.y = -1 + ((t * 0.9) % 1) * 2.9
+    if (scanRing.visible) scanRing.position.y = -1.2 + ((t * 0.9) % 1) * 3.5
 
     // Chispas orbitando.
     const speed = scanning ? 1.4 : 0.35
