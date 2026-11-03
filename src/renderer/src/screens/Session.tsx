@@ -275,6 +275,7 @@ export function Session({
               <Home
                 greeting={greeting}
                 mood={mood}
+                creature={creature}
                 variants={itemVariants}
                 history={history}
                 onGo={setSection}

@@ -480,7 +480,11 @@ export const es = {
   'creature.skins.saved': 'Apariencia aplicada: {name}',
   'creature.skins.failed': 'No pude cambiar la apariencia. Inténtalo de nuevo.',
   'creature.card.serial': 'Guardián #{n}',
-  'creature.card.level': 'NV {n}'
+  'creature.card.level': 'NV {n}',
+
+  // Inicio: tarjeta principal
+  'home.hero.arena': 'Jugar la Arena',
+  'home.hero.nextSkin': 'Nueva apariencia en el nivel {n}: {name}'
 } as const
 
 export type MessageKey = keyof typeof es

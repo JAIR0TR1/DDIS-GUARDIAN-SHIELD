@@ -480,5 +480,9 @@ export const en: Record<MessageKey, string> = {
   'creature.skins.saved': 'Look applied: {name}',
   'creature.skins.failed': "I couldn't change the look. Please try again.",
   'creature.card.serial': 'Guardian #{n}',
-  'creature.card.level': 'LV {n}'
+  'creature.card.level': 'LV {n}',
+
+  // Inicio: tarjeta principal
+  'home.hero.arena': 'Play the Arena',
+  'home.hero.nextSkin': 'New look at level {n}: {name}'
 }

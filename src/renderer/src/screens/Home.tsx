@@ -6,9 +6,15 @@ import {
   ScanSearch,
   ShieldAlert,
   ShieldCheck,
+  Sparkles,
+  Swords,
   type LucideIcon
 } from 'lucide-react'
 import type { HistoryEntry } from '@shared/history'
+import type { Creature } from '@shared/models'
+import { xpToNext } from '@domain/xp'
+import { nextSkin, SKIN_CATALOG, usableSkin } from '@domain/skins'
+import { ProgressBar } from '../components/ui/ProgressBar'
 import { excerpt } from '@shared/safeText'
 import { GlassCard } from '../components/ui/GlassCard'
 import { Button } from '../components/ui/Button'
@@ -27,6 +33,8 @@ import { useT } from '../lib/i18n'
 export interface HomeProps {
   greeting: string
   mood: CreatureState
+  /** Para el progreso de nivel y la próxima apariencia en la tarjeta principal. */
+  creature: Creature
   variants: Variants
   history: HistoryEntry[]
   onGo: (section: Section) => void
@@ -48,6 +56,7 @@ const verdictColor = {
 export function Home({
   greeting,
   mood,
+  creature,
   variants,
   history,
   onGo,
@@ -60,10 +69,7 @@ export function Home({
   return (
     <>
       <motion.div variants={variants} className="col-span-12">
-        <div className="glass flex items-center gap-4 rounded-[16px] px-4 py-3">
-          <CreatureAvatar size={34} frame="badge" state={mood} title="Nilo" />
-          <p className="text-[15px] text-text">{greeting}</p>
-        </div>
+        <Hero greeting={greeting} mood={mood} creature={creature} onGo={onGo} />
       </motion.div>
 
       <motion.div variants={variants} className="col-span-12 grid grid-cols-3 gap-4">
@@ -228,6 +234,75 @@ function StatTile({
           {value}
         </p>
         <p className="mt-1 truncate text-[12.5px] text-text-muted">{label}</p>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Tarjeta principal: Nilo grande y protagonista, su saludo, el progreso hacia el siguiente
+ * nivel (y la próxima apariencia) y accesos directos a Analizar y a la Arena.
+ */
+function Hero({
+  greeting,
+  mood,
+  creature,
+  onGo
+}: {
+  greeting: string
+  mood: CreatureState
+  creature: Creature
+  onGo: (section: Section) => void
+}): React.JSX.Element {
+  const t = useT()
+  const needed = xpToNext(creature.level)
+  const skin = SKIN_CATALOG[usableSkin(creature.skin, creature.level)]
+  const upcoming = nextSkin(creature.level)
+  return (
+    <div
+      className="glass relative flex flex-wrap items-center gap-x-6 gap-y-4 overflow-hidden rounded-[24px] px-6 py-5"
+      style={{
+        backgroundImage: `radial-gradient(70% 120% at 0% 50%, ${skin.palette.shield}2e, transparent 60%)`
+      }}
+    >
+      <div className="size-[150px] shrink-0">
+        <CreatureAvatar size={150} state={mood} rings title={creature.name} />
+      </div>
+      <div className="min-w-[240px] flex-1">
+        <p className="glass inline-block rounded-[16px] rounded-bl-[4px] px-4 py-2.5 font-display text-[18px] font-medium leading-snug text-text">
+          {greeting}
+        </p>
+        <div className="mt-4 max-w-[420px]">
+          <p className="tabular mb-1.5 flex justify-between font-mono text-[12px] text-text-muted">
+            <span>{t('creature.level', { level: creature.level })}</span>
+            <span>
+              {creature.xp} / {needed} XP
+            </span>
+          </p>
+          <ProgressBar value={creature.xp} max={needed} label={t('session.xp')} />
+          {upcoming && (
+            <p className="mt-2 flex items-center gap-1.5 text-[12.5px] text-text-muted">
+              <Sparkles aria-hidden className="size-3.5 shrink-0 text-warn" />
+              {t('home.hero.nextSkin', { name: t(`skin.${upcoming.id}`), n: upcoming.unlockLevel })}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="flex shrink-0 flex-col gap-2">
+        <Button
+          variant="primary"
+          onClick={() => onGo('analizar')}
+          icon={<ScanSearch aria-hidden className="size-4" />}
+        >
+          {t('home.empty.action')}
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => onGo('arena')}
+          icon={<Swords aria-hidden className="size-4" />}
+        >
+          {t('home.hero.arena')}
+        </Button>
       </div>
     </div>
   )
