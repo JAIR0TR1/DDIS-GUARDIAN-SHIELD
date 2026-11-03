@@ -14,6 +14,7 @@ No es una página web ni usa servidor: es una aplicación de escritorio y los da
 - Analizador de mensajes, links y capturas con semáforo, puntaje, señales y acción recomendada.
 - **Nilo**, un guardián 3D que saluda, sigue el puntero y reacciona al contexto con gestos y un objeto flotante según la estafa (regalo, paquete, maletín, teléfono…).
 - Historial, experiencia y niveles; modo presentación; modo demo sin red.
+- Interfaz en **español o inglés** y tema **oscuro, claro o del sistema**, desde Ajustes.
 - Vigilante del portapapeles, atajo global, alerta flotante e icono en la bandeja.
 
 ## Requisitos
