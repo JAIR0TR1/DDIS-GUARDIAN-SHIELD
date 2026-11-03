@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { DEFAULT_LANGUAGE, LANGUAGES } from './i18n/types'
 
 /** Perfil LOCAL: sin cuenta ni contraseña. */
 export const profileSchema = z.object({
@@ -26,6 +27,8 @@ export const themeSchema = z.enum(THEMES)
 export type Theme = z.infer<typeof themeSchema>
 
 export const settingsSchema = z.object({
+  /** Idioma de la interfaz. */
+  language: z.enum(LANGUAGES).default(DEFAULT_LANGUAGE),
   /** Apariencia de la interfaz; «system» sigue el modo de Windows. */
   theme: themeSchema.default('dark'),
   reduceMotion: z.boolean().default(false),
