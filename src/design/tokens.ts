@@ -40,3 +40,20 @@ export const haloColors = {
 } as const
 
 export type HaloState = keyof typeof haloColors
+
+/** Paleta del tema claro (espejo de `:root[data-theme='light']` en tokens.css). */
+export const lightColors = {
+  bg: '#EEF2F8',
+  bgRaised: '#FFFFFF',
+  text: '#0F172A',
+  textMuted: '#475569',
+  textSubtle: '#5B6578',
+  accent: '#0E7490',
+  accentStrong: '#155E75',
+  accentInk: '#FFFFFF',
+  violet: '#7C3AED',
+  safe: '#047857',
+  warn: '#92400E',
+  danger: '#E11D48',
+  dangerText: '#BE123C'
+} as const

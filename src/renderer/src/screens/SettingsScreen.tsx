@@ -1,11 +1,12 @@
 import { useEffect, useId, useState, type FormEvent } from 'react'
 import { motion, type Variants } from 'framer-motion'
-import { KeyRound, LockKeyhole, PlugZap, RotateCw, Trash2 } from 'lucide-react'
+import { KeyRound, LockKeyhole, Monitor, Moon, PlugZap, RotateCw, Sun, Trash2 } from 'lucide-react'
 import type { AppConfig } from '@shared/analysis'
 import { shortcutFromKeyEvent } from '@domain/shortcut'
 import type { Profile, Settings } from '@shared/models'
 import { GlassCard } from '../components/ui/GlassCard'
 import { Switch } from '../components/ui/Switch'
+import { Segmented } from '../components/ui/Segmented'
 import { Kbd } from '../components/ui/Kbd'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
@@ -48,6 +49,22 @@ export function SettingsScreen({
     <>
       <motion.div variants={variants} className="col-span-12 md:col-span-7">
         <GlassCard title="General" className="flex flex-col gap-5">
+          <Segmented
+            label="Apariencia"
+            description="Oscuro, claro o el mismo modo que tu Windows."
+            value={settings.theme}
+            disabled={busy}
+            options={[
+              { value: 'dark', label: 'Oscuro', icon: <Moon aria-hidden className="size-4" /> },
+              { value: 'light', label: 'Claro', icon: <Sun aria-hidden className="size-4" /> },
+              {
+                value: 'system',
+                label: 'Sistema',
+                icon: <Monitor aria-hidden className="size-4" />
+              }
+            ]}
+            onChange={(theme) => run(() => onSaveSettings({ ...settings, theme }))}
+          />
           <Switch
             label="Reducir movimiento"
             description="Cambia las animaciones por fundidos simples."

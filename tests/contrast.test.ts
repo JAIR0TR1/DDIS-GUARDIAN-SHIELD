@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { colors } from '../src/design/tokens'
+import { colors, lightColors } from '../src/design/tokens'
 import { blend, contrastRatio, hexToRgb } from '../src/design/contrast'
 
 const AA = 4.5
@@ -58,5 +58,38 @@ describe('contraste AA de los tokens', () => {
     for (const name of ['safe', 'warn', 'dangerText'] as const) {
       expect(contrastRatio(hexToRgb(colors[name]), glassWorst)).toBeGreaterThanOrEqual(3)
     }
+  })
+})
+
+describe('contraste AA del tema claro', () => {
+  // Lo más oscuro detrás del texto: el fondo con la mancha de aurora al 7 % bajo un panel.
+  const darkestUnderGlass = blend(hexToRgb('#0EA5E9'), hexToRgb(lightColors.bg), 0.07)
+  const glassLight = blend({ r: 255, g: 255, b: 255 }, darkestUnderGlass, 0.55)
+
+  const lightText = [
+    'text',
+    'textMuted',
+    'textSubtle',
+    'accent',
+    'accentStrong',
+    'safe',
+    'warn',
+    'dangerText'
+  ] as const
+
+  it.each(lightText)('%s sobre el fondo claro', (name) => {
+    expect(
+      contrastRatio(hexToRgb(lightColors[name]), hexToRgb(lightColors.bg))
+    ).toBeGreaterThanOrEqual(AA)
+  })
+
+  it.each(lightText)('%s sobre vidrio claro en el peor caso', (name) => {
+    expect(contrastRatio(hexToRgb(lightColors[name]), glassLight)).toBeGreaterThanOrEqual(AA)
+  })
+
+  it('el texto del botón primario sobre el cian profundo cumple AA', () => {
+    expect(
+      contrastRatio(hexToRgb(lightColors.accentInk), hexToRgb(lightColors.accent))
+    ).toBeGreaterThanOrEqual(AA)
   })
 })

@@ -59,7 +59,7 @@ export function CreatureAvatar({
       className={cn(
         'relative shrink-0',
         frame === 'badge' &&
-          'box-border rounded-full border border-accent/35 bg-[#07101c]/80 shadow-[0_0_18px_rgb(34_211_238/0.18)]',
+          'box-border rounded-full border border-accent/35 bg-[var(--surface-solid)]/80 shadow-[0_0_18px_rgb(34_211_238/0.18)]',
         className
       )}
     >

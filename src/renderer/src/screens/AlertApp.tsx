@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { X } from 'lucide-react'
 import type { AlertPayload } from '@shared/alert'
+import type { Theme } from '@shared/models'
 import type { Verdict } from '@shared/threat'
 import { transition } from '@design/motion'
 import { contextFor } from '@domain/gesture'
@@ -13,6 +14,7 @@ import { ReducedMotionContext } from '../lib/motionPref'
 import type { CreatureState } from '../creature/creatureState'
 import type { HaloState } from '@design/tokens'
 import { cn } from '../lib/cn'
+import { useTheme } from '../lib/theme'
 
 /** Evita que un Enter o Esc que estabas tecleando para otra cosa cierre o abra la alerta. */
 const KEY_GUARD_MS = 700
@@ -52,6 +54,8 @@ function autoDismissMs(payload: AlertPayload): number | null {
 export function AlertApp(): React.JSX.Element {
   const [payload, setPayload] = useState<AlertPayload | null>(null)
   const [reduceSetting, setReduceSetting] = useState(false)
+  const [theme, setTheme] = useState<Theme>('dark')
+  useTheme(theme)
   const shownAt = useRef(0)
   const osReduced = useReducedMotion()
 
@@ -61,7 +65,10 @@ export function AlertApp(): React.JSX.Element {
       setPayload(next)
       void window.guardian.data
         .getSettings()
-        .then((s) => setReduceSetting(s.reduceMotion))
+        .then((s) => {
+          setReduceSetting(s.reduceMotion)
+          setTheme(s.theme)
+        })
         .catch(() => undefined)
     })
     window.guardian.alert.ready()
@@ -112,7 +119,7 @@ export function AlertApp(): React.JSX.Element {
             initial={{ opacity: 0, y: reduced ? 0 : -14, scale: reduced ? 1 : 0.97 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={transition.base}
-            className="glass relative flex h-full w-full items-center gap-5 rounded-[24px] bg-[#0a1220] px-6"
+            className="glass relative flex h-full w-full items-center gap-5 rounded-[24px] bg-[var(--surface-solid)] px-6"
           >
             <AlertBody payload={payload} onDetail={openDetail} onDismiss={dismiss} />
           </motion.section>

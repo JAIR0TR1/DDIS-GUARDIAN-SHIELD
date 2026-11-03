@@ -19,6 +19,7 @@ import { Gallery } from './screens/Gallery'
 import { IconStage } from './screens/IconStage'
 import { GestureStage } from './screens/GestureStage'
 import { sampleHistory } from './lib/sampleHistory'
+import { useTheme } from './lib/theme'
 
 type Phase = 'boot' | 'awaken' | 'session'
 
@@ -117,6 +118,7 @@ function Shell(): React.JSX.Element {
   useEffect(() => {
     document.documentElement.classList.toggle('reduce-motion', reduceMotion)
   }, [reduceMotion])
+  useTheme(loaded?.settings.theme ?? 'dark')
 
   const enter = useCallback(async (profile: Profile): Promise<void> => {
     try {

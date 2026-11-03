@@ -238,7 +238,7 @@ export function Analyzer({
           {dragging && (
             <div
               role="status"
-              className="absolute inset-3 z-20 grid place-items-center rounded-[16px] border-2 border-dashed border-accent bg-[#06121c]/[0.97] text-center shadow-[0_0_32px_rgb(34_211_238/0.25)]"
+              className="absolute inset-3 z-20 grid place-items-center rounded-[16px] border-2 border-dashed border-accent bg-[var(--surface-solid)]/[0.97] text-center shadow-[0_0_32px_rgb(34_211_238/0.25)]"
             >
               <div className="flex flex-col items-center gap-2">
                 <ImageUp aria-hidden className="size-8 text-accent-strong" />

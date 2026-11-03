@@ -63,19 +63,19 @@ export function AmbientBackground({
       <div
         className="ambient-drift absolute -left-[10%] -top-[20%] h-[70%] w-[60%] rounded-full"
         style={{
-          background: `radial-gradient(closest-side, rgb(34 211 238 / ${open ? 0.2 : 0.11}), transparent)`
+          background: `radial-gradient(closest-side, rgb(34 211 238 / calc(var(--ambient-boost) * ${open ? 0.2 : 0.11})), transparent)`
         }}
       />
       <div
         className="ambient-drift-reverse absolute -right-[12%] top-[8%] h-[65%] w-[50%] rounded-full"
         style={{
-          background: `radial-gradient(closest-side, rgb(139 92 246 / ${open ? 0.2 : 0.11}), transparent)`
+          background: `radial-gradient(closest-side, rgb(139 92 246 / calc(var(--ambient-boost) * ${open ? 0.2 : 0.11})), transparent)`
         }}
       />
       <div
         className="ambient-drift absolute -bottom-[25%] left-[22%] h-[65%] w-[60%] rounded-full"
         style={{
-          background: `radial-gradient(closest-side, rgb(14 116 144 / ${open ? 0.26 : 0.13}), transparent)`
+          background: `radial-gradient(closest-side, rgb(14 116 144 / calc(var(--ambient-boost) * ${open ? 0.26 : 0.13})), transparent)`
         }}
       />
 
@@ -110,7 +110,7 @@ export function AmbientBackground({
         className="absolute inset-0"
         style={{
           backgroundImage:
-            'linear-gradient(rgb(148 220 255 / 0.045) 1px, transparent 1px), linear-gradient(90deg, rgb(148 220 255 / 0.045) 1px, transparent 1px)',
+            'linear-gradient(var(--ambient-grid) 1px, transparent 1px), linear-gradient(90deg, var(--ambient-grid) 1px, transparent 1px)',
           backgroundSize: '56px 56px',
           maskImage: 'radial-gradient(75% 70% at 50% 45%, black, transparent)',
           WebkitMaskImage: 'radial-gradient(75% 70% at 50% 45%, black, transparent)'
@@ -137,7 +137,8 @@ export function AmbientBackground({
       <div
         className="absolute inset-0"
         style={{
-          background: 'radial-gradient(120% 100% at 50% 40%, transparent 55%, rgb(0 0 0 / 0.55))'
+          background:
+            'radial-gradient(120% 100% at 50% 40%, transparent 55%, var(--ambient-vignette))'
         }}
       />
       <div

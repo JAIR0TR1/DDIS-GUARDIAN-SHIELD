@@ -21,7 +21,13 @@ export const thresholdsSchema = z
     message: 'El umbral seguro debe ser menor que el peligroso'
   })
 
+export const THEMES = ['dark', 'light', 'system'] as const
+export const themeSchema = z.enum(THEMES)
+export type Theme = z.infer<typeof themeSchema>
+
 export const settingsSchema = z.object({
+  /** Apariencia de la interfaz; «system» sigue el modo de Windows. */
+  theme: themeSchema.default('dark'),
   reduceMotion: z.boolean().default(false),
   /** El vigilante confirma con un aviso breve cuando lo copiado está bien (no solo si es peligroso). */
   notifySafe: z.boolean().default(true),
