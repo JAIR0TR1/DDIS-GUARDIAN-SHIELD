@@ -62,7 +62,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ## 6. Instalador de Windows
 | # | Caso | Pasos | Resultado esperado | Verificado |
 |---|---|---|---|---|
-| 6.1 | Generar | `npm run build:win` | Crea `release/EscudoGuardian-0.1.0-setup.exe` | ✅ (antes de la mascota 3D) · ⬜ regenerar |
+| 6.1 | Generar | `npm run build:win` | Crea `release/EscudoGuardian-0.1.0-setup.exe` | ✅ regenerado el 3 nov con cuentas, idiomas y temas (incluye `@supabase/supabase-js` en `app.asar`) |
 | 6.2 | Instalar y abrir | Ejecutar el instalador, abrir la app | Abre en modo demo, con icono de Nilo | ✅ instalación silenciosa en carpeta temporal |
 | 6.3 | SmartScreen | Primera ejecución | Aviso por no estar firmado: «Más información» → «Ejecutar de todas formas» | ⬜ |
 | 6.4 | Desinstalar | Desinstalar desde Windows | No quedan archivos, accesos ni registro | ✅ |
@@ -96,9 +96,32 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | 8.2 | Primer vistazo al pegar | En Analizar pega un mensaje de estafa y espera medio segundo | Nilo se inclina a leer y su globo dice «Uy… esto no me gusta nada. Dale a Analizar…» | ✅ |
 | 8.3 | Sin IA ni costo | Lo mismo en modo real | El primer vistazo no consume cuota (solo reglas locales) | ✅ por diseño (usa `peek`) |
 | 8.4 | Gesto en la alerta flotante | Atajo con un mensaje de estafa | Nilo de la alerta hace el gesto del contexto | ✅ cableado · ⬜ verlo |
-| 8.5 | Movimiento reducido | «Reducir movimiento» activo | Nilo no hace gestos (pose fija) | ⬜ |
+| 8.5 | Movimiento reducido | «Reducir movimiento» activo | Nilo no hace gestos (pose fija) | ✅ capturas idénticas con 0,5 s de diferencia |
 
 **Salvedad conocida:** la notificación nativa de Windows puede no mostrarse en modo desarrollo (Windows exige la app instalada). En la app instalada debe verse.
 
-## 8. Cómo reportar un fallo
+## 9. Cuentas y nube (Supabase)
+| # | Caso | Pasos | Resultado esperado | Verificado |
+|---|---|---|---|---|
+| 9.1 | Crear cuenta | Pantalla de cuentas → Crear cuenta → correo, contraseña fuerte y confirmación | Entra a la bienvenida (nombre) y luego a la sesión | ✅ en la app contra el Supabase real |
+| 9.2 | Contraseña débil | Registrarse con `12345678` | Medidor «Débil» con consejo; no deja crear la cuenta | ✅ |
+| 9.3 | Sugerir contraseña | Botón «Sugerir contraseña segura» | Escribe una contraseña fuerte en ambos campos y la muestra para copiarla | ✅ (200 sugerencias, todas «Fuerte», en las pruebas) |
+| 9.4 | Contraseñas distintas | Confirmación diferente | «Las contraseñas no coinciden.» | ✅ |
+| 9.5 | Otro equipo | Iniciar sesión con la misma cuenta en una carpeta de datos vacía | Trae perfil, criatura, ajustes e historial: saluda «Hola de nuevo, …» | ✅ simulado con carpeta vacía · ⬜ en otro computador real |
+| 9.6 | Contraseña incorrecta | Entrar con una contraseña errada | «Correo o contraseña incorrectos.» | ✅ |
+| 9.7 | Aislamiento entre usuarios | Un usuario intenta leer o escribir filas de otro | La base de datos lo impide (RLS) | ✅ probado contra el Supabase real |
+| 9.8 | Cerrar sesión | Ajustes → Cuenta → Cerrar sesión | Vuelve a la pantalla de cuentas; el vigilante se apaga | ✅ cableado · ⬜ probarlo tú |
+| 9.9 | Sin internet | Desconectar el wifi con sesión iniciada y analizar | Funciona con los datos locales; al volver la conexión sube lo pendiente | ✅ por diseño (reglas probadas) · ⬜ probarlo tú |
+| 9.10 | Datos previos | Primera cuenta que entra en un equipo que ya tenía datos | Se lleva el historial y la criatura existentes | ⬜ probarlo tú |
+
+## 10. Idioma, tema y movimiento
+| # | Caso | Pasos | Resultado esperado | Verificado |
+|---|---|---|---|---|
+| 10.1 | Cambiar a inglés | Ajustes → Idioma → English | Toda la interfaz, el resultado del análisis, la bandeja y las notificaciones en inglés | ✅ capturas; prueba que recorre el corpus sin frases sin traducir |
+| 10.2 | Idioma antes de entrar | ES / EN en la pantalla de cuentas | La pantalla cambia; una cuenta nueva conserva ese idioma | ✅ |
+| 10.3 | Tema claro | Ajustes → Apariencia → Claro | Fondo claro, vidrio blanco, textos legibles (AA) | ✅ capturas y pruebas de contraste |
+| 10.4 | Tema del sistema | Apariencia → Sistema y cambiar el modo de Windows | La app sigue el cambio sin reiniciar | ⬜ probarlo tú |
+| 10.5 | Reducir movimiento en caliente | Activarlo y desactivarlo sin cambiar de pantalla | Nilo se detiene y vuelve a moverse al instante; con el ajuste activo sigue cambiando de cara | ✅ capturas comparadas en ambos sentidos |
+
+## 11. Cómo reportar un fallo
 Anota: qué hacías, qué esperabas, qué pasó, y si ocurre siempre. Adjunta una captura. Si es un error de la IA, indica si estabas en modo demo o real.
