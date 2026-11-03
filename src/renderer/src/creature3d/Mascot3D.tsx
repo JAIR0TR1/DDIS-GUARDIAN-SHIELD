@@ -52,7 +52,9 @@ export function Mascot3D({
     gesture,
     gestureScale,
     prop,
-    gestureStart: 0
+    gestureStart: 0,
+    /** Hay que redibujar aunque no esté animado (cambió el estado, el halo o el ajuste). */
+    dirty: true
   })
   const unavailable = useRef(onUnavailable)
   const lastGestureKey = useRef<string | number | undefined>(undefined)
@@ -69,7 +71,8 @@ export function Mascot3D({
       gestureScale,
       prop,
       // Un gesto nuevo (o el mismo con otra clave) empieza desde cero.
-      gestureStart: restart ? performance.now() : live.current.gestureStart
+      gestureStart: restart ? performance.now() : live.current.gestureStart,
+      dirty: true
     }
     unavailable.current = onUnavailable
   })
@@ -144,19 +147,19 @@ export function Mascot3D({
       renderer.render(mascot.scene, mascot.camera)
     }
 
+    // El bucle sigue vivo aunque se reduzca el movimiento, porque el ajuste se puede cambiar en
+    // cualquier momento: animado dibuja cada fotograma; en pose fija solo redibuja cuando algo
+    // cambió (estado, halo o el propio ajuste), así Nilo cambia de cara sin moverse.
     const loop = (now: number): void => {
       if (disposed) return
-      if (!document.hidden) draw(now)
+      const cur = live.current
+      if (!document.hidden && (cur.animated || cur.dirty)) {
+        cur.dirty = false
+        draw(now)
+      }
       frameId = requestAnimationFrame(loop)
     }
-
-    if (live.current.animated) {
-      frameId = requestAnimationFrame(loop)
-    } else {
-      // Movimiento reducido: se dibuja una pose fija (una vez, y de nuevo si cambia el estado).
-      draw(performance.now() + 1000)
-      frameId = requestAnimationFrame(() => draw(performance.now() + 1000))
-    }
+    frameId = requestAnimationFrame(loop)
 
     return () => {
       disposed = true
