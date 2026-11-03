@@ -1,7 +1,19 @@
 import { useEffect, useId, useState, type FormEvent } from 'react'
 import { motion, type Variants } from 'framer-motion'
-import { KeyRound, LockKeyhole, Monitor, Moon, PlugZap, RotateCw, Sun, Trash2 } from 'lucide-react'
+import {
+  Cloud,
+  KeyRound,
+  LockKeyhole,
+  LogOut,
+  Monitor,
+  Moon,
+  PlugZap,
+  RotateCw,
+  Sun,
+  Trash2
+} from 'lucide-react'
 import type { AppConfig } from '@shared/analysis'
+import type { Account } from '@shared/auth'
 import { shortcutFromKeyEvent } from '@domain/shortcut'
 import type { Profile, Settings } from '@shared/models'
 import { GlassCard } from '../components/ui/GlassCard'
@@ -21,16 +33,21 @@ export interface SettingsScreenProps {
   variants: Variants
   onSaveSettings: (settings: Settings) => Promise<void>
   onSaveProfile: (profile: Profile) => Promise<void>
+  /** Cuenta en la nube (null si la app funciona solo en local). */
+  account: Account | null
+  onSignOut: () => Promise<void>
 }
 
-/** Ajustes: movimiento, vigilante, atajo, y la clave de la IA (se guarda cifrada). */
+/** Ajustes: apariencia, idioma, vigilante, atajo, cuenta y la clave de la IA (cifrada). */
 export function SettingsScreen({
   settings,
   profile,
   demoMode,
   variants,
   onSaveSettings,
-  onSaveProfile
+  onSaveProfile,
+  account,
+  onSignOut
 }: SettingsScreenProps): React.JSX.Element {
   const toast = useToast()
   const t = useT()
@@ -123,6 +140,32 @@ export function SettingsScreen({
           </p>
         </GlassCard>
       </motion.div>
+
+      {account && (
+        <motion.div variants={variants} className="col-span-12">
+          <GlassCard title={t('settings.account')} className="flex flex-wrap items-center gap-4">
+            <span className="grid size-10 shrink-0 place-items-center rounded-full border border-accent/35 bg-accent/10 font-display text-base font-semibold uppercase text-accent-strong">
+              {account.email.slice(0, 1)}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] text-text-muted">{t('settings.account.signedAs')}</p>
+              <p className="truncate text-sm font-medium text-text">{account.email}</p>
+              <p className="mt-1 flex items-center gap-1.5 text-[12.5px] text-text-subtle">
+                <Cloud aria-hidden className="size-3.5 shrink-0" />
+                {t('settings.account.sync')}
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() => void run(onSignOut)}
+              disabled={busy}
+              icon={<LogOut aria-hidden className="size-4" />}
+            >
+              {t('settings.account.signOut')}
+            </Button>
+          </GlassCard>
+        </motion.div>
+      )}
 
       <motion.div variants={variants} className="col-span-12">
         <AiKeyCard demoMode={demoMode} />

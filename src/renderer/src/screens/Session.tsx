@@ -5,6 +5,7 @@ import type { AnalysisOutcome } from '@shared/analysis'
 import type { Creature, Profile, Settings } from '@shared/models'
 import type { HistoryEntry } from '@shared/history'
 import type { Verdict } from '@shared/threat'
+import type { Account } from '@shared/auth'
 import { xpToNext } from '@domain/xp'
 import { pickPhrase } from '@domain/phrases'
 import { fadeOnly, panelContainer, panelItemBlur, transition } from '@design/motion'
@@ -36,6 +37,9 @@ export interface SessionProps {
   onClearHistory: () => Promise<void>
   onSaveSettings: (settings: Settings) => Promise<void>
   onSaveProfile: (profile: Profile) => Promise<void>
+  /** Cuenta en la nube (null si la app funciona solo en local). */
+  account: Account | null
+  onSignOut: () => Promise<void>
 }
 
 function watcherNoteFor(event: WatcherEvent, t: Translate): string {
@@ -76,7 +80,9 @@ export function Session({
   onTone,
   onClearHistory,
   onSaveSettings,
-  onSaveProfile
+  onSaveProfile,
+  account,
+  onSignOut
 }: SessionProps): React.JSX.Element {
   const [section, setSection] = useState<Section>(navRequest?.section ?? 'inicio')
   // Un pedido nuevo (alerta flotante, bandeja) cambia de sección. Se ajusta durante el dibujado,
@@ -304,6 +310,8 @@ export function Session({
                 variants={itemVariants}
                 onSaveSettings={onSaveSettings}
                 onSaveProfile={onSaveProfile}
+                account={account}
+                onSignOut={onSignOut}
               />
             )}
           </motion.div>

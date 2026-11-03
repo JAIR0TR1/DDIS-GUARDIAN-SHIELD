@@ -20,10 +20,12 @@ import { IconStage } from './screens/IconStage'
 import { GestureStage } from './screens/GestureStage'
 import { sampleHistory } from './lib/sampleHistory'
 import { useTheme } from './lib/theme'
+import { AuthScreen } from './screens/AuthScreen'
+import type { Account } from '@shared/auth'
 import { I18nContext } from './lib/i18n'
-import { createTranslator, DEFAULT_LANGUAGE, type MessageKey } from '@shared/i18n'
+import { createTranslator, DEFAULT_LANGUAGE, type Language, type MessageKey } from '@shared/i18n'
 
-type Phase = 'boot' | 'awaken' | 'session'
+type Phase = 'boot' | 'auth' | 'awaken' | 'session'
 
 /** Pedido de navegación con un número único, para reaccionar aunque se repita la sección. */
 type NavRequest = NavigateRequest & { nonce: number }
@@ -53,7 +55,10 @@ function Shell(): React.JSX.Element {
   const osReduced = useReducedMotion()
   const [phase, setPhase] = useState<Phase>('boot')
   const [loaded, setLoaded] = useState<Loaded | null>(null)
-  const language = loaded?.settings.language ?? DEFAULT_LANGUAGE
+  const [account, setAccount] = useState<Account | null>(null)
+  // Idioma elegido en la pantalla de cuentas, antes de tener ajustes de una cuenta.
+  const [preLanguage, setPreLanguage] = useState<Language>(DEFAULT_LANGUAGE)
+  const language = loaded?.settings.language ?? preLanguage
   const t = useMemo(() => createTranslator(language), [language])
   const [loadError, setLoadError] = useState<MessageKey | null>(null)
   const [scanning, setScanning] = useState(false)
@@ -61,15 +66,33 @@ function Shell(): React.JSX.Element {
   const [navRequest, setNavRequest] = useState<NavRequest | null>(null)
 
   // Solo actualiza estado dentro de las promesas (nunca de forma síncrona dentro del efecto).
-  const load = useCallback(() => {
-    return Promise.all([
-      window.guardian.data.getProfile(),
-      window.guardian.data.getSettings(),
-      window.guardian.data.getCreature(),
-      window.guardian.data.getHistory(),
-      window.guardian.config.get()
-    ])
-      .then(([profile, settings, creature, history, config]) => {
+  const load = useCallback((chosenLanguage?: Language) => {
+    return window.guardian.auth
+      .state()
+      .then(async (auth) => {
+        // Con cuentas en la nube, sin sesión iniciada se muestra el inicio de sesión.
+        if (auth.cloud && !auth.account) {
+          setLoaded(null)
+          setAccount(null)
+          setPhase('auth')
+          return
+        }
+        setAccount(auth.account)
+        const [profile, storedSettings, creature, history, config] = await Promise.all([
+          window.guardian.data.getProfile(),
+          window.guardian.data.getSettings(),
+          window.guardian.data.getCreature(),
+          window.guardian.data.getHistory(),
+          window.guardian.config.get()
+        ])
+        // Cuenta nueva: conserva el idioma que se eligió en la pantalla de cuentas.
+        const settings =
+          !profile && chosenLanguage && storedSettings.language !== chosenLanguage
+            ? await window.guardian.data.saveSettings({
+                ...storedSettings,
+                language: chosenLanguage
+              })
+            : storedSettings
         const seeded =
           import.meta.env.DEV && window.location.hash === '#sample' ? sampleHistory : history
         setLoaded({ profile, settings, creature, history: seeded, demoMode: config.demoMode })
@@ -141,6 +164,13 @@ function Shell(): React.JSX.Element {
     setLoaded((prev) => (prev ? { ...prev, settings: saved } : prev))
   }, [])
 
+  const signOut = useCallback(async (): Promise<void> => {
+    await window.guardian.auth.signOut()
+    setLoaded(null)
+    setAccount(null)
+    setPhase('auth')
+  }, [])
+
   const saveProfile = useCallback(async (profile: Profile): Promise<void> => {
     const saved = await window.guardian.data.saveProfile(profile)
     setLoaded((prev) => (prev ? { ...prev, profile: saved } : prev))
@@ -193,6 +223,14 @@ function Shell(): React.JSX.Element {
     body = (
       <LayoutGroup>
         <AnimatePresence>
+          {phase === 'auth' && (
+            <AuthScreen
+              key="auth"
+              language={preLanguage}
+              onLanguage={setPreLanguage}
+              onSignedIn={() => void load(preLanguage)}
+            />
+          )}
           {phase === 'awaken' && loaded && (
             <Awakening
               key="awaken"
@@ -217,6 +255,8 @@ function Shell(): React.JSX.Element {
               onClearHistory={clearHistory}
               onSaveSettings={saveSettings}
               onSaveProfile={saveProfile}
+              account={account}
+              onSignOut={signOut}
             />
           )}
         </AnimatePresence>
