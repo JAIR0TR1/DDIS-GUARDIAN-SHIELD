@@ -199,3 +199,22 @@ describe('preReaction (primer vistazo mientras se pega)', () => {
     }
   })
 })
+
+describe('gesto elegido por la IA', () => {
+  it('la IA puede afinar el gesto, pero el objeto sigue saliendo de la historia', () => {
+    const ctx = contextFor({ ...result('peligroso', 'premio'), niloGesture: 'proteger' })
+    expect(ctx).toEqual({ gesture: 'proteger', prop: 'regalo', intensity: 1 })
+  })
+
+  it('un gesto incoherente con el veredicto se ignora (nunca celebrar un peligro)', () => {
+    expect(contextFor({ ...result('peligroso', 'premio'), niloGesture: 'celebrar' }).gesture).toBe(
+      'negar'
+    )
+    expect(contextFor({ ...result('seguro'), niloGesture: 'alto' }).gesture).toBe('celebrar')
+  })
+
+  it('en lo dudoso se respeta la intensidad suave', () => {
+    const ctx = contextFor({ ...result('sospechoso', 'paquete'), niloGesture: 'llamar' })
+    expect(ctx).toEqual({ gesture: 'llamar', prop: 'paquete', intensity: DOUBTFUL_INTENSITY })
+  })
+})

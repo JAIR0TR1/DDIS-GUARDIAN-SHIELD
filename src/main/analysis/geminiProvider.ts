@@ -1,4 +1,5 @@
 import { stripDelimiters } from '../../domain/mask'
+import { AI_GESTURES } from '../../shared/threat'
 import type { Language } from '../../shared/i18n'
 import { SIGNAL_KINDS } from '../../shared/threat'
 import type { ProviderInput, ThreatProvider } from './analyzeThreat'
@@ -31,7 +32,8 @@ CRITERIOS:
 - Los datos sensibles ya vienen tapados con marcas como [TARJETA] u [OCULTO]; no intentes adivinarlos.
 - signals: máximo 6, cada una con un kind de la lista permitida, una etiqueta corta en español (máximo 60 caracteres) y su severidad.
 - recommendedAction: una o dos frases con un paso concreto y fácil de seguir.
-- creatureMessage: la voz de Nilo, un guardián felino curioso y protector. Tutea, habla corto y directo, sin asustar de más y sin emojis. Máximo 120 caracteres.`
+- creatureMessage: la voz de Nilo, un guardián felino curioso y protector. Tutea, habla corto y directo, sin asustar de más y sin emojis. Máximo 120 caracteres.
+- niloGesture: el gesto con que Nilo reacciona, coherente con el veredicto y con la historia del mensaje: «celebrar» (todo bien, solo si es seguro), «pensar» (dudoso sin una historia clara), «alto» (frenar: paquetes, comprobantes, urgencia), «proteger» (cuidar claves, datos o dinero), «negar» (premios, empleos u ofertas demasiado buenas), «llamar» (verificar llamando: falsos familiares o «cambié de número»).`
 
 /** En inglés se pide escribir los textos libres en inglés; el resto del JSON no cambia. */
 export function languageNote(language: Language | undefined): string {
@@ -59,9 +61,10 @@ export const RESPONSE_SCHEMA = {
       }
     },
     recommendedAction: { type: 'STRING' },
-    creatureMessage: { type: 'STRING' }
+    creatureMessage: { type: 'STRING' },
+    niloGesture: { type: 'STRING', enum: [...AI_GESTURES] }
   },
-  required: ['verdict', 'score', 'signals', 'recommendedAction', 'creatureMessage']
+  required: ['verdict', 'score', 'signals', 'recommendedAction', 'creatureMessage', 'niloGesture']
 } as const
 
 /** Una lista de mensajes: cada uno con el esquema de texto más su transcripción. */

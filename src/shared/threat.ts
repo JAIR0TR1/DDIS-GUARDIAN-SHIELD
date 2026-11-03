@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
+/** Gestos de Nilo que la IA puede elegir (los mismos de `domain/gesture`, sin «ninguno» ni «leer»). */
+export const AI_GESTURES = ['celebrar', 'pensar', 'alto', 'proteger', 'negar', 'llamar'] as const
+
 export const VERDICTS = ['seguro', 'sospechoso', 'peligroso'] as const
 export const verdictSchema = z.enum(VERDICTS)
 export type Verdict = z.infer<typeof verdictSchema>
@@ -46,6 +49,8 @@ export const threatResultSchema = z.object({
   score: z.number().int().min(0).max(100),
   signals: z.array(signalSchema).max(12),
   recommendedAction: z.string().min(1).max(240),
-  creatureMessage: z.string().min(1).max(200)
+  creatureMessage: z.string().min(1).max(200),
+  /** Gesto de Nilo elegido por la IA (de una lista cerrada). Ausente en las reglas locales. */
+  niloGesture: z.enum(AI_GESTURES).optional()
 })
 export type ThreatResult = z.infer<typeof threatResultSchema>

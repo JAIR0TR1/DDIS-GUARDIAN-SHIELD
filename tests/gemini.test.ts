@@ -80,7 +80,8 @@ describe('prompt', () => {
       'score',
       'signals',
       'recommendedAction',
-      'creatureMessage'
+      'creatureMessage',
+      'niloGesture'
     ])
   })
 })

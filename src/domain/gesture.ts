@@ -82,7 +82,23 @@ function firstPresent(table: readonly Entry[], kinds: ReadonlySet<SignalKind>): 
  *    suave; sin una historia clara, «pensar» con un signo de interrogación.
  *  - peligroso: el gesto de su historia, completo.
  */
-export function contextFor(result: Pick<ThreatResult, 'verdict' | 'signals'>): Context {
+export function contextFor(
+  result: Pick<ThreatResult, 'verdict' | 'signals'> & Partial<Pick<ThreatResult, 'niloGesture'>>
+): Context {
+  const base = rulesContext(result)
+  // La IA puede afinar el GESTO (no el objeto) si eligió uno coherente con el veredicto.
+  const ai = result.niloGesture
+  return ai && AI_ALLOWED[result.verdict].includes(ai) ? { ...base, gesture: ai } : base
+}
+
+/** Gestos de la IA que se aceptan para cada veredicto (nunca «celebrar» ante un peligro). */
+const AI_ALLOWED: Record<Verdict, readonly Gesture[]> = {
+  seguro: ['celebrar'],
+  sospechoso: ['pensar', 'alto', 'proteger', 'negar', 'llamar'],
+  peligroso: ['alto', 'proteger', 'negar', 'llamar']
+}
+
+function rulesContext(result: Pick<ThreatResult, 'verdict' | 'signals'>): Context {
   if (result.verdict === 'seguro') return { gesture: 'celebrar', prop: 'check', intensity: 1 }
 
   const kinds = new Set(result.signals.map((s) => s.kind))
@@ -98,7 +114,9 @@ export function contextFor(result: Pick<ThreatResult, 'verdict' | 'signals'>): C
     : { gesture: 'alto', prop: 'ninguno', intensity: 1 }
 }
 
-export function gestureFor(result: Pick<ThreatResult, 'verdict' | 'signals'>): Gesture {
+export function gestureFor(
+  result: Pick<ThreatResult, 'verdict' | 'signals'> & Partial<Pick<ThreatResult, 'niloGesture'>>
+): Gesture {
   return contextFor(result).gesture
 }
 
