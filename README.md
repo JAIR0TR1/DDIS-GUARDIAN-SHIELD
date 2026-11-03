@@ -2,6 +2,20 @@
 
 Protege del fraude digital con una criatura guardiana, **Nilo**: analiza mensajes y links, avisa con semáforo (seguro, sospechoso, peligroso) y explica por qué. Proyecto universitario de Diseño de Interfaces (aplicación de escritorio; hermana de las apps de celular y reloj).
 
+## Instalar y usar (sin programar)
+1. Ejecuta `EscudoGuardian-0.1.0-setup.exe` (se genera con `npm run build:win` en `release/`).
+2. Windows puede mostrar el aviso azul «SmartScreen» porque el instalador no está firmado: pulsa **Más información → Ejecutar de todas formas**.
+3. Abre Escudo Guardián. La primera vez te pide tu nombre; después Nilo te saluda.
+4. En **Analizar**, pega un mensaje y pulsa Analizar. Sin clave de IA funciona en modo demo; para usar la IA real, pega tu clave de Gemini en **Ajustes** (se guarda cifrada).
+
+No es una página web ni usa servidor: es una aplicación de escritorio y los datos viven en cada equipo.
+
+## Qué incluye
+- Analizador de mensajes, links y capturas con semáforo, puntaje, señales y acción recomendada.
+- **Nilo**, un guardián 3D que saluda, sigue el puntero y reacciona al contexto con gestos y un objeto flotante según la estafa (regalo, paquete, maletín, teléfono…).
+- Historial, experiencia y niveles; modo presentación; modo demo sin red.
+- Vigilante del portapapeles, atajo global, alerta flotante e icono en la bandeja.
+
 ## Requisitos
 - Windows 10 u 11
 - Node.js 20.19+ o 22.12+ (se probó con Node 24) y npm
@@ -54,8 +68,11 @@ Informe de las reglas sobre 30 mensajes de ejemplo: [docs/corpus-report.md](docs
 - **Capturas de pantalla**: arrástralas, pégalas con `Ctrl+V` o elígelas; la IA lee el texto y lo analiza.
 
 ## Datos
-Todo se guarda en archivos JSON en la carpeta de datos del usuario (`%APPDATA%\Escudo Guardián`). No hay base de datos ni módulos nativos.
+Todo se guarda en archivos JSON en la carpeta de datos del usuario (`%APPDATA%\Escudo Guardián` instalada; `%APPDATA%\escudo-guardian` en desarrollo). No hay base de datos ni módulos nativos.
 
 ## Documentación
 - [docs/design-brief.md](docs/design-brief.md): análisis de las referencias visuales y decisiones de diseño.
+- [docs/justificacion-diseno.md](docs/justificacion-diseno.md): justificación de las decisiones de diseño.
+- [docs/QA.md](docs/QA.md): casos de prueba manuales.
+- [docs/ia-gemini.md](docs/ia-gemini.md): cómo se conecta y protege la IA.
 - [CLAUDE.md](CLAUDE.md): especificación resumida y convenciones del proyecto.
