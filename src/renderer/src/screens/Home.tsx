@@ -1,5 +1,13 @@
 import { motion, type Variants } from 'framer-motion'
-import { Clock, ImageUp, Inbox, ScanSearch } from 'lucide-react'
+import {
+  Clock,
+  ImageUp,
+  Inbox,
+  ScanSearch,
+  ShieldAlert,
+  ShieldCheck,
+  type LucideIcon
+} from 'lucide-react'
 import type { HistoryEntry } from '@shared/history'
 import { excerpt } from '@shared/safeText'
 import { GlassCard } from '../components/ui/GlassCard'
@@ -56,6 +64,27 @@ export function Home({
           <CreatureAvatar size={34} frame="badge" state={mood} title="Nilo" />
           <p className="text-[15px] text-text">{greeting}</p>
         </div>
+      </motion.div>
+
+      <motion.div variants={variants} className="col-span-12 grid grid-cols-3 gap-4">
+        <StatTile
+          icon={ScanSearch}
+          label={t('home.stats.analyzed')}
+          value={history.length}
+          tone="text-accent-strong"
+        />
+        <StatTile
+          icon={ShieldAlert}
+          label={t('home.stats.threats')}
+          value={history.filter((h) => h.result.verdict === 'peligroso').length}
+          tone="text-danger-text"
+        />
+        <StatTile
+          icon={ShieldCheck}
+          label={t('home.stats.safe')}
+          value={history.filter((h) => h.result.verdict === 'seguro').length}
+          tone="text-safe"
+        />
       </motion.div>
 
       <motion.div variants={variants} className="col-span-12 md:col-span-7">
@@ -174,5 +203,32 @@ export function Home({
         </motion.div>
       </div>
     </>
+  )
+}
+
+/** Métrica del panel de Inicio: un número grande con su etiqueta y un icono de color. */
+function StatTile({
+  icon: Icon,
+  label,
+  value,
+  tone
+}: {
+  icon: LucideIcon
+  label: string
+  value: number
+  tone: string
+}): React.JSX.Element {
+  return (
+    <div className="glass flex items-center gap-3.5 rounded-[16px] px-4 py-3">
+      <span className="grid size-10 shrink-0 place-items-center rounded-[12px] border border-white/10 bg-white/6">
+        <Icon aria-hidden className={cn('size-5', tone)} />
+      </span>
+      <div className="min-w-0">
+        <p className="tabular font-display text-[26px] font-semibold leading-none text-text">
+          {value}
+        </p>
+        <p className="mt-1 truncate text-[12.5px] text-text-muted">{label}</p>
+      </div>
+    </div>
   )
 }

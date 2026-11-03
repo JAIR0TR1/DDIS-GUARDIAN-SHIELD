@@ -313,7 +313,12 @@ export const es = {
   'alert.watcher': 'Vigilante',
   'result.score.aria': 'Puntaje de riesgo {score} de 100',
   'result.signals.aria': 'Señales detectadas',
-  'result.signals.none': 'No encontré señales de estafa.'
+  'result.signals.none': 'No encontré señales de estafa.',
+
+  // Métricas de Inicio
+  'home.stats.analyzed': 'Analizados',
+  'home.stats.threats': 'Amenazas detenidas',
+  'home.stats.safe': 'Mensajes seguros'
 } as const
 
 export type MessageKey = keyof typeof es

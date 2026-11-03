@@ -312,5 +312,10 @@ export const en: Record<MessageKey, string> = {
   'alert.watcher': 'Watcher',
   'result.score.aria': 'Risk score {score} out of 100',
   'result.signals.aria': 'Detected signals',
-  'result.signals.none': "I didn't find any scam signals."
+  'result.signals.none': "I didn't find any scam signals.",
+
+  // Métricas de Inicio
+  'home.stats.analyzed': 'Analyzed',
+  'home.stats.threats': 'Threats stopped',
+  'home.stats.safe': 'Safe messages'
 }

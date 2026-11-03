@@ -126,7 +126,12 @@ export function Session({
     // Las frases base de Nilo vienen en español en creature.json; en inglés se usan las traducidas.
     const phrases =
       settings.language === 'en'
-        ? { bienvenida: [t('phrases.welcome.1'), t('phrases.welcome.2')] }
+        ? {
+            bienvenida: [
+              t('phrases.welcome.1', { name: profile.name }),
+              t('phrases.welcome.2', { name: profile.name })
+            ]
+          }
         : creature.phrases
     return pickPhrase(phrases, 'bienvenida', profile.name)
   }, [creature.phrases, profile.name, settings.language, t])
