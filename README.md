@@ -68,8 +68,11 @@ Informe de las reglas sobre 30 mensajes de ejemplo: [docs/corpus-report.md](docs
 - **Vigilante del portapapeles** (opcional, apagado por defecto): avisa si copias algo sospechoso. Ignora contraseñas, claves y tarjetas, y nunca envía nada a la IA.
 - **Capturas de pantalla**: arrástralas, pégalas con `Ctrl+V` o elígelas; la IA lee el texto y lo analiza.
 
+## Cuentas y nube
+Cada usuario crea una cuenta con correo y contraseña. Perfil, criatura, ajustes e historial se guardan en **Supabase** (PostgreSQL) y se sincronizan: inicias sesión en cualquier equipo y ves tus datos. Cada usuario solo puede leer y escribir sus propias filas (Row Level Security, ver `supabase/schema.sql`). Sin internet la app sigue funcionando con la copia local y sube los cambios después.
+
 ## Datos
-Todo se guarda en archivos JSON en la carpeta de datos del usuario (`%APPDATA%\Escudo Guardián` instalada; `%APPDATA%\escudo-guardian` en desarrollo). No hay base de datos ni módulos nativos.
+Además de la nube, todo se guarda en archivos JSON en la carpeta de datos del usuario (`%APPDATA%\Escudo Guardián` instalada; `%APPDATA%\escudo-guardian` en desarrollo). No hay base de datos ni módulos nativos.
 
 ## Documentación
 - [docs/design-brief.md](docs/design-brief.md): análisis de las referencias visuales y decisiones de diseño.

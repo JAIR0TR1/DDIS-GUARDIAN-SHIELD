@@ -6,7 +6,7 @@
  * En desarrollo se pueden reemplazar con SUPABASE_URL y SUPABASE_KEY en el entorno.
  */
 const DEFAULT_URL = 'https://gjbbylfssbtfrmyliunm.supabase.co'
-const DEFAULT_KEY = ''
+const DEFAULT_KEY = 'sb_publishable_alUnXEEAYtzgnjOnXYiglw_1cfUK14p'
 
 export interface CloudConfig {
   url: string
