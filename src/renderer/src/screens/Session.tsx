@@ -11,6 +11,8 @@ import { fadeOnly, panelContainer, panelItemBlur, transition } from '@design/mot
 import { CreatureAvatar } from '../components/ui/CreatureAvatar'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { WatcherChip } from '../components/ui/WatcherChip'
+import { useT } from '../lib/i18n'
+import type { MessageKey, Translate } from '@shared/i18n'
 import { useToast } from '../components/ui/toastContext'
 import { Sidebar, type Section } from '../components/ui/Sidebar'
 import type { Tone } from '../components/AmbientBackground'
@@ -36,16 +38,17 @@ export interface SessionProps {
   onSaveProfile: (profile: Profile) => Promise<void>
 }
 
-function watcherNoteFor(event: WatcherEvent): string {
+function watcherNoteFor(event: WatcherEvent, t: Translate): string {
   switch (event.kind) {
-    case 'ignored':
-      return `Copiaste algo y lo salté (${event.reason}).`
+    case 'ignored': {
+      // El motivo llega del proceso principal en español; se traduce al idioma activo.
+      const key = `watcher.reason.${event.reason}` as MessageKey
+      return t('watcher.note.ignored', { reason: t(key) })
+    }
     case 'safe':
-      return 'Revisé lo último que copiaste: todo en orden.'
+      return t('watcher.note.safe')
     case 'alert':
-      return event.verdict === 'peligroso'
-        ? 'Lo último que copiaste se ve peligroso.'
-        : 'Lo último que copiaste tiene cosas raras.'
+      return event.verdict === 'peligroso' ? t('watcher.note.danger') : t('watcher.note.doubt')
   }
 }
 
@@ -89,20 +92,21 @@ export function Session({
   const [savingWatcher, setSavingWatcher] = useState(false)
   const [watcherNote, setWatcherNote] = useState<string | null>(null)
   const toast = useToast()
+  const t = useT()
 
   // El vigilante cuenta qué hizo con lo último copiado, para que nunca parezca que «no hace nada».
   useEffect(() => {
     let timer = 0
     const off = window.guardian.watcher.onEvent((event) => {
       window.clearTimeout(timer)
-      setWatcherNote(watcherNoteFor(event))
+      setWatcherNote(watcherNoteFor(event, t))
       timer = window.setTimeout(() => setWatcherNote(null), 6000)
     })
     return () => {
       window.clearTimeout(timer)
       off()
     }
-  }, [])
+  }, [t])
   const osReduced = useReducedMotion()
   const reduced = osReduced === true || settings.reduceMotion
   const moodTimer = useRef<number>(0)
@@ -118,10 +122,14 @@ export function Session({
     return () => window.clearTimeout(moodTimer.current)
   }, [])
 
-  const greeting = useMemo(
-    () => pickPhrase(creature.phrases, 'bienvenida', profile.name),
-    [creature.phrases, profile.name]
-  )
+  const greeting = useMemo(() => {
+    // Las frases base de Nilo vienen en español en creature.json; en inglés se usan las traducidas.
+    const phrases =
+      settings.language === 'en'
+        ? { bienvenida: [t('phrases.welcome.1'), t('phrases.welcome.2')] }
+        : creature.phrases
+    return pickPhrase(phrases, 'bienvenida', profile.name)
+  }, [creature.phrases, profile.name, settings.language, t])
   const needed = xpToNext(creature.level)
   const itemVariants = reduced ? fadeOnly : panelItemBlur
 
@@ -145,15 +153,13 @@ export function Session({
     onSaveProfile({ ...profile, vigilante: next })
       .then(() =>
         toast.show(
-          next
-            ? 'Vigilante activo: reviso lo que copies, solo en tu equipo.'
-            : 'Vigilante apagado. Ya no miro lo que copias.',
+          next ? t('session.watcherOn') : t('session.watcherOff'),
           next ? 'success' : 'info'
         )
       )
       .catch((error: unknown) => {
         console.error('No se pudo cambiar el vigilante', error)
-        toast.show('No pude cambiar el vigilante. Inténtalo de nuevo.', 'error')
+        toast.show(t('session.watcherFailed'), 'error')
       })
       .finally(() => setSavingWatcher(false))
   }
@@ -191,7 +197,7 @@ export function Session({
               size={44}
               frame="badge"
               state={mood}
-              title="Nilo, tu Guardián"
+              title={t('session.avatar')}
             />
           }
         />
@@ -206,16 +212,16 @@ export function Session({
         >
           <div className="min-w-0">
             <h1 className="truncate font-display text-[26px] font-semibold leading-tight tracking-tight">
-              Hola, {profile.name}
+              {t('session.hello', { name: profile.name })}
             </h1>
             <p className="mt-1 flex items-center gap-2 text-sm text-text-muted">
               <span className="pulse-dot text-safe" aria-hidden />
-              Guardián activo
+              {t('session.active')}
               <span className="text-text-subtle" aria-hidden>
                 ·
               </span>
               <span className="hud-label !text-text-subtle">
-                {demoMode ? 'modo demo' : 'modo real'}
+                {demoMode ? t('mode.demo') : t('mode.real')}
               </span>
             </p>
             <div className="mt-2.5 flex items-center gap-3">
@@ -233,12 +239,12 @@ export function Session({
           </div>
           <div className="w-52 shrink-0 pt-1">
             <p className="tabular mb-1.5 flex justify-between font-mono text-[12px] text-text-muted">
-              <span>Nivel {creature.level}</span>
+              <span>{t('session.level', { level: creature.level })}</span>
               <span>
                 {creature.xp} / {needed} XP
               </span>
             </p>
-            <ProgressBar value={creature.xp} max={needed} label="Experiencia del Guardián" />
+            <ProgressBar value={creature.xp} max={needed} label={t('session.xp')} />
           </div>
         </motion.header>
 

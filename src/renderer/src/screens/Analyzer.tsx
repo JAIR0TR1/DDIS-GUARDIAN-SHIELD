@@ -25,6 +25,9 @@ import { HighlightedText } from '../components/HighlightedText'
 import { Badge } from '../components/ui/Badge'
 import { cn } from '../lib/cn'
 import { reviewLabel } from '../lib/reviewLabel'
+import { useT } from '../lib/i18n'
+import { localizeText } from '@shared/i18n/localize'
+import type { MessageKey } from '@shared/i18n'
 import { firstImage, readImageFile } from '../lib/imageFile'
 import { CreatureAvatar } from '../components/ui/CreatureAvatar'
 import type { CreatureState } from '../creature/creatureState'
@@ -36,12 +39,12 @@ const PEEK_DELAY_MS = 450
 /** Tiempo mínimo que se muestra el escáner, para que se vea qué hace Nilo aunque sea instantáneo. */
 const SCAN_MS = 1100
 
-const SCAN_LOG = [
-  'Buscando links y dominios…',
-  'Comparando con marcas conocidas…',
-  'Revisando urgencia y pedidos de claves…',
-  'Calculando el riesgo…'
-] as const
+const SCAN_LOG: readonly MessageKey[] = [
+  'analyzer.scan.links',
+  'analyzer.scan.brands',
+  'analyzer.scan.urgency',
+  'analyzer.scan.risk'
+]
 
 type Status = 'idle' | 'scanning' | 'done' | 'error'
 
@@ -72,6 +75,7 @@ export function Analyzer({
   onAnalyzing,
   onOutcome
 }: AnalyzerProps): React.JSX.Element {
+  const t = useT()
   const [text, setText] = useState(initialText)
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
@@ -100,7 +104,7 @@ export function Analyzer({
         reduced ? Promise.resolve() : sleep(SCAN_MS)
       ])
       if (!response.ok) {
-        setError(response.message)
+        setError(localizeText(response.message, t))
         setStatus('error')
         return
       }
@@ -109,7 +113,7 @@ export function Analyzer({
       onOutcome(response.outcome)
     } catch (cause) {
       console.error('Falló el análisis de la captura', cause)
-      setError('No pude analizar la captura. Inténtalo de nuevo.')
+      setError(t('analyzer.imageFailed'))
       setStatus('error')
     }
   }
@@ -151,7 +155,7 @@ export function Analyzer({
   const peek = reading && peeked?.forText === typed ? preReaction(peeked.verdict) : null
   const liveReaction: { mood: CreatureState; bubble: string } = peek ?? {
     mood: 'reposo',
-    bubble: reading ? 'Déjame leerlo…' : 'Pega un mensaje y lo reviso por ti.'
+    bubble: reading ? t('analyzer.bubble.reading') : t('analyzer.bubble.idle')
   }
 
   const canDrop = status === 'idle' || status === 'error'
@@ -181,7 +185,7 @@ export function Analyzer({
   const run = async (value: string = text): Promise<void> => {
     const parsed = analyzeInputSchema.safeParse({ text: value, source: detectSource(value) })
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Revisa el mensaje')
+      setError(value.trim() ? t('analyzer.checkMessage') : t('analyzer.empty'))
       areaRef.current?.focus()
       return
     }
@@ -198,7 +202,7 @@ export function Analyzer({
       onOutcome(result)
     } catch (cause) {
       console.error('Falló el análisis', cause)
-      setError('No pude analizar el mensaje. Inténtalo de nuevo.')
+      setError(t('analyzer.textFailed'))
       setStatus('error')
     }
   }
@@ -230,7 +234,7 @@ export function Analyzer({
     <>
       <motion.div variants={variants} className="col-span-12 lg:col-span-7">
         <GlassCard
-          title="Mensaje a revisar"
+          title={t('analyzer.card.title')}
           className="relative flex h-full flex-col overflow-hidden"
           {...dropHandlers}
         >
@@ -243,16 +247,16 @@ export function Analyzer({
               <div className="flex flex-col items-center gap-2">
                 <ImageUp aria-hidden className="size-8 text-accent-strong" />
                 <p className="font-display text-lg font-semibold text-text">
-                  Suelta la captura aquí
+                  {t('analyzer.drop.title')}
                 </p>
-                <p className="text-[13px] text-text-muted">PNG, JPG o WEBP, hasta 4 MB</p>
+                <p className="text-[13px] text-text-muted">{t('analyzer.drop.hint')}</p>
               </div>
             </div>
           )}
           {status === 'idle' || status === 'error' ? (
             <>
               <label htmlFor={areaId} className="sr-only">
-                Pega aquí el mensaje o link sospechoso
+                {t('analyzer.label')}
               </label>
               <textarea
                 ref={areaRef}
@@ -277,10 +281,10 @@ export function Analyzer({
                     void analyzeFile(file)
                   }
                 }}
-                placeholder="Pega aquí el mensaje o link que te dio mala espina…"
+                placeholder={t('analyzer.placeholder')}
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? errorId : undefined}
-                className="selectable min-h-[170px] flex-1 resize-none rounded-[12px] border border-white/12 bg-black/25 p-3.5 font-mono text-[13.5px] leading-relaxed text-text placeholder:text-text-subtle transition-[border-color,background-color] duration-[220ms] hover:border-white/20 focus:border-accent/60 aria-invalid:border-danger/60"
+                className="selectable min-h-[170px] flex-1 resize-none rounded-[12px] border border-white/12 bg-[var(--field-bg)] p-3.5 font-mono text-[13.5px] leading-relaxed text-text placeholder:text-text-subtle transition-[border-color,background-color] duration-[220ms] hover:border-white/20 focus:border-accent/60 aria-invalid:border-danger/60"
               />
               <div className="mt-1.5 flex min-h-5 items-center justify-between text-[12px]">
                 <p id={errorId} role="alert" className="text-danger-text">
@@ -297,7 +301,7 @@ export function Analyzer({
                   onClick={() => void run()}
                   icon={<ScanSearch aria-hidden className="size-4" />}
                 >
-                  Analizar
+                  {t('analyzer.analyze')}
                 </Button>
                 <Button
                   variant="secondary"
@@ -305,7 +309,7 @@ export function Analyzer({
                   onClick={() => fileRef.current?.click()}
                   icon={<ImagePlus aria-hidden className="size-4" />}
                 >
-                  Elegir captura
+                  {t('analyzer.pickImage')}
                 </Button>
                 <input
                   ref={fileRef}
@@ -313,7 +317,7 @@ export function Analyzer({
                   accept={IMAGE_TYPES.join(',')}
                   className="sr-only"
                   tabIndex={-1}
-                  aria-label="Elegir una captura de pantalla"
+                  aria-label={t('analyzer.pickImage.aria')}
                   onChange={(e) => {
                     const file = e.target.files?.[0]
                     e.target.value = '' // permite elegir la misma imagen otra vez
@@ -321,18 +325,17 @@ export function Analyzer({
                   }}
                 />
                 <span className="ml-auto flex items-center gap-2 text-[12.5px] text-text-muted">
-                  <Kbd keys="Ctrl+Enter" /> para analizar
+                  <Kbd keys="Ctrl+Enter" /> {t('analyzer.toAnalyze')}
                 </span>
               </div>
               <p className="mt-2.5 text-[12.5px] leading-snug text-text-subtle">
-                También puedes arrastrar una captura a esta tarjeta o pegarla con Ctrl+V. La imagen
-                se envía a la IA de Google para leerla (en modo demo no se envía nada).
+                {t('analyzer.imageNote')}
               </p>
 
               {/* Modo presentación: ejemplos listos, sin depender de internet. */}
               <div className="mt-5 border-t border-white/10 pt-4">
                 <p className="hud-label mb-2.5 flex items-center gap-2">
-                  <FlaskConical aria-hidden className="size-3.5" /> Modo presentación
+                  <FlaskConical aria-hidden className="size-3.5" /> {t('analyzer.presentation')}
                 </p>
                 <div className="grid grid-cols-3 gap-2">
                   {demoMessages.map((m) => (
@@ -342,8 +345,12 @@ export function Analyzer({
                       onClick={() => loadSample(m.text)}
                       className="app-no-drag glass rounded-[12px] px-3 py-2.5 text-left transition-[transform,background-color] duration-[220ms] ease-[var(--ease-guardian)] hover:bg-white/10 active:scale-[0.98]"
                     >
-                      <span className="block text-sm font-medium text-text">{m.label}</span>
-                      <span className="block text-[12px] text-text-muted">{m.hint}</span>
+                      <span className="block text-sm font-medium text-text">
+                        {t(`analyzer.demo.${m.id}.label` as MessageKey)}
+                      </span>
+                      <span className="block text-[12px] text-text-muted">
+                        {t(`analyzer.demo.${m.id}.hint` as MessageKey)}
+                      </span>
                     </button>
                   ))}
                 </div>
@@ -364,25 +371,27 @@ export function Analyzer({
 
       <motion.div variants={variants} className="col-span-12 lg:col-span-5">
         {status === 'error' ? (
-          <GlassCard title="Resultado" className="h-full">
+          <GlassCard title={t('analyzer.result')} className="h-full">
             <EmptyState
               tone="error"
               icon={<AlertTriangle aria-hidden className="size-5" />}
-              title="No salió el análisis"
-              description={
-                error ?? 'Algo falló de mi lado. Tu mensaje sigue ahí: inténtalo otra vez.'
-              }
-              action={<Button onClick={retry}>Reintentar</Button>}
+              title={t('analyzer.failed.title')}
+              description={error ?? t('analyzer.failed.body')}
+              action={<Button onClick={retry}>{t('analyzer.retry')}</Button>}
             />
           </GlassCard>
         ) : scanning ? (
-          <GlassCard title="Resultado" className="h-full">
+          <GlassCard title={t('analyzer.result')} className="h-full">
             <NiloStage mood="escaneando" gesture="ninguno" bubble="" />
             <ScanLog />
           </GlassCard>
         ) : outcome && result ? (
           <div className="flex flex-col gap-3">
-            <ThreatResultCard result={result} title="Resultado" reactionKey={outcome.entry.id} />
+            <ThreatResultCard
+              result={result}
+              title={t('analyzer.result')}
+              reactionKey={outcome.entry.id}
+            />
             <Gains outcome={outcome} />
           </div>
         ) : (
@@ -443,13 +452,14 @@ function ScannedMessage({
   preview: string | undefined
   onReset: () => void
 }): React.JSX.Element {
+  const t = useT()
   return (
     <div className="flex h-full flex-col">
       <div className="relative min-h-[170px] flex-1 overflow-hidden rounded-[12px] border border-white/12 bg-black/25 p-3.5">
         {preview && (
           <img
             src={preview}
-            alt="Captura que estás analizando"
+            alt={t('analyzer.imageAlt')}
             draggable={false}
             className="mb-3 max-h-40 w-auto max-w-full rounded-[10px] border border-white/10 object-contain"
           />
@@ -464,7 +474,7 @@ function ScannedMessage({
       <div className="mt-3 flex min-h-9 items-center justify-between">
         {scanning ? (
           <p className="hud-label flex items-center gap-2 !text-accent" role="status">
-            <span className="pulse-dot size-1.5 text-accent" aria-hidden /> Escaneando…
+            <span className="pulse-dot size-1.5 text-accent" aria-hidden /> {t('analyzer.scanning')}
           </p>
         ) : (
           <Button
@@ -472,7 +482,7 @@ function ScannedMessage({
             onClick={onReset}
             icon={<RotateCcw aria-hidden className="size-4" />}
           >
-            Analizar otro
+            {t('analyzer.another')}
           </Button>
         )}
       </div>
@@ -506,10 +516,11 @@ function RepeatingScan(): React.JSX.Element {
 }
 
 function ScanLog(): React.JSX.Element {
+  const t = useT()
   return (
     <ul
       className="flex flex-col gap-2.5 py-2 font-mono text-[13px]"
-      aria-label="Pasos del análisis"
+      aria-label={t('analyzer.scan.aria')}
     >
       {SCAN_LOG.map((line, i) => (
         <li
@@ -520,7 +531,7 @@ function ScanLog(): React.JSX.Element {
           <span aria-hidden className="text-accent">
             ›
           </span>
-          {line}
+          {t(line)}
         </li>
       ))}
     </ul>
@@ -528,6 +539,7 @@ function ScanLog(): React.JSX.Element {
 }
 
 function Gains({ outcome }: { outcome: AnalysisOutcome }): React.JSX.Element {
+  const t = useT()
   return (
     <motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -543,12 +555,14 @@ function Gains({ outcome }: { outcome: AnalysisOutcome }): React.JSX.Element {
       >
         +{outcome.xpGained} XP
       </span>
-      {outcome.levelsGained > 0 && <Badge color="#F59E0B">¡Nivel {outcome.creature.level}!</Badge>}
-      <Badge>{reviewLabel(outcome.entry)}</Badge>
+      {outcome.levelsGained > 0 && (
+        <Badge color="#F59E0B">{t('analyzer.levelBadge', { level: outcome.creature.level })}</Badge>
+      )}
+      <Badge>{reviewLabel(outcome.entry, t)}</Badge>
       {outcome.notice && (
         <p className="flex w-full items-center gap-2 text-[13px] text-text-muted">
           <CheckCheck aria-hidden className="size-4 shrink-0" />
-          {outcome.notice}
+          {localizeText(outcome.notice, t)}
         </p>
       )}
     </motion.div>

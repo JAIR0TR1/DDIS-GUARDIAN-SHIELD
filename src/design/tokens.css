@@ -83,6 +83,7 @@
   --ambient-vignette: rgb(0 0 0 / 0.55);
   --ambient-grid: rgb(148 220 255 / 0.045);
   --ambient-boost: 1; /* intensidad de las manchas de la aurora */
+  --field-bg: rgb(0 0 0 / 0.25); /* fondo de campos de texto */
 }
 
 /*
@@ -133,6 +134,7 @@
   --ambient-vignette: rgb(100 116 139 / 0.22);
   --ambient-grid: rgb(30 64 120 / 0.06);
   --ambient-boost: 0.55;
+  --field-bg: rgb(255 255 255 / 0.7);
 }
 
 /* Reducir movimiento: la clase la aplica Ajustes además de la preferencia del sistema. */

@@ -10,23 +10,25 @@ import {
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
 import { transition } from '@design/motion'
+import type { MessageKey } from '@shared/i18n'
+import { useT } from '../../lib/i18n'
 
 export type Section = 'inicio' | 'analizar' | 'historial' | 'criatura' | 'ajustes'
 
 interface NavItem {
   id: Section
-  label: string
+  labelKey: MessageKey
   icon: LucideIcon
 }
 
 const MAIN: NavItem[] = [
-  { id: 'inicio', label: 'Inicio', icon: LayoutDashboard },
-  { id: 'analizar', label: 'Analizar', icon: ScanLine },
-  { id: 'historial', label: 'Historial', icon: History },
-  { id: 'criatura', label: 'Criatura', icon: PawPrint }
+  { id: 'inicio', labelKey: 'nav.home', icon: LayoutDashboard },
+  { id: 'analizar', labelKey: 'nav.analyze', icon: ScanLine },
+  { id: 'historial', labelKey: 'nav.history', icon: History },
+  { id: 'criatura', labelKey: 'nav.creature', icon: PawPrint }
 ]
 
-const SETTINGS: NavItem = { id: 'ajustes', label: 'Ajustes', icon: Settings }
+const SETTINGS: NavItem = { id: 'ajustes', labelKey: 'nav.settings', icon: Settings }
 
 export interface SidebarProps {
   current: Section
@@ -44,13 +46,15 @@ function NavButton({
   active: boolean
   onSelect: (s: Section) => void
 }): React.JSX.Element {
+  const t = useT()
+  const label = t(item.labelKey)
   const Icon = item.icon
   return (
     <button
       type="button"
-      aria-label={item.label}
+      aria-label={label}
       aria-current={active ? 'page' : undefined}
-      title={item.label}
+      title={label}
       onClick={() => onSelect(item.id)}
       className={cn(
         'app-no-drag relative grid size-11 place-items-center rounded-[14px] text-text-muted',
@@ -73,9 +77,10 @@ function NavButton({
 
 /** Barra lateral estrecha: criatura arriba, 4 secciones y Ajustes abajo. */
 export function Sidebar({ current, onSelect, creatureSlot }: SidebarProps): React.JSX.Element {
+  const t = useT()
   return (
     <nav
-      aria-label="Secciones"
+      aria-label={t('nav.label')}
       className="relative z-20 flex w-[72px] shrink-0 flex-col items-center border-r border-white/8 bg-white/[0.025] py-4"
     >
       <div className="mb-5">{creatureSlot}</div>

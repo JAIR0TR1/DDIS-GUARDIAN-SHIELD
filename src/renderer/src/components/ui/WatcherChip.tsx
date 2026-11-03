@@ -1,5 +1,6 @@
 import { Eye, EyeOff } from 'lucide-react'
 import { cn } from '../../lib/cn'
+import { useT } from '../../lib/i18n'
 
 export interface WatcherChipProps {
   on: boolean
@@ -12,12 +13,13 @@ export interface WatcherChipProps {
  * el usuario debe saber, en todo momento, si Nilo está mirando lo que copia.
  */
 export function WatcherChip({ on, onToggle, disabled }: WatcherChipProps): React.JSX.Element {
+  const t = useT()
   return (
     <button
       type="button"
       role="switch"
       aria-checked={on}
-      aria-label="Vigilar el portapapeles"
+      aria-label={t('watcher.aria')}
       disabled={disabled}
       onClick={onToggle}
       className={cn(
@@ -33,12 +35,12 @@ export function WatcherChip({ on, onToggle, disabled }: WatcherChipProps): React
         <>
           <span aria-hidden className="pulse-dot size-1.5 text-accent" />
           <Eye aria-hidden className="size-4" />
-          Vigilando portapapeles
+          {t('watcher.on')}
         </>
       ) : (
         <>
           <EyeOff aria-hidden className="size-4" />
-          Vigilante apagado
+          {t('watcher.off')}
         </>
       )}
     </button>

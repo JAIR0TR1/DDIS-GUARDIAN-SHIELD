@@ -21,6 +21,8 @@ import { GlassCard } from './GlassCard'
 import { VerdictBadge } from './Badge'
 import { CreatureAvatar } from './CreatureAvatar'
 import { contextFor } from '@domain/gesture'
+import { localizeText } from '@shared/i18n/localize'
+import { useT } from '../../lib/i18n'
 import type { CreatureState } from '../../creature/creatureState'
 
 const signalIcon: Record<SignalKind, LucideIcon> = {
@@ -71,14 +73,15 @@ export interface ThreatResultCardProps {
 export function ThreatResultCard({
   result,
   text,
-  title = 'Última amenaza',
+  title,
   className,
   reactionKey
 }: ThreatResultCardProps): React.JSX.Element {
+  const t = useT()
   const context = contextFor(result)
   return (
     <GlassCard
-      title={title}
+      title={title ?? t('home.lastThreat')}
       glow={result.verdict === 'peligroso' ? 'danger' : 'none'}
       className={cn('flex flex-col', className)}
     >
@@ -89,7 +92,7 @@ export function ThreatResultCard({
             'tabular font-display text-[44px] font-semibold leading-none',
             scoreColor[result.verdict]
           )}
-          aria-label={`Puntaje de riesgo ${result.score} de 100`}
+          aria-label={t('result.score.aria', { score: result.score })}
         >
           {result.score}
           <span className="text-lg font-normal text-text-muted">/100</span>
@@ -97,21 +100,21 @@ export function ThreatResultCard({
       </div>
 
       {text !== undefined && (
-        <p className="selectable mt-4 line-clamp-3 overflow-hidden break-words rounded-[10px] border border-white/8 bg-black/30 px-3 py-2 font-mono text-[13px] text-text-muted">
+        <p className="selectable mt-4 line-clamp-3 overflow-hidden break-words rounded-[10px] border border-white/8 bg-[var(--field-bg)] px-3 py-2 font-mono text-[13px] text-text-muted">
           {neutralizeLinks(text)}
         </p>
       )}
 
-      <ul className="mt-4 flex flex-col gap-2" aria-label="Señales detectadas">
+      <ul className="mt-4 flex flex-col gap-2" aria-label={t('result.signals.aria')}>
         {result.signals.length === 0 && (
-          <li className="text-sm text-text-muted">No encontré señales de estafa.</li>
+          <li className="text-sm text-text-muted">{t('result.signals.none')}</li>
         )}
         {result.signals.map((signal) => {
           const Icon = signalIcon[signal.kind]
           return (
             <li key={signal.id} className="flex items-center gap-2.5 text-sm text-text">
               <Icon aria-hidden className={cn('size-4 shrink-0', severityColor[signal.severity])} />
-              {signal.label}
+              {localizeText(signal.label, t)}
             </li>
           )
         })}
@@ -136,8 +139,10 @@ export function ThreatResultCard({
           title="Nilo"
         />
         <div className="min-w-0">
-          <p className="text-sm font-medium text-text">{result.creatureMessage}</p>
-          <p className="mt-0.5 text-[13px] text-text-muted">{result.recommendedAction}</p>
+          <p className="text-sm font-medium text-text">{localizeText(result.creatureMessage, t)}</p>
+          <p className="mt-0.5 text-[13px] text-text-muted">
+            {localizeText(result.recommendedAction, t)}
+          </p>
         </div>
       </div>
     </GlassCard>

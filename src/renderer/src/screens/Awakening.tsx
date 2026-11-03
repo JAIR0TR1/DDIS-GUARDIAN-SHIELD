@@ -8,6 +8,7 @@ import { CreatureAvatar } from '../components/ui/CreatureAvatar'
 import { Kbd } from '../components/ui/Kbd'
 import { Switch } from '../components/ui/Switch'
 import { useViewportHeight } from '../hooks/useViewportHeight'
+import { useT } from '../lib/i18n'
 
 export interface AwakeningProps {
   /** Perfil guardado. `null` en el primer arranque (onboarding). */
@@ -32,6 +33,7 @@ export function Awakening({
   shortcut,
   onEnter
 }: AwakeningProps): React.JSX.Element {
+  const t = useT()
   const returning = profile?.onboardingDone === true
   const height = useViewportHeight()
   // La criatura se adapta a la altura libre: ventana − barra de título − HUD − bloque de texto.
@@ -51,10 +53,10 @@ export function Awakening({
       <div className="flex items-center justify-between px-6 pt-4 font-mono text-[12px]">
         <span className="hud-bracket flex items-center gap-2 uppercase tracking-[0.12em] text-accent">
           <span className="pulse-dot size-1.5 text-accent" aria-hidden />
-          Sistema en reposo
+          {t('awake.idle')}
         </span>
         <span className="text-text-muted">
-          v{version} · {demoMode ? 'modo demo' : 'modo real'}
+          v{version} · {demoMode ? t('mode.demo') : t('mode.real')}
         </span>
       </div>
 
@@ -66,9 +68,9 @@ export function Awakening({
             state="reposo"
             rings
             greet={returning ? 1 : 2.8}
-            title="Nilo despierta"
+            title={t('awake.title')}
           />
-          <GreetingBubble text={returning ? '¡Hola de nuevo!' : '¡Hola!'} />
+          <GreetingBubble text={returning ? t('awake.helloAgain') : t('awake.hello')} />
         </div>
         <div
           className="flex w-full flex-col items-center justify-start"
@@ -119,6 +121,7 @@ function Returning({
   profile: Profile
   onEnter: (p: Profile) => void
 }): React.JSX.Element {
+  const t = useT()
   const entered = useRef(false)
   const enter = useCallback(() => {
     if (entered.current) return
@@ -138,10 +141,10 @@ function Returning({
   return (
     <div className="text-center" role="status">
       <h1 className="font-display text-[28px] font-semibold tracking-tight text-text">
-        Hola de nuevo, {profile.name}
+        {t('awake.welcomeBack', { name: profile.name })}
       </h1>
-      <p className="mt-1.5 text-[15px] text-text-muted">Despertando al Guardián…</p>
-      <p className="mt-4 text-[13px] text-text-subtle">Presiona cualquier tecla para entrar ya</p>
+      <p className="mt-1.5 text-[15px] text-text-muted">{t('awake.waking')}</p>
+      <p className="mt-4 text-[13px] text-text-subtle">{t('awake.skip')}</p>
     </div>
   )
 }
@@ -160,6 +163,7 @@ function Onboarding({
   onEnter: (p: Profile) => void
   shortcut: string
 }): React.JSX.Element {
+  const t = useT()
   const [step, setStep] = useState(0)
   const [vigilante, setVigilante] = useState(false)
   const [name, setName] = useState('')
@@ -185,7 +189,7 @@ function Onboarding({
       vigilante
     })
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Escribe cómo te llamas')
+      setError(t('onboarding.nameError'))
       inputRef.current?.focus()
       return
     }
@@ -211,14 +215,15 @@ function Onboarding({
           {step === 2 && (
             <form onSubmit={submit} className="flex w-full flex-col items-center" noValidate>
               <h1 className="font-display text-[28px] font-semibold tracking-tight">
-                Un atajo y ya casi
+                {t('onboarding.shortcut.title')}
               </h1>
               <p className="mt-1.5 text-[15px] text-text-muted">
-                Con <Kbd keys={shortcut} className="mx-0.5 align-middle" /> me llamas desde
-                cualquier programa.
+                {t('onboarding.shortcut.before')}{' '}
+                <Kbd keys={shortcut} className="mx-0.5 align-middle" />{' '}
+                {t('onboarding.shortcut.after')}
               </p>
               <label htmlFor={inputId} className="sr-only">
-                ¿Cómo te llamas?
+                {t('onboarding.name')}
               </label>
               <input
                 ref={inputRef}
@@ -230,7 +235,7 @@ function Onboarding({
                 }}
                 maxLength={24}
                 autoComplete="off"
-                placeholder="¿Cómo te llamas?"
+                placeholder={t('onboarding.name')}
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? errorId : undefined}
                 className="mt-5 h-12 w-full rounded-[12px] border border-white/12 bg-white/6 px-4 text-[15px] text-text placeholder:text-text-subtle transition-[border-color,box-shadow,background-color] duration-[220ms] hover:border-white/20 focus:border-accent/60 focus:bg-white/8 aria-invalid:border-danger/60"
@@ -251,10 +256,10 @@ function Onboarding({
                 icon={<Zap aria-hidden className="size-4" />}
                 className="mt-1"
               >
-                Despertar al Guardián
+                {t('onboarding.start')}
               </Button>
               <p className="mt-3 flex items-center gap-2 text-[13px] text-text-subtle">
-                <Kbd keys="Enter" /> para empezar
+                <Kbd keys="Enter" /> {t('onboarding.toStart')}
               </p>
             </form>
           )}
@@ -270,14 +275,14 @@ function Onboarding({
               onClick={back}
               icon={<ArrowLeft aria-hidden className="size-4" />}
             >
-              Atrás
+              {t('onboarding.back')}
             </Button>
           )}
         </div>
         <div
           className="flex items-center gap-2"
           role="group"
-          aria-label={`Paso ${step + 1} de ${STEPS}`}
+          aria-label={t('onboarding.step', { n: step + 1, total: STEPS })}
         >
           {Array.from({ length: STEPS }, (_, i) => (
             <span
@@ -299,7 +304,7 @@ function Onboarding({
               autoFocus
               icon={<ArrowRight aria-hidden className="size-4" />}
             >
-              Siguiente
+              {t('onboarding.next')}
             </Button>
           )}
         </div>
@@ -309,16 +314,19 @@ function Onboarding({
 }
 
 function StepWhat(): React.JSX.Element {
+  const t = useT()
   const items = [
-    { icon: ScanText, label: 'Pega un mensaje o link' },
-    { icon: ShieldCheck, label: 'Te digo si es seguro' },
-    { icon: Bell, label: 'Te aviso antes de que caigas' }
+    { icon: ScanText, label: t('onboarding.what.1') },
+    { icon: ShieldCheck, label: t('onboarding.what.2') },
+    { icon: Bell, label: t('onboarding.what.3') }
   ]
   return (
     <>
-      <h1 className="font-display text-[28px] font-semibold tracking-tight">Hola, soy Nilo</h1>
+      <h1 className="font-display text-[28px] font-semibold tracking-tight">
+        {t('onboarding.what.title')}
+      </h1>
       <p className="mt-1.5 max-w-[400px] text-[15px] text-text-muted">
-        Vigilo tus mensajes y links para avisarte antes de que caigas.
+        {t('onboarding.what.body')}
       </p>
       <ul className="mt-5 grid w-full grid-cols-3 gap-2">
         {items.map(({ icon: Icon, label }) => (
@@ -342,21 +350,21 @@ function StepPrivacy({
   vigilante: boolean
   onVigilante: (v: boolean) => void
 }): React.JSX.Element {
+  const t = useT()
   return (
     <>
       <h1 className="font-display text-[28px] font-semibold tracking-tight">
-        Tu información, contigo
+        {t('onboarding.privacy.title')}
       </h1>
       <p className="mt-1.5 max-w-[420px] text-[15px] text-text-muted">
-        Reviso casi todo en tu computador. Solo si un mensaje es dudoso, envío un fragmento a la IA
-        de Google, con claves y números de tarjeta tapados.
+        {t('onboarding.privacy.body')}
       </p>
       <div className="glass mt-5 w-full rounded-[14px] p-4 text-left">
         <Switch
           checked={vigilante}
           onChange={onVigilante}
-          label="Vigilar el portapapeles"
-          description="Opcional. Te aviso si copias algo sospechoso. Puedes cambiarlo en Ajustes."
+          label={t('settings.watcher')}
+          description={t('onboarding.watcher.hint')}
         />
       </div>
     </>

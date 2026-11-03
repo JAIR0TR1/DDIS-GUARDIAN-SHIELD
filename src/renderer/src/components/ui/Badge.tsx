@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { cn } from '../../lib/cn'
 import type { Verdict } from '@shared/threat'
 import { verdictMeta } from './verdictMeta'
+import { useT } from '../../lib/i18n'
 
 /** Semáforo: SIEMPRE icono + texto, nunca solo color. */
 export function VerdictBadge({
@@ -11,6 +12,7 @@ export function VerdictBadge({
   verdict: Verdict
   className?: string
 }): React.JSX.Element {
+  const t = useT()
   const meta = verdictMeta[verdict]
   const Icon = meta.icon
   return (
@@ -22,7 +24,7 @@ export function VerdictBadge({
       )}
     >
       <Icon aria-hidden className="size-4" />
-      {meta.label}
+      {t(meta.labelKey)}
     </span>
   )
 }

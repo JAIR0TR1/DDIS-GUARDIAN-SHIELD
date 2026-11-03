@@ -16,7 +16,7 @@ export const sampleHistory: HistoryEntry[] = [
       signals: [
         { id: 'short', kind: 'link-acortado', label: 'Link acortado', severity: 'media' },
         { id: 'urgent', kind: 'urgencia', label: 'Mensaje con urgencia', severity: 'media' },
-        { id: 'key', kind: 'pide-clave', label: 'Te pide la clave', severity: 'alta' }
+        { id: 'key', kind: 'pide-clave', label: 'Te pide la clave o un código', severity: 'alta' }
       ],
       recommendedAction: 'Bórralo y no respondas. Si dudas, llama al número oficial de tu banco.',
       creatureMessage: 'No hagas clic. Te pide tu clave y ese link no es oficial.'
@@ -31,7 +31,9 @@ export const sampleHistory: HistoryEntry[] = [
     result: {
       verdict: 'sospechoso',
       score: 55,
-      signals: [{ id: 'money', kind: 'dinero', label: 'Promete dinero fácil', severity: 'media' }],
+      signals: [
+        { id: 'money', kind: 'dinero', label: 'Promete multiplicar tu dinero', severity: 'media' }
+      ],
       recommendedAction: 'Verifica la empresa antes de dar datos.',
       creatureMessage: 'Hmm, algo no me cuadra.'
     }

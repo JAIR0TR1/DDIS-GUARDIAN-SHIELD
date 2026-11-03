@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Minus, Shield, Square, Copy, X } from 'lucide-react'
 import { IconButton } from './IconButton'
+import { useT } from '../../lib/i18n'
 
 /** Barra de título propia: la ventana no tiene marco. El área libre arrastra la ventana. */
 export function Titlebar(): React.JSX.Element {
+  const t = useT()
   const [maximized, setMaximized] = useState(false)
 
   useEffect(() => {
@@ -23,11 +25,14 @@ export function Titlebar(): React.JSX.Element {
         <span className="font-display text-[13px] font-medium text-text">Escudo Guardián</span>
       </div>
       <div className="flex items-center gap-0.5">
-        <IconButton label="Minimizar" onClick={() => window.guardian.window.minimize()}>
+        <IconButton
+          label={t('titlebar.minimize')}
+          onClick={() => window.guardian.window.minimize()}
+        >
           <Minus aria-hidden className="size-4" />
         </IconButton>
         <IconButton
-          label={maximized ? 'Restaurar' : 'Maximizar'}
+          label={maximized ? t('titlebar.restore') : t('titlebar.maximize')}
           onClick={() => window.guardian.window.toggleMaximize()}
         >
           {maximized ? (
@@ -36,7 +41,11 @@ export function Titlebar(): React.JSX.Element {
             <Square aria-hidden className="size-3.5" />
           )}
         </IconButton>
-        <IconButton label="Cerrar" tone="danger" onClick={() => window.guardian.window.close()}>
+        <IconButton
+          label={t('titlebar.close')}
+          tone="danger"
+          onClick={() => window.guardian.window.close()}
+        >
           <X aria-hidden className="size-4" />
         </IconButton>
       </div>

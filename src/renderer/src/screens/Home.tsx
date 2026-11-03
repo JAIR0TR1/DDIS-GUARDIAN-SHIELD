@@ -14,6 +14,7 @@ import type { CreatureState } from '../creature/creatureState'
 import { cn } from '../lib/cn'
 import { relativeTime } from '../lib/relativeTime'
 import { firstImage } from '../lib/imageFile'
+import { useT } from '../lib/i18n'
 
 export interface HomeProps {
   greeting: string
@@ -46,6 +47,7 @@ export function Home({
   onDropImage,
   shortcut
 }: HomeProps): React.JSX.Element {
+  const t = useT()
   const lastThreat = history[0] ?? null
   return (
     <>
@@ -64,14 +66,14 @@ export function Home({
             className="h-full"
           />
         ) : (
-          <GlassCard title="Última amenaza" className="h-full">
+          <GlassCard title={t('home.lastThreat')} className="h-full">
             <EmptyState
               icon={<Inbox aria-hidden className="size-5" />}
-              title="Todo tranquilo por aquí"
-              description="Cuando analices un mensaje, el resultado aparece acá con su semáforo."
+              title={t('home.empty.title')}
+              description={t('home.empty.body')}
               action={
                 <Button variant="secondary" onClick={() => onGo('analizar')}>
-                  Analizar un mensaje
+                  {t('home.empty.action')}
                 </Button>
               }
             />
@@ -81,11 +83,11 @@ export function Home({
 
       <div className="col-span-12 flex flex-col gap-4 md:col-span-5">
         <motion.div variants={variants}>
-          <GlassCard title="Analizar">
+          <GlassCard title={t('home.analyze')}>
             <div
               role="button"
               tabIndex={0}
-              aria-label="Pegar un mensaje para analizarlo"
+              aria-label={t('home.dropAria')}
               onClick={() => onGo('analizar')}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
@@ -119,7 +121,7 @@ export function Home({
               className="app-no-drag grid cursor-pointer place-items-center gap-2 rounded-[14px] border border-dashed border-accent/35 bg-accent/[0.04] px-4 py-7 text-center text-sm text-text-muted transition-[background-color,border-color] duration-[220ms] hover:border-accent/60 hover:bg-accent/[0.08]"
             >
               <ImageUp aria-hidden className="size-5 text-accent-strong" />
-              Pega un mensaje o arrastra una captura
+              {t('home.drop')}
             </div>
             <div className="mt-3 flex items-center justify-between gap-3">
               <Button
@@ -127,7 +129,7 @@ export function Home({
                 onClick={() => onGo('analizar')}
                 icon={<ScanSearch aria-hidden className="size-4" />}
               >
-                Analizar
+                {t('home.analyze')}
               </Button>
               <Kbd keys={shortcut} />
             </div>
@@ -135,11 +137,11 @@ export function Home({
         </motion.div>
 
         <motion.div variants={variants} className="min-h-0 flex-1">
-          <GlassCard title="Historial" className="h-full">
+          <GlassCard title={t('home.history')} className="h-full">
             {history.length === 0 ? (
               <p className="flex items-center gap-2 text-sm text-text-muted">
                 <Clock aria-hidden className="size-4" />
-                Aún no hay análisis. Empieza con el primero.
+                {t('home.history.empty')}
               </p>
             ) : (
               <>
@@ -150,21 +152,21 @@ export function Home({
                     return (
                       <li key={entry.id} className="flex items-center gap-3 text-sm">
                         <Icon
-                          aria-label={meta.label}
+                          aria-label={t(meta.labelKey)}
                           className={cn('size-[18px] shrink-0', verdictColor[entry.result.verdict])}
                         />
                         <span className="min-w-0 flex-1 truncate text-text">
                           {excerpt(entry.excerpt, 40)}
                         </span>
                         <span className="shrink-0 font-mono text-[12px] text-text-muted">
-                          {relativeTime(entry.at)}
+                          {relativeTime(entry.at, t)}
                         </span>
                       </li>
                     )
                   })}
                 </ul>
                 <Button variant="ghost" className="mt-3 -ml-2" onClick={() => onGo('historial')}>
-                  Ver todo
+                  {t('home.history.all')}
                 </Button>
               </>
             )}

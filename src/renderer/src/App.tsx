@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, LayoutGroup, MotionConfig, useReducedMotion } from 'framer-motion'
 import { ReducedMotionContext } from './lib/motionPref'
 import { AlertTriangle } from 'lucide-react'
@@ -20,6 +20,8 @@ import { IconStage } from './screens/IconStage'
 import { GestureStage } from './screens/GestureStage'
 import { sampleHistory } from './lib/sampleHistory'
 import { useTheme } from './lib/theme'
+import { I18nContext } from './lib/i18n'
+import { createTranslator, DEFAULT_LANGUAGE, type MessageKey } from '@shared/i18n'
 
 type Phase = 'boot' | 'awaken' | 'session'
 
@@ -51,7 +53,9 @@ function Shell(): React.JSX.Element {
   const osReduced = useReducedMotion()
   const [phase, setPhase] = useState<Phase>('boot')
   const [loaded, setLoaded] = useState<Loaded | null>(null)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const language = loaded?.settings.language ?? DEFAULT_LANGUAGE
+  const t = useMemo(() => createTranslator(language), [language])
+  const [loadError, setLoadError] = useState<MessageKey | null>(null)
   const [scanning, setScanning] = useState(false)
   const [tone, setTone] = useState<Tone>('neutral')
   const [navRequest, setNavRequest] = useState<NavRequest | null>(null)
@@ -73,7 +77,7 @@ function Shell(): React.JSX.Element {
       })
       .catch((error: unknown) => {
         console.error('No se pudieron cargar los datos', error)
-        setLoadError('No pude leer tus datos guardados.')
+        setLoadError('app.error.load')
       })
   }, [])
 
@@ -128,7 +132,7 @@ function Shell(): React.JSX.Element {
       setPhase('session')
     } catch (error) {
       console.error('No se pudo guardar el perfil', error)
-      setLoadError('No pude guardar tu perfil.')
+      setLoadError('app.error.profile')
     }
   }, [])
 
@@ -150,20 +154,17 @@ function Shell(): React.JSX.Element {
           : prev
       )
       if (outcome.levelsGained > 0) {
-        toast.show(
-          `¡Subimos al nivel ${outcome.creature.level}! Cada estafa que paramos nos hace más fuertes.`,
-          'success'
-        )
+        toast.show(t('app.levelUp', { level: outcome.creature.level }), 'success')
       }
     },
-    [toast]
+    [toast, t]
   )
 
   const clearHistory = useCallback(async (): Promise<void> => {
     await window.guardian.data.clearHistory()
     setLoaded((prev) => (prev ? { ...prev, history: [] } : prev))
-    toast.show('Historial borrado.', 'info')
-  }, [toast])
+    toast.show(t('app.historyCleared'), 'info')
+  }, [toast, t])
 
   const galleryMode = import.meta.env.DEV && window.location.hash === '#gallery'
   const iconMode = import.meta.env.DEV && window.location.hash === '#icon'
@@ -182,9 +183,9 @@ function Shell(): React.JSX.Element {
         <EmptyState
           tone="error"
           icon={<AlertTriangle aria-hidden className="size-5" />}
-          title="Algo salió mal"
-          description={loadError}
-          action={<Button onClick={retry}>Reintentar</Button>}
+          title={t('app.error.title')}
+          description={t(loadError)}
+          action={<Button onClick={retry}>{t('app.retry')}</Button>}
         />
       </div>
     )
@@ -224,18 +225,20 @@ function Shell(): React.JSX.Element {
   }
 
   return (
-    <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
-      <ReducedMotionContext.Provider value={reduceMotion || osReduced === true}>
-        <div className="relative flex h-full flex-col overflow-hidden">
-          <AmbientBackground mode={phase === 'session' ? 'panels' : 'open'} tone={tone} />
-          <Titlebar />
-          <main className="relative min-h-0 flex-1 overflow-hidden">
-            {body}
-            {scanning && !reduceMotion && <ScanBeam onComplete={() => setScanning(false)} />}
-          </main>
-        </div>
-      </ReducedMotionContext.Provider>
-    </MotionConfig>
+    <I18nContext.Provider value={t}>
+      <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
+        <ReducedMotionContext.Provider value={reduceMotion || osReduced === true}>
+          <div className="relative flex h-full flex-col overflow-hidden">
+            <AmbientBackground mode={phase === 'session' ? 'panels' : 'open'} tone={tone} />
+            <Titlebar />
+            <main className="relative min-h-0 flex-1 overflow-hidden">
+              {body}
+              {scanning && !reduceMotion && <ScanBeam onComplete={() => setScanning(false)} />}
+            </main>
+          </div>
+        </ReducedMotionContext.Provider>
+      </MotionConfig>
+    </I18nContext.Provider>
   )
 }
 

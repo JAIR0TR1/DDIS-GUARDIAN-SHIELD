@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { motion, useReducedMotion } from 'framer-motion'
 import { X } from 'lucide-react'
 import type { AlertPayload } from '@shared/alert'
@@ -15,6 +15,9 @@ import type { CreatureState } from '../creature/creatureState'
 import type { HaloState } from '@design/tokens'
 import { cn } from '../lib/cn'
 import { useTheme } from '../lib/theme'
+import { I18nContext, useT } from '../lib/i18n'
+import { createTranslator, DEFAULT_LANGUAGE, type Language } from '@shared/i18n'
+import { localizeText } from '@shared/i18n/localize'
 
 /** Evita que un Enter o Esc que estabas tecleando para otra cosa cierre o abra la alerta. */
 const KEY_GUARD_MS = 700
@@ -55,6 +58,8 @@ export function AlertApp(): React.JSX.Element {
   const [payload, setPayload] = useState<AlertPayload | null>(null)
   const [reduceSetting, setReduceSetting] = useState(false)
   const [theme, setTheme] = useState<Theme>('dark')
+  const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE)
+  const t = useMemo(() => createTranslator(language), [language])
   useTheme(theme)
   const shownAt = useRef(0)
   const osReduced = useReducedMotion()
@@ -68,6 +73,7 @@ export function AlertApp(): React.JSX.Element {
         .then((s) => {
           setReduceSetting(s.reduceMotion)
           setTheme(s.theme)
+          setLanguage(s.language)
         })
         .catch(() => undefined)
     })
@@ -109,23 +115,25 @@ export function AlertApp(): React.JSX.Element {
   const reduced = reduceSetting || osReduced === true
 
   return (
-    <ReducedMotionContext.Provider value={reduced}>
-      <div className="grid h-screen w-screen place-items-center p-3">
-        {payload && (
-          <motion.section
-            key={payload.kind === 'result' ? payload.entry.id : payload.kind}
-            role="alertdialog"
-            aria-labelledby="alert-title"
-            initial={{ opacity: 0, y: reduced ? 0 : -14, scale: reduced ? 1 : 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={transition.base}
-            className="glass relative flex h-full w-full items-center gap-5 rounded-[24px] bg-[var(--surface-solid)] px-6"
-          >
-            <AlertBody payload={payload} onDetail={openDetail} onDismiss={dismiss} />
-          </motion.section>
-        )}
-      </div>
-    </ReducedMotionContext.Provider>
+    <I18nContext.Provider value={t}>
+      <ReducedMotionContext.Provider value={reduced}>
+        <div className="grid h-screen w-screen place-items-center p-3">
+          {payload && (
+            <motion.section
+              key={payload.kind === 'result' ? payload.entry.id : payload.kind}
+              role="alertdialog"
+              aria-labelledby="alert-title"
+              initial={{ opacity: 0, y: reduced ? 0 : -14, scale: reduced ? 1 : 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={transition.base}
+              className="glass relative flex h-full w-full items-center gap-5 rounded-[24px] bg-[var(--surface-solid)] px-6"
+            >
+              <AlertBody payload={payload} onDetail={openDetail} onDismiss={dismiss} />
+            </motion.section>
+          )}
+        </div>
+      </ReducedMotionContext.Provider>
+    </I18nContext.Provider>
   )
 }
 
@@ -138,6 +146,7 @@ function AlertBody({
   onDetail: () => void
   onDismiss: () => void
 }): React.JSX.Element {
+  const t = useT()
   if (payload.kind === 'result') {
     const { result } = payload.entry
     const verdict = result.verdict
@@ -162,17 +171,17 @@ function AlertBody({
                 'tabular font-display text-[34px] font-semibold leading-none',
                 scoreColor[verdict]
               )}
-              aria-label={`Puntaje de riesgo ${result.score} de 100`}
+              aria-label={t('result.score.aria', { score: result.score })}
             >
               {result.score}
               <span className="text-base font-normal text-text-muted">/100</span>
             </p>
           </div>
           <h2 id="alert-title" className="mt-2.5 text-[15px] font-medium leading-snug text-text">
-            {result.creatureMessage}
+            {localizeText(result.creatureMessage, t)}
           </h2>
           <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-text-muted">
-            {result.recommendedAction}
+            {localizeText(result.recommendedAction, t)}
           </p>
           <div className="mt-3.5 flex items-center gap-2.5">
             <Button
@@ -182,13 +191,13 @@ function AlertBody({
               className="min-h-9"
               aria-keyshortcuts="Enter"
             >
-              Ver detalle <Kbd keys="Enter" onAccent className="ml-1" />
+              {t('alert.detail')} <Kbd keys="Enter" onAccent className="ml-1" />
             </Button>
             <Button variant="ghost" onClick={onDismiss} aria-keyshortcuts="Escape">
-              Descartar <Kbd keys="Esc" className="ml-1" />
+              {t('alert.dismiss')} <Kbd keys="Esc" className="ml-1" />
             </Button>
             {payload.passive && (
-              <span className="ml-auto text-[12px] text-text-subtle">Vigilante</span>
+              <span className="ml-auto text-[12px] text-text-subtle">{t('alert.watcher')}</span>
             )}
           </div>
         </div>
@@ -199,23 +208,26 @@ function AlertBody({
   const simple = {
     safe: {
       mood: 'feliz' as const,
-      title: 'Revisé lo que copiaste',
-      text: payload.kind === 'safe' ? `${payload.message} Riesgo: ${payload.score}/100.` : ''
+      title: t('alert.safe.title'),
+      text:
+        payload.kind === 'safe'
+          ? `${localizeText(payload.message, t)} ${t('alert.safe.risk', { score: payload.score })}`
+          : ''
     },
     scanning: {
       mood: 'escaneando' as const,
-      title: 'Revisando lo que copiaste…',
-      text: 'Un momento, Nilo está mirando el mensaje.'
+      title: t('alert.scanning.title'),
+      text: t('alert.scanning.body')
     },
     empty: {
       mood: 'reposo' as const,
-      title: 'No hay nada copiado',
-      text: 'Copia un mensaje o un link sospechoso y vuelve a presionar el atajo.'
+      title: t('alert.empty.title'),
+      text: t('alert.empty.body')
     },
     error: {
       mood: 'alerta' as const,
-      title: 'Algo salió mal',
-      text: payload.kind === 'error' ? payload.message : ''
+      title: t('alert.error.title'),
+      text: payload.kind === 'error' ? localizeText(payload.message, t) : ''
     }
   }[payload.kind]
 
@@ -236,7 +248,7 @@ function AlertBody({
               className="-ml-3"
               icon={<X aria-hidden className="size-4" />}
             >
-              Cerrar <Kbd keys="Esc" className="ml-1" />
+              {t('alert.close')} <Kbd keys="Esc" className="ml-1" />
             </Button>
           </div>
         )}

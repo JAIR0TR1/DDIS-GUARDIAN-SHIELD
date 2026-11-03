@@ -11,6 +11,8 @@ import { Kbd } from '../components/ui/Kbd'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { useToast } from '../components/ui/toastContext'
+import { useT } from '../lib/i18n'
+import { localizeText } from '@shared/i18n/localize'
 
 export interface SettingsScreenProps {
   settings: Settings
@@ -31,6 +33,7 @@ export function SettingsScreen({
   onSaveProfile
 }: SettingsScreenProps): React.JSX.Element {
   const toast = useToast()
+  const t = useT()
   const [busy, setBusy] = useState(false)
 
   const run = async (action: () => Promise<void>): Promise<void> => {
@@ -39,7 +42,7 @@ export function SettingsScreen({
       await action()
     } catch (error) {
       console.error('No se pudo guardar el ajuste', error)
-      toast.show('No pude guardar el cambio. Inténtalo de nuevo.', 'error')
+      toast.show(t('settings.saveFailed'), 'error')
     } finally {
       setBusy(false)
     }
@@ -48,40 +51,59 @@ export function SettingsScreen({
   return (
     <>
       <motion.div variants={variants} className="col-span-12 md:col-span-7">
-        <GlassCard title="General" className="flex flex-col gap-5">
+        <GlassCard title={t('settings.general')} className="flex flex-col gap-5">
           <Segmented
-            label="Apariencia"
-            description="Oscuro, claro o el mismo modo que tu Windows."
+            label={t('settings.appearance')}
+            description={t('settings.appearance.hint')}
             value={settings.theme}
             disabled={busy}
             options={[
-              { value: 'dark', label: 'Oscuro', icon: <Moon aria-hidden className="size-4" /> },
-              { value: 'light', label: 'Claro', icon: <Sun aria-hidden className="size-4" /> },
+              {
+                value: 'dark',
+                label: t('settings.theme.dark'),
+                icon: <Moon aria-hidden className="size-4" />
+              },
+              {
+                value: 'light',
+                label: t('settings.theme.light'),
+                icon: <Sun aria-hidden className="size-4" />
+              },
               {
                 value: 'system',
-                label: 'Sistema',
+                label: t('settings.theme.system'),
                 icon: <Monitor aria-hidden className="size-4" />
               }
             ]}
             onChange={(theme) => run(() => onSaveSettings({ ...settings, theme }))}
           />
+          <Segmented
+            label={t('settings.language')}
+            description={t('settings.language.hint')}
+            value={settings.language}
+            disabled={busy}
+            options={[
+              { value: 'es', label: t('settings.language.es') },
+              { value: 'en', label: t('settings.language.en') }
+            ]}
+            onChange={(language) => run(() => onSaveSettings({ ...settings, language }))}
+          />
           <Switch
-            label="Reducir movimiento"
-            description="Cambia las animaciones por fundidos simples."
+            label={t('settings.reduceMotion')}
+            description={t('settings.reduceMotion.hint')}
             checked={settings.reduceMotion}
             disabled={busy}
             onChange={(reduceMotion) => run(() => onSaveSettings({ ...settings, reduceMotion }))}
           />
           <Switch
-            label="Vigilar el portapapeles"
-            description="Opcional. Te aviso si copias algo sospechoso."
+            label={t('settings.watcher')}
+            description={t('settings.watcher.hint')}
             checked={profile.vigilante}
             disabled={busy}
             onChange={(vigilante) => run(() => onSaveProfile({ ...profile, vigilante }))}
           />
           <Switch
-            label="Avisar también cuando todo está bien"
-            description="Con el vigilante encendido, te confirma con un aviso breve que revisó lo que copiaste. Si te cansa, apágalo."
+            label={t('settings.notifySafe')}
+            description={t('settings.notifySafe.hint')}
             checked={settings.notifySafe}
             disabled={busy || !profile.vigilante}
             onChange={(notifySafe) => run(() => onSaveSettings({ ...settings, notifySafe }))}
@@ -94,12 +116,10 @@ export function SettingsScreen({
       </motion.div>
 
       <motion.div variants={variants} className="col-span-12 md:col-span-5">
-        <GlassCard title="Privacidad" className="flex flex-col gap-3">
+        <GlassCard title={t('settings.privacy')} className="flex flex-col gap-3">
           <p className="flex gap-2.5 text-sm leading-relaxed text-text-muted">
             <LockKeyhole aria-hidden className="mt-0.5 size-4 shrink-0 text-accent-strong" />
-            Las reglas locales revisan todo en tu computador. Solo los mensajes dudosos envían un
-            fragmento a la IA de Google, con claves, códigos y números de tarjeta tapados. Tu
-            historial nunca sale de este equipo.
+            {t('settings.privacy.body')}
           </p>
         </GlassCard>
       </motion.div>
@@ -123,6 +143,7 @@ function ShortcutField({
   onChanged: (shortcut: string) => Promise<void>
 }): React.JSX.Element {
   const toast = useToast()
+  const t = useT()
   const [capturing, setCapturing] = useState(false)
   const [hint, setHint] = useState('')
 
@@ -138,7 +159,7 @@ function ShortcutField({
       }
       const combo = shortcutFromKeyEvent(event)
       if (combo === null) {
-        setHint('Mantén Ctrl o Alt y presiona una letra, un número o F1 a F12.')
+        setHint(t('settings.shortcut.invalid'))
         return
       }
       setCapturing(false)
@@ -151,27 +172,25 @@ function ShortcutField({
         })
         .catch((error: unknown) => {
           console.error('No se pudo cambiar el atajo', error)
-          toast.show('No pude cambiar el atajo. Inténtalo de nuevo.', 'error')
+          toast.show(t('settings.shortcut.failed'), 'error')
         })
     }
     window.addEventListener('keydown', onKey, true)
     return () => window.removeEventListener('keydown', onKey, true)
-  }, [capturing, onChanged, toast])
+  }, [capturing, onChanged, toast, t])
 
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="min-w-0">
-        <p className="text-sm font-medium text-text">Atajo global</p>
+        <p className="text-sm font-medium text-text">{t('settings.shortcut')}</p>
         <p className="text-[13px] text-text-muted" role="status">
-          {capturing
-            ? hint || 'Presiona la nueva combinación… (Esc para cancelar)'
-            : 'Analiza lo que copiaste, desde cualquier programa.'}
+          {capturing ? hint || t('settings.shortcut.press') : t('settings.shortcut.hint')}
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {capturing ? (
           <span className="rounded-[8px] border border-accent/50 bg-accent/10 px-2.5 py-1 text-[12px] text-accent-strong">
-            Esperando…
+            {t('settings.shortcut.waiting')}
           </span>
         ) : (
           <Kbd keys={shortcut} />
@@ -184,7 +203,7 @@ function ShortcutField({
           }}
           aria-pressed={capturing}
         >
-          {capturing ? 'Cancelar' : 'Cambiar'}
+          {capturing ? t('settings.shortcut.cancel') : t('settings.shortcut.change')}
         </Button>
       </div>
     </div>
@@ -193,6 +212,7 @@ function ShortcutField({
 
 function AiKeyCard({ demoMode }: { demoMode: boolean }): React.JSX.Element {
   const toast = useToast()
+  const t = useT()
   const inputId = useId()
   const [config, setConfig] = useState<AppConfig | null>(null)
   const [key, setKey] = useState('')
@@ -212,10 +232,10 @@ function AiKeyCard({ demoMode }: { demoMode: boolean }): React.JSX.Element {
       await window.guardian.ai.saveKey(key)
       setKey('') // la clave no se queda en pantalla ni en memoria del renderer
       refresh()
-      toast.show('Clave guardada y cifrada en tu equipo.', 'success')
+      toast.show(t('settings.ai.savedToast'), 'success')
     } catch (error) {
       console.error('No se pudo guardar la clave', error)
-      toast.show('No pude guardar esa clave. Revisa que sea completa y sin espacios.', 'error')
+      toast.show(t('settings.ai.saveFailed'), 'error')
     } finally {
       setSaving(false)
     }
@@ -225,10 +245,10 @@ function AiKeyCard({ demoMode }: { demoMode: boolean }): React.JSX.Element {
     setTesting(true)
     try {
       const result = await window.guardian.ai.test()
-      toast.show(result.message, result.ok ? 'success' : 'error')
+      toast.show(localizeText(result.message, t), result.ok ? 'success' : 'error')
     } catch (error) {
       console.error('Falló la prueba de conexión', error)
-      toast.show('No pude hacer la prueba. Inténtalo de nuevo.', 'error')
+      toast.show(t('settings.ai.testFailed'), 'error')
     } finally {
       setTesting(false)
     }
@@ -237,26 +257,26 @@ function AiKeyCard({ demoMode }: { demoMode: boolean }): React.JSX.Element {
   const clear = async (): Promise<void> => {
     await window.guardian.ai.clearKey()
     refresh()
-    toast.show('Clave borrada de este equipo.', 'info')
+    toast.show(t('settings.ai.clearedToast'), 'info')
   }
 
   const needsRestart = config !== null && config.hasKey && demoMode
 
   return (
-    <GlassCard title="Inteligencia artificial (Gemini)" className="flex flex-col gap-4">
+    <GlassCard title={t('settings.ai')} className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <Badge color={demoMode ? '#FBBF24' : '#34D399'}>
-          {demoMode ? 'Modo demo: respuestas de ejemplo' : 'Modo real: Gemini'}
+          {demoMode ? t('settings.ai.demo') : t('settings.ai.real')}
         </Badge>
         <Badge color={config?.hasKey ? '#34D399' : '#9CA3AF'}>
-          {config?.hasKey ? 'Clave guardada' : 'Sin clave'}
+          {config?.hasKey ? t('settings.ai.keySaved') : t('settings.ai.noKey')}
         </Badge>
       </div>
 
       <form onSubmit={(e) => void save(e)} className="flex flex-col gap-2 sm:flex-row sm:items-end">
         <div className="min-w-0 flex-1">
           <label htmlFor={inputId} className="mb-1.5 block text-[13px] text-text-muted">
-            Clave de Google AI Studio
+            {t('settings.ai.keyLabel')}
           </label>
           <input
             id={inputId}
@@ -265,7 +285,7 @@ function AiKeyCard({ demoMode }: { demoMode: boolean }): React.JSX.Element {
             onChange={(e) => setKey(e.target.value)}
             autoComplete="off"
             spellCheck={false}
-            placeholder={config?.hasKey ? 'Pega otra para reemplazarla' : 'Pega aquí tu clave'}
+            placeholder={config?.hasKey ? t('settings.ai.keyReplace') : t('settings.ai.keyPaste')}
             className="h-11 w-full rounded-[12px] border border-white/12 bg-white/6 px-3.5 font-mono text-sm text-text placeholder:text-text-subtle transition-[border-color,background-color] duration-[220ms] hover:border-white/20 focus:border-accent/60 focus:bg-white/8"
           />
         </div>
@@ -276,7 +296,7 @@ function AiKeyCard({ demoMode }: { demoMode: boolean }): React.JSX.Element {
           disabled={!key.trim()}
           icon={<KeyRound aria-hidden className="size-4" />}
         >
-          Guardar clave
+          {t('settings.ai.save')}
         </Button>
       </form>
 
@@ -287,7 +307,7 @@ function AiKeyCard({ demoMode }: { demoMode: boolean }): React.JSX.Element {
           disabled={!config?.hasKey}
           icon={<PlugZap aria-hidden className="size-4" />}
         >
-          Probar conexión
+          {t('settings.ai.test')}
         </Button>
         <Button
           variant="ghost"
@@ -295,7 +315,7 @@ function AiKeyCard({ demoMode }: { demoMode: boolean }): React.JSX.Element {
           disabled={!config?.hasKey}
           icon={<Trash2 aria-hidden className="size-4" />}
         >
-          Borrar clave
+          {t('settings.ai.clear')}
         </Button>
       </div>
 
@@ -305,9 +325,7 @@ function AiKeyCard({ demoMode }: { demoMode: boolean }): React.JSX.Element {
           className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-accent/30 bg-accent/[0.06] px-3.5 py-3 text-sm text-text"
         >
           <p className="min-w-0 flex-1">
-            {config?.packaged
-              ? 'Reinicia la app para empezar a usar la IA real.'
-              : 'Para usar la IA real en desarrollo, pon DEMO_MODE=false en tu archivo .env y reinicia.'}
+            {config?.packaged ? t('settings.ai.restartPackaged') : t('settings.ai.restartDev')}
           </p>
           {config?.packaged && (
             <Button
@@ -315,17 +333,13 @@ function AiKeyCard({ demoMode }: { demoMode: boolean }): React.JSX.Element {
               onClick={() => void window.guardian.app.relaunch()}
               icon={<RotateCw aria-hidden className="size-4" />}
             >
-              Reiniciar ahora
+              {t('settings.ai.restartNow')}
             </Button>
           )}
         </div>
       )}
 
-      <p className="text-[13px] leading-relaxed text-text-muted">
-        La clave se guarda cifrada con la protección de tu usuario de Windows y nunca vuelve a
-        mostrarse. La consigues gratis en Google AI Studio (aistudio.google.com/apikey). Con el plan
-        gratuito hay límites: si se agotan, uso las reglas locales.
-      </p>
+      <p className="text-[13px] leading-relaxed text-text-muted">{t('settings.ai.note')}</p>
     </GlassCard>
   )
 }
