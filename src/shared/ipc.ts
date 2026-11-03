@@ -53,5 +53,11 @@ export const IPC = {
   },
   app: {
     relaunch: 'app:relaunch'
+  },
+  auth: {
+    state: 'auth:state',
+    signUp: 'auth:sign-up',
+    signIn: 'auth:sign-in',
+    signOut: 'auth:sign-out'
   }
 } as const

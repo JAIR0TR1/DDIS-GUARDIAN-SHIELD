@@ -207,6 +207,7 @@ function fakeData(initial: Pick<Creature, 'level' | 'xp'> = { level: 1, xp: 0 })
     saveCreature: async (c) => (creature = c),
     getHistory: async () => state.history,
     addHistory: async (e) => void state.history.unshift(e),
+    replaceHistory: async (entries) => void (state.history = [...entries]),
     clearHistory: async () => void (state.history = [])
   }
 }

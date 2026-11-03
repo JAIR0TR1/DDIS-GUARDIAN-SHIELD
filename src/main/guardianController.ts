@@ -38,6 +38,8 @@ export interface GuardianController {
   onProfileSaved: (profile: Profile) => void
   /** Ajustes guardados: aplica el idioma a la bandeja y a las notificaciones. */
   onSettingsSaved: (settings: Settings) => void
+  /** Se inició o cerró sesión: vuelve a leer perfil y ajustes de la cuenta activa. */
+  onAccountChanged: () => Promise<void>
   setShortcut: (shortcut: string) => Promise<ShortcutChange>
   analyzeClipboard: () => Promise<void>
   openDetail: (entryId?: string) => void
@@ -230,6 +232,14 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
     onSettingsSaved(settings) {
       t = createTranslator(settings.language)
       tray?.setTranslator(t)
+    },
+
+    async onAccountChanged() {
+      const [profile, settings] = await Promise.all([data.getProfile(), data.getSettings()])
+      t = createTranslator(settings.language)
+      tray?.setTranslator(t)
+      // Sin sesión (o cuenta nueva sin perfil) el vigilante queda apagado.
+      applyWatcher(profile?.vigilante === true)
     },
 
     async setShortcut(shortcut) {

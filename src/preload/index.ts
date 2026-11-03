@@ -63,6 +63,12 @@ const api: GuardianApi = {
   },
   app: {
     relaunch: () => ipcRenderer.invoke(IPC.app.relaunch)
+  },
+  auth: {
+    state: () => ipcRenderer.invoke(IPC.auth.state),
+    signUp: (credentials) => ipcRenderer.invoke(IPC.auth.signUp, credentials),
+    signIn: (credentials) => ipcRenderer.invoke(IPC.auth.signIn, credentials),
+    signOut: () => ipcRenderer.invoke(IPC.auth.signOut)
   }
 }
 

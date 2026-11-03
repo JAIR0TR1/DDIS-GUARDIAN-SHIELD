@@ -3,7 +3,11 @@ import { join } from 'node:path'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { registerWindowControls } from './windowControls'
 import { registerDataIpc } from './dataIpc'
-import { createAppData } from './storage/appData'
+import { createAccountData } from './storage/accountData'
+import { cloudConfig } from './cloud/config'
+import { createCloud } from './cloud/cloud'
+import { createEncryptedStorage } from './cloud/encryptedStorage'
+import { registerAuthIpc } from './authIpc'
 import { createAnalysisService } from './analysis/service'
 import { createProviderResolver } from './analysis/providerFactory'
 import { createApiKeyStore } from './secrets/apiKeyStore'
@@ -42,13 +46,27 @@ if (!gotLock) {
     registerWindowControls()
     registerAlertReady()
     loadEnvironment()
-    const data = createAppData()
+    // Cuentas en la nube (Supabase). Sin configuración, la app funciona solo en local.
+    const cfg = cloudConfig()
+    const cloud = cfg
+      ? createCloud(cfg, createEncryptedStorage(join(app.getPath('userData'), 'session.bin')))
+      : null
+    const data = createAccountData(cloud)
+    // Abre (y sincroniza) la cuenta guardada sin bloquear la ventana; el renderer lo espera.
+    const ready = (async () => {
+      const account = cloud ? await cloud.account().catch(() => null) : null
+      await data.open(account)
+    })().catch((error: unknown) => {
+      // Nunca bloquear el arranque: sin cuenta abierta, el renderer muestra el inicio de sesión.
+      console.error('[cloud] No pude abrir la cuenta guardada', error)
+    })
     const keys = createApiKeyStore(join(app.getPath('userData'), 'gemini.key.bin'))
     // Demo o real se decide una sola vez al arrancar (cambiarlo requiere reiniciar).
     const config = await resolveConfig(keys)
     const analysis = createAnalysisService(data, createProviderResolver(config, keys))
     const controller = createGuardianController({ data, analysis })
     registerDataIpc({ data, analysis, keys, config, controller })
+    registerAuthIpc({ cloud, data, controller, ready })
     guardian = controller
 
     const openMain = (): void => {
@@ -59,6 +77,7 @@ if (!gotLock) {
     }
     openMain()
     prepareAlertWindow()
+    await ready
     await controller.init()
     void runAlertTest(controller)
     void runWatcherTest(data)

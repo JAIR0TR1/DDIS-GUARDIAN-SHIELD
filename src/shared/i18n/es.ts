@@ -337,7 +337,41 @@ export const es = {
   'notify.running.body':
     'Te traje la que ya corría. Si acabas de cambiar el código, ciérrala desde la bandeja (clic derecho → Salir) y ábrela de nuevo.',
   'notify.danger': '¡Cuidado! Posible estafa',
-  'notify.doubt': 'Ojo: mensaje dudoso'
+  'notify.doubt': 'Ojo: mensaje dudoso',
+
+  // Cuentas
+  'auth.tagline': 'Tu guardián contra estafas, en cualquier equipo.',
+  'auth.privacy': 'Cada cuenta solo ve sus propios datos.',
+  'auth.signIn.title': 'Bienvenido de nuevo',
+  'auth.signUp.title': 'Crea tu cuenta',
+  'auth.modes': 'Iniciar sesión o crear cuenta',
+  'auth.tab.signIn': 'Iniciar sesión',
+  'auth.tab.signUp': 'Crear cuenta',
+  'auth.email': 'Correo electrónico',
+  'auth.password': 'Contraseña',
+  'auth.confirm': 'Repite la contraseña',
+  'auth.passwordHint': 'Mínimo {min} caracteres.',
+  'auth.showPassword': 'Mostrar contraseña',
+  'auth.hidePassword': 'Ocultar contraseña',
+  'auth.signIn.submit': 'Entrar',
+  'auth.signUp.submit': 'Crear cuenta',
+  'auth.noAccount': '¿No tienes cuenta?',
+  'auth.haveAccount': '¿Ya tienes cuenta?',
+  'auth.error.mismatch': 'Las contraseñas no coinciden.',
+  'auth.error.invalid-credentials': 'Correo o contraseña incorrectos.',
+  'auth.error.user-exists': 'Ya existe una cuenta con ese correo. Inicia sesión.',
+  'auth.error.weak-password': 'La contraseña es muy débil: usa al menos 8 caracteres.',
+  'auth.error.invalid-email': 'Ese correo no parece válido.',
+  'auth.error.confirm-email': 'Revisa tu correo y confirma la cuenta para poder entrar.',
+  'auth.error.network': 'No hay conexión con el servidor. Revisa tu internet.',
+  'auth.error.rate-limit': 'Demasiados intentos. Espera un momento y vuelve a intentar.',
+  'auth.error.not-configured': 'Las cuentas no están configuradas en esta versión.',
+  'auth.error.unknown': 'Algo falló. Inténtalo de nuevo.',
+  'settings.account': 'Cuenta',
+  'settings.account.signedAs': 'Sesión iniciada como',
+  'settings.account.sync':
+    'Tu historial, tu criatura y tus ajustes se guardan en la nube: entra desde cualquier equipo y los verás.',
+  'settings.account.signOut': 'Cerrar sesión'
 } as const
 
 export type MessageKey = keyof typeof es

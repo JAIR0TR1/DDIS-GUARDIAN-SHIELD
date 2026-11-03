@@ -336,5 +336,39 @@ export const en: Record<MessageKey, string> = {
   'notify.running.body':
     'I brought you the one already running. If you just changed the code, close it from the tray (right-click → Quit) and open it again.',
   'notify.danger': 'Careful! Possible scam',
-  'notify.doubt': 'Heads up: doubtful message'
+  'notify.doubt': 'Heads up: doubtful message',
+
+  // Cuentas
+  'auth.tagline': 'Your guardian against scams, on any device.',
+  'auth.privacy': 'Each account only sees its own data.',
+  'auth.signIn.title': 'Welcome back',
+  'auth.signUp.title': 'Create your account',
+  'auth.modes': 'Sign in or create an account',
+  'auth.tab.signIn': 'Sign in',
+  'auth.tab.signUp': 'Create account',
+  'auth.email': 'Email',
+  'auth.password': 'Password',
+  'auth.confirm': 'Repeat the password',
+  'auth.passwordHint': 'At least {min} characters.',
+  'auth.showPassword': 'Show password',
+  'auth.hidePassword': 'Hide password',
+  'auth.signIn.submit': 'Sign in',
+  'auth.signUp.submit': 'Create account',
+  'auth.noAccount': "Don't have an account?",
+  'auth.haveAccount': 'Already have an account?',
+  'auth.error.mismatch': "The passwords don't match.",
+  'auth.error.invalid-credentials': 'Wrong email or password.',
+  'auth.error.user-exists': 'An account with that email already exists. Sign in.',
+  'auth.error.weak-password': 'The password is too weak: use at least 8 characters.',
+  'auth.error.invalid-email': "That email doesn't look valid.",
+  'auth.error.confirm-email': 'Check your email and confirm the account to sign in.',
+  'auth.error.network': 'No connection to the server. Check your internet.',
+  'auth.error.rate-limit': 'Too many attempts. Wait a moment and try again.',
+  'auth.error.not-configured': 'Accounts are not configured in this version.',
+  'auth.error.unknown': 'Something failed. Please try again.',
+  'settings.account': 'Account',
+  'settings.account.signedAs': 'Signed in as',
+  'settings.account.sync':
+    'Your history, creature and settings are saved in the cloud: sign in on any device and you will see them.',
+  'settings.account.signOut': 'Sign out'
 }

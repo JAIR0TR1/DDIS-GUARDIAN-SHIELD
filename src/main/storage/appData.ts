@@ -26,6 +26,8 @@ const MAX_HISTORY = 500
 export interface AppData {
   getHistory: () => Promise<HistoryEntry[]>
   addHistory: (entry: HistoryEntry) => Promise<void>
+  /** Reemplaza todo el historial (sincronización). */
+  replaceHistory: (entries: HistoryEntry[]) => Promise<void>
   clearHistory: () => Promise<void>
   getProfile: () => Promise<Profile | null>
   saveProfile: (profile: Profile) => Promise<Profile>
@@ -35,8 +37,8 @@ export interface AppData {
   saveCreature: (creature: Creature) => Promise<Creature>
 }
 
-export function createAppData(): AppData {
-  const dir = dataDir()
+/** Datos guardados en `dir` (por defecto, la carpeta de datos de la app; por cuenta, su subcarpeta). */
+export function createAppData(dir: string = dataDir()): AppData {
   const profile = new JsonStore(join(dir, 'profile.json'), profileSchema)
   const settings = new JsonStore(join(dir, 'settings.json'), settingsSchema)
   const creature = new JsonStore(join(dir, 'creature.json'), creatureSchema)
@@ -58,6 +60,8 @@ export function createAppData(): AppData {
         const current = (await history.read()) ?? []
         await history.write([entry, ...current].slice(0, MAX_HISTORY))
       }),
+    replaceHistory: (entries) =>
+      enqueue(async () => void (await history.write(entries.slice(0, MAX_HISTORY)))),
     clearHistory: () => enqueue(async () => void (await history.write([]))),
     getProfile: () => profile.read(),
     saveProfile: (value) => profile.write(value),

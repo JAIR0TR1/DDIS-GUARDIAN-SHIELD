@@ -1,5 +1,6 @@
 import type { AlertPayload, NavigateRequest, ShortcutChange, WatcherEvent } from './alert'
 import type { AiTestResult, AnalysisOutcome, AnalyzeInput, AppConfig } from './analysis'
+import type { AuthResult, AuthState, Credentials } from './auth'
 import type { HistoryEntry } from './history'
 import type { AnalyzeImageInput, ImageAnalysisResponse } from './image'
 import type { Creature, Profile, Settings } from './models'
@@ -67,5 +68,12 @@ export interface GuardianApi {
   app: {
     /** Reinicia la app (solo en la versión instalada). */
     relaunch: () => Promise<void>
+  }
+  auth: {
+    /** Cuenta con sesión guardada en este equipo (o ninguna). */
+    state: () => Promise<AuthState>
+    signUp: (credentials: Credentials) => Promise<AuthResult>
+    signIn: (credentials: Credentials) => Promise<AuthResult>
+    signOut: () => Promise<void>
   }
 }
