@@ -350,7 +350,7 @@ export const es = {
   'auth.email': 'Correo electrónico',
   'auth.password': 'Contraseña',
   'auth.confirm': 'Repite la contraseña',
-  'auth.passwordHint': 'Mínimo {min} caracteres.',
+  'auth.passwordHint': 'Mínimo 8 caracteres; mejor 12 o más con números y símbolos.',
   'auth.showPassword': 'Mostrar contraseña',
   'auth.hidePassword': 'Ocultar contraseña',
   'auth.signIn.submit': 'Entrar',
@@ -371,7 +371,22 @@ export const es = {
   'settings.account.signedAs': 'Sesión iniciada como',
   'settings.account.sync':
     'Tu historial, tu criatura y tus ajustes se guardan en la nube: entra desde cualquier equipo y los verás.',
-  'settings.account.signOut': 'Cerrar sesión'
+  'settings.account.signOut': 'Cerrar sesión',
+
+  // Fuerza de la contraseña
+  'auth.strength.debil': 'Débil',
+  'auth.strength.aceptable': 'Aceptable',
+  'auth.strength.fuerte': 'Fuerte',
+  'auth.hint.length': 'usa al menos 8 caracteres',
+  'auth.hint.longer': 'con 12 o más caracteres será más fuerte',
+  'auth.hint.number': 'añade un número',
+  'auth.hint.symbol': 'añade un símbolo como ! o #',
+  'auth.hint.case': 'mezcla mayúsculas y minúsculas',
+  'auth.hint.common': 'evita palabras comunes como «password»',
+  'auth.hint.pattern': 'evita secuencias como 1234 o letras repetidas',
+  'auth.suggest': 'Sugerir contraseña segura',
+  'auth.suggested': 'Cópiala y guárdala en un lugar seguro.',
+  'auth.error.weakLocal': 'Esa contraseña es muy fácil de adivinar. Mejórala o usa la sugerida.'
 } as const
 
 export type MessageKey = keyof typeof es

@@ -1,7 +1,9 @@
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { motion } from 'framer-motion'
-import { Eye, EyeOff, LogIn, ShieldCheck, UserPlus } from 'lucide-react'
-import { PASSWORD_MIN, type AuthErrorCode } from '@shared/auth'
+import { Eye, EyeOff, LogIn, ShieldCheck, Sparkles, UserPlus } from 'lucide-react'
+import type { AuthErrorCode } from '@shared/auth'
+import { checkPassword, suggestPassword, type PasswordStrength } from '@domain/password'
+import { cn } from '../lib/cn'
 import type { Language, MessageKey } from '@shared/i18n'
 import { transition } from '@design/motion'
 import { Button } from '../components/ui/Button'
@@ -35,6 +37,7 @@ export function AuthScreen({
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<MessageKey | null>(null)
   const [busy, setBusy] = useState(false)
+  const [suggested, setSuggested] = useState(false)
   const emailId = useId()
   const passwordId = useId()
   const confirmId = useId()
@@ -49,10 +52,25 @@ export function AuthScreen({
     setMode(next)
     setError(null)
     setConfirm('')
+    setSuggested(false)
+  }
+
+  /** Genera una contraseña fuerte, la escribe en ambos campos y la deja visible para copiarla. */
+  const suggest = (): void => {
+    const generated = suggestPassword()
+    setPassword(generated)
+    setConfirm(generated)
+    setShowPassword(true)
+    setSuggested(true)
+    setError(null)
   }
 
   const submit = async (event: FormEvent): Promise<void> => {
     event.preventDefault()
+    if (mode === 'signUp' && checkPassword(password).strength === 'debil') {
+      setError('auth.error.weakLocal')
+      return
+    }
     if (mode === 'signUp' && password !== confirm) {
       setError('auth.error.mismatch')
       return
@@ -172,7 +190,10 @@ export function AuthScreen({
                 type={showPassword ? 'text' : 'password'}
                 autoComplete={signUp ? 'new-password' : 'current-password'}
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value)
+                  setSuggested(false)
+                }}
                 aria-invalid={error ? true : undefined}
                 aria-describedby={error ? errorId : undefined}
                 className={`${inputClass} pr-11`}
@@ -192,9 +213,24 @@ export function AuthScreen({
               </button>
             </div>
             {signUp && (
-              <p className="mt-1 text-[12px] text-text-subtle">
-                {t('auth.passwordHint', { min: PASSWORD_MIN })}
-              </p>
+              <>
+                <PasswordMeter password={password} />
+                <div className="mt-1.5 flex flex-wrap items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={suggest}
+                    className="inline-flex min-h-8 items-center gap-1.5 rounded-[10px] px-2 text-[13px] font-medium text-accent-strong transition-colors duration-[220ms] hover:bg-accent/10"
+                  >
+                    <Sparkles aria-hidden className="size-4" />
+                    {t('auth.suggest')}
+                  </button>
+                  {suggested && (
+                    <p role="status" className="text-[12px] text-text-subtle">
+                      {t('auth.suggested')}
+                    </p>
+                  )}
+                </div>
+              </>
             )}
           </div>
 
@@ -250,5 +286,51 @@ export function AuthScreen({
         </p>
       </div>
     </motion.div>
+  )
+}
+
+const meterColor: Record<PasswordStrength, string> = {
+  debil: 'bg-danger',
+  aceptable: 'bg-warn',
+  fuerte: 'bg-safe'
+}
+const meterText: Record<PasswordStrength, string> = {
+  debil: 'text-danger-text',
+  aceptable: 'text-warn',
+  fuerte: 'text-safe'
+}
+
+/** Medidor de fuerza: cuatro barras, la etiqueta (con color Y texto) y un consejo concreto. */
+function PasswordMeter({ password }: { password: string }): React.JSX.Element {
+  const t = useT()
+  const check = checkPassword(password)
+  const filled = password ? Math.max(1, check.score) : 0
+  const hint = check.hints[0]
+  return (
+    <div className="mt-2" aria-live="polite">
+      <div className="flex gap-1" aria-hidden>
+        {[0, 1, 2, 3].map((i) => (
+          <span
+            key={i}
+            className={cn(
+              'h-1 flex-1 rounded-full transition-colors duration-[220ms]',
+              i < filled ? meterColor[check.strength] : 'bg-white/10'
+            )}
+          />
+        ))}
+      </div>
+      <p className="mt-1 text-[12px] text-text-subtle">
+        {password ? (
+          <>
+            <span className={cn('font-medium', meterText[check.strength])}>
+              {t(`auth.strength.${check.strength}`)}
+            </span>
+            {hint && ` · ${t(`auth.hint.${hint}`)}`}
+          </>
+        ) : (
+          t('auth.passwordHint')
+        )}
+      </p>
+    </div>
   )
 }

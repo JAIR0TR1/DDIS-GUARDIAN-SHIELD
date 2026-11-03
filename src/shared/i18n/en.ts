@@ -349,7 +349,7 @@ export const en: Record<MessageKey, string> = {
   'auth.email': 'Email',
   'auth.password': 'Password',
   'auth.confirm': 'Repeat the password',
-  'auth.passwordHint': 'At least {min} characters.',
+  'auth.passwordHint': 'At least 8 characters; better 12 or more with numbers and symbols.',
   'auth.showPassword': 'Show password',
   'auth.hidePassword': 'Hide password',
   'auth.signIn.submit': 'Sign in',
@@ -370,5 +370,20 @@ export const en: Record<MessageKey, string> = {
   'settings.account.signedAs': 'Signed in as',
   'settings.account.sync':
     'Your history, creature and settings are saved in the cloud: sign in on any device and you will see them.',
-  'settings.account.signOut': 'Sign out'
+  'settings.account.signOut': 'Sign out',
+
+  // Fuerza de la contraseña
+  'auth.strength.debil': 'Weak',
+  'auth.strength.aceptable': 'Fair',
+  'auth.strength.fuerte': 'Strong',
+  'auth.hint.length': 'use at least 8 characters',
+  'auth.hint.longer': '12 or more characters makes it stronger',
+  'auth.hint.number': 'add a number',
+  'auth.hint.symbol': 'add a symbol like ! or #',
+  'auth.hint.case': 'mix upper and lower case',
+  'auth.hint.common': 'avoid common words like "password"',
+  'auth.hint.pattern': 'avoid sequences like 1234 or repeated letters',
+  'auth.suggest': 'Suggest a strong password',
+  'auth.suggested': 'Copy it and keep it somewhere safe.',
+  'auth.error.weakLocal': 'That password is too easy to guess. Improve it or use the suggested one.'
 }
