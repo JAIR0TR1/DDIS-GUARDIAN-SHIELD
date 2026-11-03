@@ -164,6 +164,10 @@ function Shell(): React.JSX.Element {
     setLoaded((prev) => (prev ? { ...prev, settings: saved } : prev))
   }, [])
 
+  const updateCreature = useCallback((creature: Creature): void => {
+    setLoaded((prev) => (prev ? { ...prev, creature } : prev))
+  }, [])
+
   const signOut = useCallback(async (): Promise<void> => {
     await window.guardian.auth.signOut()
     setLoaded(null)
@@ -257,6 +261,7 @@ function Shell(): React.JSX.Element {
               onSaveProfile={saveProfile}
               account={account}
               onSignOut={signOut}
+              onCreature={updateCreature}
             />
           )}
         </AnimatePresence>

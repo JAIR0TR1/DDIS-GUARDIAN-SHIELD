@@ -391,7 +391,80 @@ export const es = {
   // Captura con varios mensajes
   'analyzer.multi.summary': 'Encontré {n} mensajes en la captura',
   'analyzer.multi.tab': 'Mensaje {n}',
-  'analyzer.multi.aria': 'Mensajes de la captura'
+  'analyzer.multi.aria': 'Mensajes de la captura',
+
+  // Villanos (identidad de cada estafa)
+  'villain.familiar.name': 'El Falso Pariente',
+  'villain.familiar.tagline': '«Cambié de número, préstame plata».',
+  'villain.familiar.tell':
+    'Se delata porque escribe desde un número nuevo y pide dinero con afán. Llama al número de siempre.',
+  'villain.comprobante.name': 'Comprobante Trucho',
+  'villain.comprobante.tagline': '«Te pagué por error, devuélvemelo».',
+  'villain.comprobante.tell':
+    'Se delata con comprobantes en archivos o links y pagos «por error». Revisa tu saldo en la app del banco.',
+  'villain.paquete.name': 'Paquete Perdido',
+  'villain.paquete.tagline': '«Tu envío está retenido: paga el reenvío».',
+  'villain.paquete.tell':
+    'Se delata cobrando por liberar un paquete con un link raro. Revisa solo en la página oficial de la transportadora.',
+  'villain.empleo.name': 'Jefe Fantasma',
+  'villain.empleo.tagline': '«Trabaja desde casa, solo paga la inscripción».',
+  'villain.empleo.tell':
+    'Se delata pidiendo que pagues para empezar a trabajar. Un empleo real no te cobra.',
+  'villain.dinero.name': 'El Multiplicador',
+  'villain.dinero.tagline': '«Duplica tu dinero en 7 días».',
+  'villain.dinero.tell':
+    'Se delata con ganancias garantizadas o préstamos que piden pagar antes. Verifica en la Superfinanciera.',
+  'villain.premio.name': 'El Premio Fantasma',
+  'villain.premio.tagline': '«¡Ganaste! Reclama tu premio aquí».',
+  'villain.premio.tell':
+    'Se delata regalando premios que no pediste y pidiendo datos o pagos para reclamarlos.',
+  'villain.soporte.name': 'Soporte Tramposo',
+  'villain.soporte.tagline': '«Tu equipo tiene un virus, instala esto».',
+  'villain.soporte.tell':
+    'Se delata escribiéndote primero y pidiendo acceso remoto a tu equipo. Cuelga y llama tú a la empresa.',
+  'villain.banco.name': 'Banco Impostor',
+  'villain.banco.tagline': '«Tu cuenta será bloqueada: confirma tu clave».',
+  'villain.banco.tell':
+    'Se delata pidiendo claves o códigos y usando links que no son del banco. Ningún banco te los pide.',
+  'villain.impostor.name': 'El Impostor',
+  'villain.impostor.tagline': '«Es urgente, haz clic ya».',
+  'villain.impostor.tell':
+    'Se delata con prisa, amenazas y links acortados. Respira, no hagas clic y verifica por el canal oficial.',
+
+  // Arena
+  'nav.arena': 'Arena',
+  'arena.title': 'Arena del Guardián',
+  'arena.intro':
+    'Los villanos de las estafas atacan por mensaje. Decide si cada mensaje es una estafa o es seguro: cada acierto le da fuerza a {name} y experiencia.',
+  'arena.rules': '{rounds} rondas · {hearts} corazones · {xp} XP por acierto',
+  'arena.meet': 'Conoce a los villanos',
+  'arena.start': 'Empezar partida',
+  'arena.round': 'Ronda {n} de {total}',
+  'arena.hits': 'Aciertos: {n}',
+  'arena.streak': 'Racha: {n}',
+  'arena.hearts': '{n} corazones',
+  'arena.question': '¿Este mensaje es una estafa?',
+  'arena.friend': 'Mensaje amigo',
+  'arena.friend.tagline': '¿O es otro villano disfrazado?',
+  'arena.mystery': '¿Quién escribe?',
+  'arena.saysScam': 'Es estafa',
+  'arena.saysSafe': 'Es seguro',
+  'arena.right.scam': '¡Bien! Derrotaste a {villain}.',
+  'arena.right.safe': '¡Bien! Era un mensaje seguro.',
+  'arena.wrong.scam': '¡Ouch! Era {villain}.',
+  'arena.wrong.safe': 'Era un mensaje seguro: no todo es estafa.',
+  'arena.keySignal': 'Señal clave: {signal}',
+  'arena.safeTip': 'Nadie te pide claves, pagos ni que hagas clic con afán: por eso es seguro.',
+  'arena.next': 'Siguiente',
+  'arena.finish': 'Ver resultado',
+  'arena.end.win': '¡Ganaste la Arena!',
+  'arena.end.lose': 'Te quedaste sin corazones',
+  'arena.end.score': '{hits} de {total} aciertos · mejor racha: {streak}',
+  'arena.end.xp': '+{xp} XP para {name}',
+  'arena.end.level': '¡{name} subió al nivel {level}!',
+  'arena.again': 'Jugar otra vez',
+  'arena.hp': 'Vida del villano',
+  'arena.rewardFailed': 'No pude guardar la experiencia. Inténtalo de nuevo.'
 } as const
 
 export type MessageKey = keyof typeof es

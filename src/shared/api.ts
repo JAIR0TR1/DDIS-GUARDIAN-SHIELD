@@ -69,6 +69,10 @@ export interface GuardianApi {
     /** Reinicia la app (solo en la versión instalada). */
     relaunch: () => Promise<void>
   }
+  arena: {
+    /** Suma la XP de una partida; devuelve la criatura actualizada y los niveles ganados. */
+    reward: (xp: number) => Promise<{ creature: Creature; levelsGained: number }>
+  }
   auth: {
     /** Cuenta con sesión guardada en este equipo (o ninguna). */
     state: () => Promise<AuthState>

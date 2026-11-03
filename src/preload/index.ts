@@ -64,6 +64,9 @@ const api: GuardianApi = {
   app: {
     relaunch: () => ipcRenderer.invoke(IPC.app.relaunch)
   },
+  arena: {
+    reward: (xp) => ipcRenderer.invoke(IPC.arena.reward, xp)
+  },
   auth: {
     state: () => ipcRenderer.invoke(IPC.auth.state),
     signUp: (credentials) => ipcRenderer.invoke(IPC.auth.signUp, credentials),

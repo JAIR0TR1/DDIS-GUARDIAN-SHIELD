@@ -54,6 +54,10 @@ export const IPC = {
   app: {
     relaunch: 'app:relaunch'
   },
+  arena: {
+    /** Cobra la experiencia de una partida de la Arena (con tope, validado en main). */
+    reward: 'arena:reward'
+  },
   auth: {
     state: 'auth:state',
     signUp: 'auth:sign-up',

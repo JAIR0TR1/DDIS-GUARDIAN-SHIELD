@@ -1,4 +1,7 @@
 import { app, ipcMain } from 'electron'
+import { z } from 'zod'
+import { addXp } from '../domain/xp'
+import { MAX_GAME_XP } from '../domain/arena'
 import { IPC } from '../shared/ipc'
 import { creatureSchema, profileSchema, settingsSchema } from '../shared/models'
 import { analyzeInputSchema, type AiTestResult, type AppConfig } from '../shared/analysis'
@@ -46,6 +49,14 @@ export function registerDataIpc({ data, analysis, keys, config, controller }: Ip
   ipcMain.handle(IPC.data.saveCreature, (_e, value: unknown) =>
     data.saveCreature(creatureSchema.parse(value))
   )
+  // Arena: la XP llega del renderer, así que se valida y se limita aquí.
+  ipcMain.handle(IPC.arena.reward, async (_e, value: unknown) => {
+    const xp = z.number().int().min(0).max(MAX_GAME_XP).parse(value)
+    const creature = await data.getCreature()
+    const gain = addXp({ level: creature.level, xp: creature.xp }, xp)
+    const updated = await data.saveCreature({ ...creature, ...gain.progress })
+    return { creature: updated, levelsGained: gain.levelsGained }
+  })
   ipcMain.handle(IPC.data.getHistory, () => data.getHistory())
   ipcMain.handle(IPC.data.clearHistory, () => data.clearHistory())
   ipcMain.handle(IPC.analysis.run, (_e, input: unknown) => analysis.run(input))

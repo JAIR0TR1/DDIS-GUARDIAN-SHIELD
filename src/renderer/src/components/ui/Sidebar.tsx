@@ -6,6 +6,7 @@ import {
   PawPrint,
   ScanLine,
   Settings,
+  Swords,
   type LucideIcon
 } from 'lucide-react'
 import { cn } from '../../lib/cn'
@@ -13,7 +14,7 @@ import { transition } from '@design/motion'
 import type { MessageKey } from '@shared/i18n'
 import { useT } from '../../lib/i18n'
 
-export type Section = 'inicio' | 'analizar' | 'historial' | 'criatura' | 'ajustes'
+export type Section = 'inicio' | 'analizar' | 'historial' | 'criatura' | 'arena' | 'ajustes'
 
 interface NavItem {
   id: Section
@@ -25,7 +26,8 @@ const MAIN: NavItem[] = [
   { id: 'inicio', labelKey: 'nav.home', icon: LayoutDashboard },
   { id: 'analizar', labelKey: 'nav.analyze', icon: ScanLine },
   { id: 'historial', labelKey: 'nav.history', icon: History },
-  { id: 'criatura', labelKey: 'nav.creature', icon: PawPrint }
+  { id: 'criatura', labelKey: 'nav.creature', icon: PawPrint },
+  { id: 'arena', labelKey: 'nav.arena', icon: Swords }
 ]
 
 const SETTINGS: NavItem = { id: 'ajustes', labelKey: 'nav.settings', icon: Settings }

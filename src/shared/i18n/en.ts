@@ -391,5 +391,78 @@ export const en: Record<MessageKey, string> = {
   // Captura con varios mensajes
   'analyzer.multi.summary': 'I found {n} messages in the screenshot',
   'analyzer.multi.tab': 'Message {n}',
-  'analyzer.multi.aria': 'Messages in the screenshot'
+  'analyzer.multi.aria': 'Messages in the screenshot',
+
+  // Villanos (identidad de cada estafa)
+  'villain.familiar.name': 'The Fake Relative',
+  'villain.familiar.tagline': '"I changed my number, lend me money."',
+  'villain.familiar.tell':
+    'It gives itself away by writing from a new number and asking for money in a rush. Call the usual number.',
+  'villain.comprobante.name': 'Bogus Receipt',
+  'villain.comprobante.tagline': '"I paid you by mistake, send it back."',
+  'villain.comprobante.tell':
+    'It gives itself away with receipts in files or links and payments "by mistake". Check your balance in the bank app.',
+  'villain.paquete.name': 'Lost Parcel',
+  'villain.paquete.tagline': '"Your parcel is held: pay for redelivery."',
+  'villain.paquete.tell':
+    "It gives itself away charging to release a parcel through an odd link. Check only on the carrier's official site.",
+  'villain.empleo.name': 'Phantom Boss',
+  'villain.empleo.tagline': '"Work from home, just pay the sign-up fee."',
+  'villain.empleo.tell':
+    'It gives itself away asking you to pay to start working. A real job never charges you.',
+  'villain.dinero.name': 'The Multiplier',
+  'villain.dinero.tagline': '"Double your money in 7 days."',
+  'villain.dinero.tell':
+    'It gives itself away with guaranteed profits or loans that ask for payment first. Check with the Superfinanciera.',
+  'villain.premio.name': 'The Phantom Prize',
+  'villain.premio.tagline': '"You won! Claim your prize here."',
+  'villain.premio.tell':
+    'It gives itself away handing out prizes you never asked for and asking for data or payments to claim them.',
+  'villain.soporte.name': 'Sneaky Support',
+  'villain.soporte.tagline': '"Your device has a virus, install this."',
+  'villain.soporte.tell':
+    'It gives itself away by contacting you first and asking for remote access. Hang up and call the company yourself.',
+  'villain.banco.name': 'Impostor Bank',
+  'villain.banco.tagline': '"Your account will be blocked: confirm your password."',
+  'villain.banco.tell':
+    "It gives itself away asking for passwords or codes and using links that are not the bank's. No bank asks for them.",
+  'villain.impostor.name': 'The Impostor',
+  'villain.impostor.tagline': '"It\'s urgent, click now."',
+  'villain.impostor.tell':
+    "It gives itself away with rush, threats and shortened links. Breathe, don't click and check through the official channel.",
+
+  // Arena
+  'nav.arena': 'Arena',
+  'arena.title': 'Guardian Arena',
+  'arena.intro':
+    'Scam villains attack by message. Decide whether each message is a scam or safe: every right answer powers up {name} and earns experience.',
+  'arena.rules': '{rounds} rounds · {hearts} hearts · {xp} XP per hit',
+  'arena.meet': 'Meet the villains',
+  'arena.start': 'Start match',
+  'arena.round': 'Round {n} of {total}',
+  'arena.hits': 'Hits: {n}',
+  'arena.streak': 'Streak: {n}',
+  'arena.hearts': '{n} hearts',
+  'arena.question': 'Is this message a scam?',
+  'arena.friend': 'Friendly message',
+  'arena.friend.tagline': 'Or another villain in disguise?',
+  'arena.mystery': 'Who is writing?',
+  'arena.saysScam': "It's a scam",
+  'arena.saysSafe': "It's safe",
+  'arena.right.scam': 'Nice! You defeated {villain}.',
+  'arena.right.safe': 'Nice! It was a safe message.',
+  'arena.wrong.scam': 'Ouch! It was {villain}.',
+  'arena.wrong.safe': 'It was a safe message: not everything is a scam.',
+  'arena.keySignal': 'Key signal: {signal}',
+  'arena.safeTip': "Nobody asks for passwords, payments or a rushed click: that's why it's safe.",
+  'arena.next': 'Next',
+  'arena.finish': 'See result',
+  'arena.end.win': 'You won the Arena!',
+  'arena.end.lose': 'You ran out of hearts',
+  'arena.end.score': '{hits} of {total} correct · best streak: {streak}',
+  'arena.end.xp': '+{xp} XP for {name}',
+  'arena.end.level': '{name} reached level {level}!',
+  'arena.again': 'Play again',
+  'arena.hp': 'Villain health',
+  'arena.rewardFailed': "I couldn't save the experience. Please try again."
 }

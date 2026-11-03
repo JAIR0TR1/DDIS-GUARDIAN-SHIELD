@@ -23,6 +23,7 @@ import { Analyzer } from './Analyzer'
 import { History } from './History'
 import { CreatureScreen } from './CreatureScreen'
 import { SettingsScreen } from './SettingsScreen'
+import { Arena } from './Arena'
 
 export interface SessionProps {
   profile: Profile
@@ -40,6 +41,8 @@ export interface SessionProps {
   /** Cuenta en la nube (null si la app funciona solo en local). */
   account: Account | null
   onSignOut: () => Promise<void>
+  /** La Arena dio experiencia: criatura actualizada. */
+  onCreature: (creature: Creature) => void
 }
 
 function watcherNoteFor(event: WatcherEvent, t: Translate): string {
@@ -82,7 +85,8 @@ export function Session({
   onSaveSettings,
   onSaveProfile,
   account,
-  onSignOut
+  onSignOut,
+  onCreature
 }: SessionProps): React.JSX.Element {
   const [section, setSection] = useState<Section>(navRequest?.section ?? 'inicio')
   // Un pedido nuevo (alerta flotante, bandeja) cambia de sección. Se ajusta durante el dibujado,
@@ -301,6 +305,14 @@ export function Session({
             )}
             {section === 'criatura' && (
               <CreatureScreen creature={creature} variants={itemVariants} mood={mood} />
+            )}
+            {section === 'arena' && (
+              <Arena
+                creature={creature}
+                variants={itemVariants}
+                reduced={reduced}
+                onCreature={onCreature}
+              />
             )}
             {section === 'ajustes' && (
               <SettingsScreen
