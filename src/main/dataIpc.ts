@@ -58,7 +58,7 @@ export function registerDataIpc({ data, analysis, keys, config, controller }: Ip
     IPC.analysis.runImage,
     async (_e, input: unknown): Promise<ImageAnalysisResponse> => {
       try {
-        return { ok: true, outcome: await analysis.runImage(input) }
+        return { ok: true, outcomes: await analysis.runImage(input) }
       } catch (error) {
         console.warn(
           '[analysis] Falló el análisis de la captura:',

@@ -386,7 +386,12 @@ export const es = {
   'auth.hint.pattern': 'evita secuencias como 1234 o letras repetidas',
   'auth.suggest': 'Sugerir contraseña segura',
   'auth.suggested': 'Cópiala y guárdala en un lugar seguro.',
-  'auth.error.weakLocal': 'Esa contraseña es muy fácil de adivinar. Mejórala o usa la sugerida.'
+  'auth.error.weakLocal': 'Esa contraseña es muy fácil de adivinar. Mejórala o usa la sugerida.',
+
+  // Captura con varios mensajes
+  'analyzer.multi.summary': 'Encontré {n} mensajes en la captura',
+  'analyzer.multi.tab': 'Mensaje {n}',
+  'analyzer.multi.aria': 'Mensajes de la captura'
 } as const
 
 export type MessageKey = keyof typeof es

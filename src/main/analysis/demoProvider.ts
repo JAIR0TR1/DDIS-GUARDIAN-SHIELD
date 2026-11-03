@@ -2,6 +2,8 @@ import type { ThreatProvider, ProviderInput } from './analyzeThreat'
 
 /** Texto que «lee» el modo demo en cualquier captura: un ejemplo claro de estafa. */
 export const DEMO_IMAGE_TEXT = 'Ganaste un premio. Confirma tu clave en bit.ly/premio-nequi'
+export const DEMO_IMAGE_TEXT_SAFE =
+  'Hola, te recuerdo que mañana tenemos reunión del grupo a las 3 p. m. en la biblioteca.'
 
 /**
  * Proveedor de demostración: no usa red ni clave. Responde de forma determinista a los
@@ -34,13 +36,28 @@ export const demoProvider: ThreatProvider = {
    * avisa. Así el flujo de capturas se puede mostrar sin internet.
    */
   async refineImage() {
+    // Una captura de ejemplo con DOS mensajes, para mostrar el análisis por separado.
     return {
-      verdict: 'peligroso',
-      score: 90,
-      signals: [],
-      recommendedAction: 'Bórralo y no respondas. Si dudas, llama al número oficial de tu banco.',
-      creatureMessage: 'No hagas clic. Te pide tu clave y ese link no es oficial.',
-      extractedText: DEMO_IMAGE_TEXT
+      messages: [
+        {
+          verdict: 'peligroso',
+          score: 90,
+          signals: [],
+          recommendedAction:
+            'Bórralo y no respondas. Si dudas, llama al número oficial de tu banco.',
+          creatureMessage: 'No hagas clic. Te pide tu clave y ese link no es oficial.',
+          extractedText: DEMO_IMAGE_TEXT
+        },
+        {
+          verdict: 'seguro',
+          score: 5,
+          signals: [],
+          recommendedAction:
+            'No hace falta hacer nada. Igual, desconfía si alguien te pide claves.',
+          creatureMessage: 'Todo en orden. Este mensaje se ve limpio.',
+          extractedText: DEMO_IMAGE_TEXT_SAFE
+        }
+      ]
     }
   }
 }

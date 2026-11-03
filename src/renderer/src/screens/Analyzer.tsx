@@ -24,6 +24,7 @@ import { ThreatResultCard } from '../components/ui/ThreatResultCard'
 import { HighlightedText } from '../components/HighlightedText'
 import { Badge } from '../components/ui/Badge'
 import { cn } from '../lib/cn'
+import { verdictMeta } from '../components/ui/verdictMeta'
 import { reviewLabel } from '../lib/reviewLabel'
 import { useT } from '../lib/i18n'
 import { localizeText } from '@shared/i18n/localize'
@@ -79,7 +80,10 @@ export function Analyzer({
   const [text, setText] = useState(initialText)
   const [status, setStatus] = useState<Status>('idle')
   const [error, setError] = useState<string | null>(null)
-  const [outcome, setOutcome] = useState<AnalysisOutcome | null>(null)
+  // Una captura puede traer varios mensajes: un resultado por cada uno, y cuál se está viendo.
+  const [outcomes, setOutcomes] = useState<AnalysisOutcome[]>([])
+  const [selected, setSelected] = useState(0)
+  const outcome = outcomes[selected] ?? null
   /** Captura en análisis: la imagen (para mostrarla) y lo que se envió (para reintentar). */
   const [image, setImage] = useState<{ preview: string; input: AnalyzeImageInput } | null>(null)
   const [dragging, setDragging] = useState(false)
@@ -108,9 +112,11 @@ export function Analyzer({
         setStatus('error')
         return
       }
-      setOutcome(response.outcome)
+      setOutcomes(response.outcomes)
+      setSelected(worstIndex(response.outcomes))
       setStatus('done')
-      onOutcome(response.outcome)
+      // Se informan del menos al más grave: Nilo y el fondo terminan reaccionando al peor.
+      for (const item of bySeverity(response.outcomes)) onOutcome(item)
     } catch (cause) {
       console.error('Falló el análisis de la captura', cause)
       setError(t('analyzer.imageFailed'))
@@ -197,7 +203,8 @@ export function Analyzer({
         window.guardian.analysis.run(parsed.data),
         reduced ? Promise.resolve() : sleep(SCAN_MS)
       ])
-      setOutcome(result)
+      setOutcomes([result])
+      setSelected(0)
       setStatus('done')
       onOutcome(result)
     } catch (cause) {
@@ -209,7 +216,8 @@ export function Analyzer({
 
   const reset = (): void => {
     setStatus('idle')
-    setOutcome(null)
+    setOutcomes([])
+    setSelected(0)
     setError(null)
     setImage(null)
     setText('')
@@ -387,6 +395,9 @@ export function Analyzer({
           </GlassCard>
         ) : outcome && result ? (
           <div className="flex flex-col gap-3">
+            {outcomes.length > 1 && (
+              <MessageTabs outcomes={outcomes} selected={selected} onSelect={setSelected} />
+            )}
             <ThreatResultCard
               result={result}
               title={t('analyzer.result')}
@@ -566,5 +577,92 @@ function Gains({ outcome }: { outcome: AnalysisOutcome }): React.JSX.Element {
         </p>
       )}
     </motion.div>
+  )
+}
+
+const SEVERITY: Record<Verdict, number> = { seguro: 0, sospechoso: 1, peligroso: 2 }
+
+/** Copia ordenada del menos al más grave. */
+function bySeverity(list: readonly AnalysisOutcome[]): AnalysisOutcome[] {
+  return [...list].sort(
+    (a, b) => SEVERITY[a.entry.result.verdict] - SEVERITY[b.entry.result.verdict]
+  )
+}
+
+/** Índice del mensaje más grave (el primero que se muestra). */
+function worstIndex(list: readonly AnalysisOutcome[]): number {
+  let worst = 0
+  list.forEach((item, index) => {
+    if (SEVERITY[item.entry.result.verdict] > SEVERITY[list[worst].entry.result.verdict]) {
+      worst = index
+    }
+  })
+  return worst
+}
+
+/** Resumen y pestañas cuando la captura trae varios mensajes. Flechas para moverse. */
+function MessageTabs({
+  outcomes,
+  selected,
+  onSelect
+}: {
+  outcomes: readonly AnalysisOutcome[]
+  selected: number
+  onSelect: (index: number) => void
+}): React.JSX.Element {
+  const t = useT()
+  const counts = (['peligroso', 'sospechoso', 'seguro'] as const)
+    .map((verdict) => ({
+      verdict,
+      n: outcomes.filter((o) => o.entry.result.verdict === verdict).length
+    }))
+    .filter((c) => c.n > 0)
+  const move = (event: React.KeyboardEvent, index: number): void => {
+    const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0
+    if (step === 0) return
+    event.preventDefault()
+    onSelect((index + step + outcomes.length) % outcomes.length)
+  }
+  return (
+    <div className="glass rounded-[16px] px-4 py-3">
+      <p className="text-sm font-medium text-text">
+        {t('analyzer.multi.summary', { n: outcomes.length })}
+        <span className="text-text-muted">
+          {' · '}
+          {counts.map((c) => `${c.n} ${t(`verdict.${c.verdict}`).toLowerCase()}`).join(', ')}
+        </span>
+      </p>
+      <div
+        role="tablist"
+        aria-label={t('analyzer.multi.aria')}
+        className="mt-2.5 flex flex-wrap gap-2"
+      >
+        {outcomes.map((item, index) => {
+          const meta = verdictMeta[item.entry.result.verdict]
+          const Icon = meta.icon
+          const active = index === selected
+          return (
+            <button
+              key={item.entry.id}
+              type="button"
+              role="tab"
+              aria-selected={active}
+              tabIndex={active ? 0 : -1}
+              onClick={() => onSelect(index)}
+              onKeyDown={(event) => move(event, index)}
+              className={cn(
+                'app-no-drag inline-flex min-h-8 items-center gap-1.5 rounded-[10px] border px-2.5 text-[13px] font-medium transition-[background-color,border-color] duration-[220ms]',
+                active
+                  ? meta.className
+                  : 'border-white/12 bg-white/5 text-text-muted hover:bg-white/10'
+              )}
+            >
+              <Icon aria-hidden className="size-4" />
+              {t('analyzer.multi.tab', { n: index + 1 })}
+            </button>
+          )
+        })}
+      </div>
+    </div>
   )
 }

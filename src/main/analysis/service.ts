@@ -23,7 +23,8 @@ export interface RunOptions {
 export interface AnalysisService {
   run: (input: unknown, options?: RunOptions) => Promise<AnalysisOutcome>
   /** Analiza una captura de pantalla con el modelo de visión. Lanza ProviderError si no se puede. */
-  runImage: (input: unknown) => Promise<AnalysisOutcome>
+  /** Analiza una captura: un resultado por cada mensaje que contenga. */
+  runImage: (input: unknown) => Promise<AnalysisOutcome[]>
   /** Mira un texto con las reglas locales SIN guardar nada (ni historial ni XP). */
   peek: (text: string) => Promise<ThreatResult>
 }
@@ -62,10 +63,7 @@ export function createAnalysisService(
   getProvider: () => Promise<ProviderChoice>
 ): AnalysisService {
   const cache = new LruCache<AnalyzeOutput>(200, ONE_HOUR)
-  const imageCache = new LruCache<AnalyzeOutput & { extractedText: string; demo: boolean }>(
-    50,
-    ONE_HOUR
-  )
+  const imageCache = new LruCache<ImageOutput[]>(50, ONE_HOUR)
 
   /** Guarda en el historial, suma XP (una sola vez por contenido) y arma la respuesta. */
   async function finish({ source, text, output, cached }: Finish): Promise<AnalysisOutcome> {
@@ -138,12 +136,18 @@ export function createAnalysisService(
 
       const hit = imageCache.get(key)
       if (hit) {
-        return finish({
-          source: 'image',
-          text: hit.extractedText || NO_TEXT,
-          output: hit,
-          cached: true
-        })
+        const outcomes: AnalysisOutcome[] = []
+        for (const output of hit) {
+          outcomes.push(
+            await finish({
+              source: 'image',
+              text: output.extractedText || NO_TEXT,
+              output,
+              cached: true
+            })
+          )
+        }
+        return outcomes
       }
 
       // Las capturas SIEMPRE necesitan IA (hay que leerlas): sin proveedor no hay plan B.
@@ -171,39 +175,59 @@ export function createAnalysisService(
       }
       const parsed = visionResultSchema.safeParse(raw)
       if (!parsed.success) {
+        // Solo la ruta del campo y el motivo: nunca el contenido de la captura.
+        console.warn(
+          '[vision] Salida inválida:',
+          parsed.error.issues.slice(0, 5).map((i) => `${i.path.join('.')}: ${i.message}`)
+        )
         throw new ProviderError(
           'Salida de visión inválida',
           'La IA respondió algo que no pude leer. Inténtalo de nuevo.'
         )
       }
-      const { extractedText, ...ai } = parsed.data
-
-      // Las reglas locales revisan el texto transcrito; la IA no puede bajar un «peligroso».
-      const local = analyzeLocal(extractedText, settings.thresholds)
-      const localResult = toThreatResult(local)
       const demo = provider.name === 'demo'
-      const output: AnalyzeOutput & { extractedText: string; demo: boolean } = {
-        extractedText,
-        demo,
-        usedAI: true,
-        provider: provider.name,
-        notice: demo
-          ? 'Modo demo: este resultado es un ejemplo, no leí tu imagen. Con la IA real sí la leo.'
-          : undefined,
-        result: {
-          ...ai,
-          verdict: guardVerdict(local.verdict, ai.verdict),
-          score: guardScore(local, ai.score),
-          signals:
-            ai.signals.length > 0
-              ? mergeSpans(ai.signals, localResult.signals)
-              : localResult.signals
+      // Cada mensaje de la captura se revisa por separado: las reglas locales leen su transcripción
+      // y la IA no puede bajar un «peligroso».
+      const outputs: ImageOutput[] = parsed.data.messages.map(({ extractedText, ...ai }) => {
+        const local = analyzeLocal(extractedText, settings.thresholds)
+        const localResult = toThreatResult(local)
+        return {
+          extractedText,
+          demo,
+          usedAI: true,
+          provider: provider.name,
+          notice: demo
+            ? 'Modo demo: este resultado es un ejemplo, no leí tu imagen. Con la IA real sí la leo.'
+            : undefined,
+          result: {
+            ...ai,
+            verdict: guardVerdict(local.verdict, ai.verdict),
+            score: guardScore(local, ai.score),
+            signals:
+              ai.signals.length > 0
+                ? mergeSpans(ai.signals, localResult.signals)
+                : localResult.signals
+          }
         }
+      })
+      if (!demo) imageCache.set(key, outputs)
+      const outcomes: AnalysisOutcome[] = []
+      for (const output of outputs) {
+        outcomes.push(
+          await finish({
+            source: 'image',
+            text: output.extractedText || NO_TEXT,
+            output,
+            cached: false
+          })
+        )
       }
-      if (!demo) imageCache.set(key, output)
-      return finish({ source: 'image', text: extractedText || NO_TEXT, output, cached: false })
+      return outcomes
     }
   }
 }
 
 const NO_TEXT = '(No pude leer texto en la captura)'
+
+/** Resultado de un mensaje de una captura, con su transcripción. */
+type ImageOutput = AnalyzeOutput & { extractedText: string; demo: boolean }

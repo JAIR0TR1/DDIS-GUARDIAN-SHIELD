@@ -385,5 +385,11 @@ export const en: Record<MessageKey, string> = {
   'auth.hint.pattern': 'avoid sequences like 1234 or repeated letters',
   'auth.suggest': 'Suggest a strong password',
   'auth.suggested': 'Copy it and keep it somewhere safe.',
-  'auth.error.weakLocal': 'That password is too easy to guess. Improve it or use the suggested one.'
+  'auth.error.weakLocal':
+    'That password is too easy to guess. Improve it or use the suggested one.',
+
+  // Captura con varios mensajes
+  'analyzer.multi.summary': 'I found {n} messages in the screenshot',
+  'analyzer.multi.tab': 'Message {n}',
+  'analyzer.multi.aria': 'Messages in the screenshot'
 }

@@ -1,3 +1,4 @@
+import { withIds } from '../src/main/analysis/geminiProvider'
 import { describe, expect, it } from 'vitest'
 import {
   analyzeImageInputSchema,
@@ -61,9 +62,38 @@ describe('visionResultSchema', () => {
       recommendedAction: 'Bórralo.',
       creatureMessage: 'No hagas clic.'
     }
-    expect(visionResultSchema.safeParse(base).success).toBe(false)
+    expect(visionResultSchema.safeParse({ messages: [base] }).success).toBe(false)
     expect(
-      visionResultSchema.safeParse({ ...base, extractedText: 'Ganaste un premio' }).success
+      visionResultSchema.safeParse({ messages: [{ ...base, extractedText: 'Ganaste un premio' }] })
+        .success
     ).toBe(true)
+  })
+
+  it('acepta varios mensajes por captura, pero al menos uno y como mucho cinco', () => {
+    const message = {
+      verdict: 'seguro',
+      score: 5,
+      signals: [],
+      recommendedAction: 'Nada.',
+      creatureMessage: 'Todo bien.',
+      extractedText: 'Hola'
+    }
+    expect(visionResultSchema.safeParse({ messages: [message, message] }).success).toBe(true)
+    expect(visionResultSchema.safeParse({ messages: [] }).success).toBe(false)
+    expect(visionResultSchema.safeParse({ messages: Array(6).fill(message) }).success).toBe(false)
+  })
+})
+
+describe('withIds en capturas', () => {
+  it('añade ids a las señales de cada mensaje de la lista', () => {
+    const raw = {
+      messages: [
+        { signals: [{ kind: 'premio', label: 'Premio', severity: 'alta' }] },
+        { signals: [] }
+      ]
+    }
+    const out = withIds(raw) as { messages: Array<{ signals: Array<{ id: string }> }> }
+    expect(out.messages[0].signals[0].id).toBe('ai-1')
+    expect(out.messages[1].signals).toEqual([])
   })
 })

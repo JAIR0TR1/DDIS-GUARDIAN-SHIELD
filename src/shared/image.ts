@@ -26,11 +26,19 @@ export function checkImageFile(file: { type: string; size: number }): string | n
   return null
 }
 
-/** Lo que devuelve el modelo de visión: el resultado más la transcripción de la captura. */
-export const visionResultSchema = threatResultSchema.extend({
+/** Una captura puede traer varios mensajes (p. ej. dos chats): se analizan por separado. */
+export const MAX_IMAGE_MESSAGES = 5
+
+/** Un mensaje de la captura: su transcripción y su análisis. */
+export const visionMessageSchema = threatResultSchema.extend({
   extractedText: z.string().max(3000)
 })
 
-/** Respuesta del análisis de una captura: o un resultado, o un mensaje amable para mostrar. */
+/** Lo que devuelve el modelo de visión: uno o más mensajes, en el orden en que aparecen. */
+export const visionResultSchema = z.object({
+  messages: z.array(visionMessageSchema).min(1).max(MAX_IMAGE_MESSAGES)
+})
+
+/** Respuesta del análisis de una captura: un resultado por mensaje, o un mensaje amable. */
 export type ImageAnalysisResponse =
-  { ok: true; outcome: AnalysisOutcome } | { ok: false; message: string }
+  { ok: true; outcomes: AnalysisOutcome[] } | { ok: false; message: string }
