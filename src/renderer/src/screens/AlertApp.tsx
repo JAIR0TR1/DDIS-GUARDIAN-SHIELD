@@ -15,6 +15,8 @@ import type { CreatureState } from '../creature/creatureState'
 import type { HaloState } from '@design/tokens'
 import { cn } from '../lib/cn'
 import { useTheme } from '../lib/theme'
+import { SkinContext } from '../lib/skin'
+import { DEFAULT_SKIN, usableSkin, type SkinId } from '@domain/skins'
 import { I18nContext, useT } from '../lib/i18n'
 import { createTranslator, DEFAULT_LANGUAGE, type Language } from '@shared/i18n'
 import { localizeText } from '@shared/i18n/localize'
@@ -59,6 +61,7 @@ export function AlertApp(): React.JSX.Element {
   const [reduceSetting, setReduceSetting] = useState(false)
   const [theme, setTheme] = useState<Theme>('dark')
   const [language, setLanguage] = useState<Language>(DEFAULT_LANGUAGE)
+  const [skin, setSkin] = useState<SkinId>(DEFAULT_SKIN)
   const t = useMemo(() => createTranslator(language), [language])
   useTheme(theme)
   const shownAt = useRef(0)
@@ -75,6 +78,10 @@ export function AlertApp(): React.JSX.Element {
           setTheme(s.theme)
           setLanguage(s.language)
         })
+        .catch(() => undefined)
+      void window.guardian.data
+        .getCreature()
+        .then((c) => setSkin(usableSkin(c.skin, c.level)))
         .catch(() => undefined)
     })
     window.guardian.alert.ready()
@@ -116,23 +123,25 @@ export function AlertApp(): React.JSX.Element {
 
   return (
     <I18nContext.Provider value={t}>
-      <ReducedMotionContext.Provider value={reduced}>
-        <div className="grid h-screen w-screen place-items-center p-3">
-          {payload && (
-            <motion.section
-              key={payload.kind === 'result' ? payload.entry.id : payload.kind}
-              role="alertdialog"
-              aria-labelledby="alert-title"
-              initial={{ opacity: 0, y: reduced ? 0 : -14, scale: reduced ? 1 : 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={transition.base}
-              className="glass relative flex h-full w-full items-center gap-5 rounded-[24px] bg-[var(--surface-solid)] px-6"
-            >
-              <AlertBody payload={payload} onDetail={openDetail} onDismiss={dismiss} />
-            </motion.section>
-          )}
-        </div>
-      </ReducedMotionContext.Provider>
+      <SkinContext.Provider value={skin}>
+        <ReducedMotionContext.Provider value={reduced}>
+          <div className="grid h-screen w-screen place-items-center p-3">
+            {payload && (
+              <motion.section
+                key={payload.kind === 'result' ? payload.entry.id : payload.kind}
+                role="alertdialog"
+                aria-labelledby="alert-title"
+                initial={{ opacity: 0, y: reduced ? 0 : -14, scale: reduced ? 1 : 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={transition.base}
+                className="glass relative flex h-full w-full items-center gap-5 rounded-[24px] bg-[var(--surface-solid)] px-6"
+              >
+                <AlertBody payload={payload} onDetail={openDetail} onDismiss={dismiss} />
+              </motion.section>
+            )}
+          </div>
+        </ReducedMotionContext.Provider>
+      </SkinContext.Provider>
     </I18nContext.Provider>
   )
 }

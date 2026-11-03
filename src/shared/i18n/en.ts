@@ -464,5 +464,21 @@ export const en: Record<MessageKey, string> = {
   'arena.end.level': '{name} reached level {level}!',
   'arena.again': 'Play again',
   'arena.hp': 'Villain health',
-  'arena.rewardFailed': "I couldn't save the experience. Please try again."
+  'arena.rewardFailed': "I couldn't save the experience. Please try again.",
+
+  // Apariencias y carta
+  'skin.clasico': 'Classic',
+  'skin.medianoche': 'Midnight',
+  'skin.esmeralda': 'Emerald',
+  'skin.fuego': 'Blaze',
+  'skin.aurora': 'Aurora',
+  'creature.skins': 'Looks',
+  'creature.skins.locked': 'Level {n}',
+  'creature.skins.next':
+    'Next: {name} at level {n}. Analyze messages or play the Arena to level up.',
+  'creature.skins.all': 'You unlocked every look!',
+  'creature.skins.saved': 'Look applied: {name}',
+  'creature.skins.failed': "I couldn't change the look. Please try again.",
+  'creature.card.serial': 'Guardian #{n}',
+  'creature.card.level': 'LV {n}'
 }

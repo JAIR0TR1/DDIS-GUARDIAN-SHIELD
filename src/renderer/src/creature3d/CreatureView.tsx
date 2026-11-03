@@ -4,6 +4,7 @@ import type { Gesture, Prop } from '@domain/gesture'
 import { Creature } from '../creature/Creature'
 import { defaultHalo, type CreatureState } from '../creature/creatureState'
 import { useReducedMotionPref } from '../lib/motionPref'
+import { useSkin } from '../lib/skin'
 import { Mascot3D } from './Mascot3D'
 import { webglAvailable } from './webgl'
 import { mascotSnapshot } from './mascotSnapshot'
@@ -50,6 +51,7 @@ export function CreatureView({
   title = 'Nilo, tu Guardián'
 }: CreatureViewProps): React.JSX.Element {
   const reduced = useReducedMotionPref()
+  const skin = useSkin()
   const [live3dFailed, setLive3dFailed] = useState(false)
   const haloState = halo ?? defaultHalo[state]
   const canUse3D = webglAvailable()
@@ -64,6 +66,7 @@ export function CreatureView({
           greetFor={reduced ? 0 : greet}
           gesture={reduced ? 'ninguno' : gesture}
           gestureScale={gestureScale}
+          skin={skin}
           prop={reduced ? 'ninguno' : prop}
           gestureKey={gestureKey}
           animated={!reduced}
@@ -74,7 +77,7 @@ export function CreatureView({
     )
   }
 
-  const photo = canUse3D ? mascotSnapshot(state, haloState) : null
+  const photo = canUse3D ? mascotSnapshot(state, haloState, skin) : null
   if (photo) {
     return <img src={photo} alt={title} draggable={false} className="size-full object-contain" />
   }

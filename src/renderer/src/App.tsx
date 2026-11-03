@@ -20,6 +20,8 @@ import { IconStage } from './screens/IconStage'
 import { GestureStage } from './screens/GestureStage'
 import { sampleHistory } from './lib/sampleHistory'
 import { useTheme } from './lib/theme'
+import { SkinContext } from './lib/skin'
+import { usableSkin } from '@domain/skins'
 import { AuthScreen } from './screens/AuthScreen'
 import type { Account } from '@shared/auth'
 import { I18nContext } from './lib/i18n'
@@ -60,6 +62,7 @@ function Shell(): React.JSX.Element {
   const [preLanguage, setPreLanguage] = useState<Language>(DEFAULT_LANGUAGE)
   const language = loaded?.settings.language ?? preLanguage
   const t = useMemo(() => createTranslator(language), [language])
+  const skin = usableSkin(loaded?.creature.skin, loaded?.creature.level ?? 1)
   const [loadError, setLoadError] = useState<MessageKey | null>(null)
   const [scanning, setScanning] = useState(false)
   const [tone, setTone] = useState<Tone>('neutral')
@@ -271,18 +274,20 @@ function Shell(): React.JSX.Element {
 
   return (
     <I18nContext.Provider value={t}>
-      <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
-        <ReducedMotionContext.Provider value={reduceMotion || osReduced === true}>
-          <div className="relative flex h-full flex-col overflow-hidden">
-            <AmbientBackground mode={phase === 'session' ? 'panels' : 'open'} tone={tone} />
-            <Titlebar />
-            <main className="relative min-h-0 flex-1 overflow-hidden">
-              {body}
-              {scanning && !reduceMotion && <ScanBeam onComplete={() => setScanning(false)} />}
-            </main>
-          </div>
-        </ReducedMotionContext.Provider>
-      </MotionConfig>
+      <SkinContext.Provider value={skin}>
+        <MotionConfig reducedMotion={reduceMotion ? 'always' : 'user'}>
+          <ReducedMotionContext.Provider value={reduceMotion || osReduced === true}>
+            <div className="relative flex h-full flex-col overflow-hidden">
+              <AmbientBackground mode={phase === 'session' ? 'panels' : 'open'} tone={tone} />
+              <Titlebar />
+              <main className="relative min-h-0 flex-1 overflow-hidden">
+                {body}
+                {scanning && !reduceMotion && <ScanBeam onComplete={() => setScanning(false)} />}
+              </main>
+            </div>
+          </ReducedMotionContext.Provider>
+        </MotionConfig>
+      </SkinContext.Provider>
     </I18nContext.Provider>
   )
 }

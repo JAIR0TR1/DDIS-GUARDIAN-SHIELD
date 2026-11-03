@@ -464,7 +464,23 @@ export const es = {
   'arena.end.level': '¡{name} subió al nivel {level}!',
   'arena.again': 'Jugar otra vez',
   'arena.hp': 'Vida del villano',
-  'arena.rewardFailed': 'No pude guardar la experiencia. Inténtalo de nuevo.'
+  'arena.rewardFailed': 'No pude guardar la experiencia. Inténtalo de nuevo.',
+
+  // Apariencias y carta
+  'skin.clasico': 'Clásico',
+  'skin.medianoche': 'Medianoche',
+  'skin.esmeralda': 'Esmeralda',
+  'skin.fuego': 'Fuego',
+  'skin.aurora': 'Aurora',
+  'creature.skins': 'Apariencias',
+  'creature.skins.locked': 'Nivel {n}',
+  'creature.skins.next':
+    'Siguiente: {name} en el nivel {n}. Analiza mensajes o juega la Arena para subir.',
+  'creature.skins.all': '¡Desbloqueaste todas las apariencias!',
+  'creature.skins.saved': 'Apariencia aplicada: {name}',
+  'creature.skins.failed': 'No pude cambiar la apariencia. Inténtalo de nuevo.',
+  'creature.card.serial': 'Guardián #{n}',
+  'creature.card.level': 'NV {n}'
 } as const
 
 export type MessageKey = keyof typeof es

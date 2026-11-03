@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { DEFAULT_SKIN, SKIN_CATALOG, type SkinId } from '@domain/skins'
 import { ACESFilmicToneMapping, SRGBColorSpace, WebGLRenderer } from 'three'
 import type { HaloState } from '@design/tokens'
 import type { Gesture, Prop } from '@domain/gesture'
@@ -15,6 +16,8 @@ export interface Mascot3DProps {
   gesture?: Gesture
   /** Qué tan marcado es el gesto (0-1). */
   gestureScale?: number
+  /** Apariencia (colores) desbloqueada por nivel. */
+  skin?: SkinId
   /** Objeto que flota sobre la cabeza (regalo, paquete, llave…). */
   prop?: Prop
   /** Cambia cada vez que el gesto debe REINICIARSE (p. ej. el id de un resultado nuevo). */
@@ -36,6 +39,7 @@ export function Mascot3D({
   greetFor = 0,
   gesture = 'ninguno',
   gestureScale = 1,
+  skin = DEFAULT_SKIN,
   prop = 'ninguno',
   gestureKey,
   animated,
@@ -51,6 +55,7 @@ export function Mascot3D({
     greetFor,
     gesture,
     gestureScale,
+    skin,
     prop,
     gestureStart: 0,
     /** Hay que redibujar aunque no esté animado (cambió el estado, el halo o el ajuste). */
@@ -69,6 +74,7 @@ export function Mascot3D({
       greetFor,
       gesture,
       gestureScale,
+      skin,
       prop,
       // Un gesto nuevo (o el mismo con otra clave) empieza desde cero.
       gestureStart: restart ? performance.now() : live.current.gestureStart,
@@ -96,6 +102,7 @@ export function Mascot3D({
     Object.assign(renderer.domElement.style, { width: '100%', height: '100%', display: 'block' })
 
     const mascot = buildMascot()
+    let appliedSkin: SkinId | null = null
     const look = { x: 0, y: 0 }
     const target = { x: 0, y: 0 }
     const started = performance.now()
@@ -126,6 +133,10 @@ export function Mascot3D({
       const dt = Math.min(0.05, (now - last) / 1000)
       last = now
       const cur = live.current
+      if (cur.skin !== appliedSkin) {
+        mascot.setSkin(SKIN_CATALOG[cur.skin].palette)
+        appliedSkin = cur.skin
+      }
       look.x += (target.x - look.x) * Math.min(1, dt * 6)
       look.y += (target.y - look.y) * Math.min(1, dt * 6)
       const frame: Frame = {

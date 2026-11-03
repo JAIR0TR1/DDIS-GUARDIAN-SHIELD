@@ -188,6 +188,7 @@ function fakeData(initial: Pick<Creature, 'level' | 'xp'> = { level: 1, xp: 0 })
     name: 'Nilo',
     type: 'Guardián',
     rarity: 'rara',
+    skin: 'clasico',
     attack: 1,
     defense: 1,
     personality: 'x',

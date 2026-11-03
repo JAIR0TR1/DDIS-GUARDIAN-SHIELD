@@ -32,6 +32,7 @@ import {
 } from 'three'
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
 import { haloColors, type HaloState } from '@design/tokens'
+import type { SkinPalette } from '@domain/skins'
 import type { Gesture, Prop } from '@domain/gesture'
 import { buildProps } from './props'
 import type { CreatureState } from '../creature/creatureState'
@@ -75,6 +76,8 @@ export interface Mascot {
   scene: Scene
   camera: PerspectiveCamera
   update: (frame: Frame) => void
+  /** Cambia los colores (apariencia desbloqueada por nivel) sin reconstruir la escena. */
+  setSkin: (palette: SkinPalette) => void
   dispose: () => void
 }
 
@@ -700,5 +703,17 @@ export function buildMascot(): Mascot {
     props.dispose()
   }
 
-  return { scene, camera, update, dispose }
+  function setSkin(palette: SkinPalette): void {
+    body.color.set(palette.body)
+    capMat.color.set(palette.cap)
+    brimMat.color.set(palette.brim)
+    eyeMat.color.set(palette.eyes)
+    accent.color.set(palette.eyes)
+    violetGlow.color.set(palette.shield)
+    violetGlow.emissive.set(palette.shield)
+    goldMat.color.set(palette.chain)
+    goldMat.emissive.set(palette.chainGlow)
+  }
+
+  return { scene, camera, update, setSkin, dispose }
 }

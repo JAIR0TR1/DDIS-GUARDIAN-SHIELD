@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { DEFAULT_LANGUAGE, LANGUAGES } from './i18n/types'
+import { DEFAULT_SKIN, SKINS } from '../domain/skins'
 
 /** Perfil LOCAL: sin cuenta ni contraseña. */
 export const profileSchema = z.object({
@@ -61,6 +62,8 @@ export const creatureSchema = z.object({
   /** XP acumulada dentro del nivel actual. */
   xp: z.number().int().min(0),
   level: z.number().int().min(1).max(99),
+  /** Apariencia elegida (se desbloquean por nivel). */
+  skin: z.enum(SKINS).default(DEFAULT_SKIN),
   personality: z.string().min(1),
   phrases: z.record(z.string(), z.array(z.string().min(1)).min(1))
 })

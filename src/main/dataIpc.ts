@@ -2,6 +2,7 @@ import { app, ipcMain } from 'electron'
 import { z } from 'zod'
 import { addXp } from '../domain/xp'
 import { MAX_GAME_XP } from '../domain/arena'
+import { usableSkin } from '../domain/skins'
 import { IPC } from '../shared/ipc'
 import { creatureSchema, profileSchema, settingsSchema } from '../shared/models'
 import { analyzeInputSchema, type AiTestResult, type AppConfig } from '../shared/analysis'
@@ -46,9 +47,11 @@ export function registerDataIpc({ data, analysis, keys, config, controller }: Ip
     return saved
   })
   ipcMain.handle(IPC.data.getCreature, () => data.getCreature())
-  ipcMain.handle(IPC.data.saveCreature, (_e, value: unknown) =>
-    data.saveCreature(creatureSchema.parse(value))
-  )
+  ipcMain.handle(IPC.data.saveCreature, (_e, value: unknown) => {
+    const creature = creatureSchema.parse(value)
+    // Una apariencia que aún no se desbloquea no se puede guardar.
+    return data.saveCreature({ ...creature, skin: usableSkin(creature.skin, creature.level) })
+  })
   // Arena: la XP llega del renderer, así que se valida y se limita aquí.
   ipcMain.handle(IPC.arena.reward, async (_e, value: unknown) => {
     const xp = z.number().int().min(0).max(MAX_GAME_XP).parse(value)

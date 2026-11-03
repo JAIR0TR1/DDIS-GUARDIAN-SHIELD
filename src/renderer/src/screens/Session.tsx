@@ -304,7 +304,13 @@ export function Session({
               />
             )}
             {section === 'criatura' && (
-              <CreatureScreen creature={creature} variants={itemVariants} mood={mood} />
+              <CreatureScreen
+                creature={creature}
+                variants={itemVariants}
+                mood={mood}
+                reduced={reduced}
+                onCreature={onCreature}
+              />
             )}
             {section === 'arena' && (
               <Arena
