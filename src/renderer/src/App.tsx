@@ -40,7 +40,7 @@ interface Loaded {
   demoMode: boolean
 }
 
-const VERSION = '0.1'
+const VERSION = '0.2'
 /** Cuánto dura el color de Nilo en el fondo tras un análisis. */
 const TONE_MS = 9000
 

@@ -3,7 +3,7 @@
 Protege del fraude digital con una criatura guardiana, **Nilo**: analiza mensajes y links, avisa con semáforo (seguro, sospechoso, peligroso) y explica por qué. Proyecto universitario de Diseño de Interfaces (aplicación de escritorio; hermana de las apps de celular y reloj).
 
 ## Instalar y usar (sin programar)
-1. Ejecuta `EscudoGuardian-0.1.0-setup.exe` (se genera con `npm run build:win` en `release/`).
+1. Ejecuta `EscudoGuardian-0.2.0-setup.exe` (se genera con `npm run build:win` en `release/`).
 2. Windows puede mostrar el aviso azul «SmartScreen» porque el instalador no está firmado: pulsa **Más información → Ejecutar de todas formas**.
 3. Abre Escudo Guardián. La primera vez te pide tu nombre; después Nilo te saluda.
 4. En **Analizar**, pega un mensaje y pulsa Analizar. Sin clave de IA funciona en modo demo; para usar la IA real, pega tu clave de Gemini en **Ajustes** (se guarda cifrada).

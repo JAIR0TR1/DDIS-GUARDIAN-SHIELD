@@ -62,7 +62,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ## 6. Instalador de Windows
 | # | Caso | Pasos | Resultado esperado | Verificado |
 |---|---|---|---|---|
-| 6.1 | Generar | `npm run build:win` | Crea `release/EscudoGuardian-0.1.0-setup.exe` | ✅ regenerado el 3 nov con cuentas, idiomas y temas (incluye `@supabase/supabase-js` en `app.asar`) |
+| 6.1 | Generar | `npm run build:win` | Crea `release/EscudoGuardian-0.2.0-setup.exe` | ✅ regenerado el 3 nov (0.2.0: Arena, apariencias, capturas con varios mensajes) (incluye `@supabase/supabase-js` en `app.asar`) |
 | 6.2 | Instalar y abrir | Ejecutar el instalador, abrir la app | Abre en modo demo, con icono de Nilo | ✅ instalación silenciosa en carpeta temporal |
 | 6.3 | SmartScreen | Primera ejecución | Aviso por no estar firmado: «Más información» → «Ejecutar de todas formas» | ⬜ |
 | 6.4 | Desinstalar | Desinstalar desde Windows | No quedan archivos, accesos ni registro | ✅ |
