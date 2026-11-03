@@ -28,10 +28,17 @@ export interface AnalysisService {
   peek: (text: string) => Promise<ThreatResult>
 }
 
-/** Clave de caché: mismo contenido (sin importar mayúsculas ni tildes) y mismos umbrales. */
-export function cacheKey(text: string, safeBelow: number, dangerAbove: number): string {
+/** Clave de caché: mismo contenido (sin importar mayúsculas ni tildes), umbrales e idioma. */
+export function cacheKey(
+  text: string,
+  safeBelow: number,
+  dangerAbove: number,
+  language = 'es'
+): string {
   const normalized = fold(text).replace(/\s+/g, ' ').trim()
-  return createHash('sha256').update(`${safeBelow}|${dangerAbove}|${normalized}`).digest('hex')
+  return createHash('sha256')
+    .update(`${safeBelow}|${dangerAbove}|${language}|${normalized}`)
+    .digest('hex')
 }
 
 const imageKey = (data: string): string => createHash('sha256').update(data).digest('hex')
@@ -100,7 +107,7 @@ export function createAnalysisService(
       const input = analyzeInputSchema.parse(rawInput)
       const settings = await data.getSettings()
       const { safeBelow, dangerAbove } = settings.thresholds
-      const key = cacheKey(input.text, safeBelow, dangerAbove)
+      const key = cacheKey(input.text, safeBelow, dangerAbove, settings.language)
       const useAI = options.useAI !== false
 
       const cached = cache.get(key)
@@ -110,7 +117,8 @@ export function createAnalysisService(
         (await analyzeThreat(input, {
           thresholds: settings.thresholds,
           provider: choice?.provider ?? null,
-          noProviderNotice: choice?.notice
+          noProviderNotice: choice?.notice,
+          language: settings.language
         }))
       // Un resultado sin IA no se guarda en la caché: si luego se pide con IA, debe consultarla.
       if (!cached && !output.notice && useAI) cache.set(key, output)
@@ -150,7 +158,7 @@ export function createAnalysisService(
 
       let raw: unknown
       try {
-        raw = await provider.refineImage(input)
+        raw = await provider.refineImage({ ...input, language: settings.language })
       } catch (error) {
         // Los mensajes de texto caen a las reglas locales; una captura no tiene plan B: se dice así.
         if (error instanceof ProviderError) {

@@ -5,7 +5,9 @@ import { createClipboardWatcher } from './clipboard/watcher'
 import type { AlertPayload, NavigateRequest, ShortcutChange, WatcherEvent } from '../shared/alert'
 import type { AnalysisOutcome } from '../shared/analysis'
 import { IPC } from '../shared/ipc'
-import type { Profile } from '../shared/models'
+import { createTranslator, translateDefault, type Translate } from '../shared/i18n'
+import { localizeText } from '../shared/i18n/localize'
+import type { Profile, Settings } from '../shared/models'
 import type { Verdict } from '../shared/threat'
 import type { AnalysisService } from './analysis/service'
 import type { AppData } from './storage/appData'
@@ -34,6 +36,8 @@ export interface GuardianController {
   /** Una segunda copia intentó abrirse: avisa que ya había una corriendo. */
   notifyAlreadyRunning: () => void
   onProfileSaved: (profile: Profile) => void
+  /** Ajustes guardados: aplica el idioma a la bandeja y a las notificaciones. */
+  onSettingsSaved: (settings: Settings) => void
   setShortcut: (shortcut: string) => Promise<ShortcutChange>
   analyzeClipboard: () => Promise<void>
   openDetail: (entryId?: string) => void
@@ -59,6 +63,7 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
   let shortcutDisplay = 'Ctrl+Shift+G'
   let registeredAccelerator: string | null = null
   let decay: NodeJS.Timeout | null = null
+  let t: Translate = translateDefault
 
   const baseState = (): TrayState => (watcherOn ? 'activo' : 'dormida')
 
@@ -142,8 +147,8 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
     }
     showAlert(resultPayload(outcome, true), { focus: false })
     notify(
-      verdict === 'peligroso' ? '¡Cuidado! Posible estafa' : 'Ojo: mensaje dudoso',
-      creatureMessage,
+      verdict === 'peligroso' ? t('notify.danger') : t('notify.doubt'),
+      localizeText(creatureMessage, t),
       outcome.entry.id
     )
     setTray(trayByVerdict[verdict], true)
@@ -156,8 +161,8 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
     if (toldAboutTray || !Notification.isSupported()) return
     toldAboutTray = true
     new Notification({
-      title: 'Escudo Guardián sigue vigilando',
-      body: 'Está en la bandeja, junto al reloj. Para cerrarla del todo: clic derecho en su icono → Salir.',
+      title: t('notify.hidden.title'),
+      body: t('notify.hidden.body'),
       icon: trayIconFor('activo')
     }).show()
   }
@@ -187,6 +192,7 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
   return {
     async init() {
       const [profile, settings] = await Promise.all([data.getProfile(), data.getSettings()])
+      t = createTranslator(settings.language)
       const parsed = normalizeShortcut(settings.shortcut)
       shortcutDisplay = parsed.ok ? parsed.display : 'Ctrl+Shift+G'
       const accelerator = parsed.ok ? parsed.accelerator : 'CommandOrControl+Shift+G'
@@ -200,7 +206,8 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
           onToggleWatcher: (enabled) => void toggleWatcher(enabled),
           onQuit: () => app.quit()
         },
-        shortcutDisplay
+        shortcutDisplay,
+        t
       )
       applyWatcher(profile?.vigilante === true)
     },
@@ -210,14 +217,19 @@ export function createGuardianController(deps: ControllerDeps): GuardianControll
     notifyAlreadyRunning() {
       if (!Notification.isSupported()) return
       new Notification({
-        title: 'Escudo Guardián ya estaba abierta',
-        body: 'Te traje la que ya corría. Si acabas de cambiar el código, ciérrala desde la bandeja (clic derecho → Salir) y ábrela de nuevo.',
+        title: t('notify.running.title'),
+        body: t('notify.running.body'),
         icon: trayIconFor('activo')
       }).show()
     },
 
     onProfileSaved(profile) {
       if (profile.vigilante !== watcherOn) applyWatcher(profile.vigilante)
+    },
+
+    onSettingsSaved(settings) {
+      t = createTranslator(settings.language)
+      tray?.setTranslator(t)
     },
 
     async setShortcut(shortcut) {

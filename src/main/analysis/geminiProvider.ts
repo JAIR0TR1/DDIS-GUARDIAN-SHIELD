@@ -1,4 +1,5 @@
 import { stripDelimiters } from '../../domain/mask'
+import type { Language } from '../../shared/i18n'
 import { SIGNAL_KINDS } from '../../shared/threat'
 import type { ProviderInput, ThreatProvider } from './analyzeThreat'
 import { ProviderError } from './providerError'
@@ -31,6 +32,13 @@ CRITERIOS:
 - signals: máximo 6, cada una con un kind de la lista permitida, una etiqueta corta en español (máximo 60 caracteres) y su severidad.
 - recommendedAction: una o dos frases con un paso concreto y fácil de seguir.
 - creatureMessage: la voz de Nilo, un guardián felino curioso y protector. Tutea, habla corto y directo, sin asustar de más y sin emojis. Máximo 120 caracteres.`
+
+/** En inglés se pide escribir los textos libres en inglés; el resto del JSON no cambia. */
+export function languageNote(language: Language | undefined): string {
+  return language === 'en'
+    ? '\n\nIDIOMA DE SALIDA: escribe las etiquetas de las señales, recommendedAction y creatureMessage en inglés. Los valores de verdict y kind siguen siendo los de la lista.'
+    : ''
+}
 
 /** Esquema de salida (tipos en mayúsculas, como pide la API de Gemini). */
 export const RESPONSE_SCHEMA = {
@@ -246,7 +254,9 @@ export function createGeminiProvider(options: GeminiOptions): ThreatProvider {
       return generate(
         model,
         {
-          systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+          systemInstruction: {
+            parts: [{ text: SYSTEM_INSTRUCTION + languageNote(input.language) }]
+          },
           contents: [{ role: 'user', parts: [{ text: buildUserPrompt(input) }] }],
           generationConfig: {
             temperature: 0.2,
@@ -260,11 +270,13 @@ export function createGeminiProvider(options: GeminiOptions): ThreatProvider {
     },
 
     /** Captura de pantalla: transcribe el texto visible y lo analiza con el modelo de visión. */
-    async refineImage({ mimeType, data }) {
+    async refineImage({ mimeType, data, language }) {
       return generate(
         visionModel,
         {
-          systemInstruction: { parts: [{ text: VISION_SYSTEM_INSTRUCTION }] },
+          systemInstruction: {
+            parts: [{ text: VISION_SYSTEM_INSTRUCTION + languageNote(language) }]
+          },
           contents: [
             {
               role: 'user',

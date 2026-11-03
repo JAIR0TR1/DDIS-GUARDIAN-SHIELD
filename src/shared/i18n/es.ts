@@ -318,7 +318,26 @@ export const es = {
   // Métricas de Inicio
   'home.stats.analyzed': 'Analizados',
   'home.stats.threats': 'Amenazas detenidas',
-  'home.stats.safe': 'Mensajes seguros'
+  'home.stats.safe': 'Mensajes seguros',
+
+  // Bandeja y notificaciones de Windows
+  'tray.tip.activo': 'Escudo Guardián · vigilando',
+  'tray.tip.segura': 'Escudo Guardián · todo en orden',
+  'tray.tip.duda': 'Escudo Guardián · algo dudoso',
+  'tray.tip.amenaza': 'Escudo Guardián · ¡amenaza detectada!',
+  'tray.tip.dormida': 'Escudo Guardián · vigilante apagado',
+  'tray.open': 'Abrir Escudo Guardián',
+  'tray.analyze': 'Analizar el portapapeles ({shortcut})',
+  'tray.watch': 'Vigilar el portapapeles',
+  'tray.quit': 'Salir',
+  'notify.hidden.title': 'Escudo Guardián sigue vigilando',
+  'notify.hidden.body':
+    'Está en la bandeja, junto al reloj. Para cerrarla del todo: clic derecho en su icono → Salir.',
+  'notify.running.title': 'Escudo Guardián ya estaba abierta',
+  'notify.running.body':
+    'Te traje la que ya corría. Si acabas de cambiar el código, ciérrala desde la bandeja (clic derecho → Salir) y ábrela de nuevo.',
+  'notify.danger': '¡Cuidado! Posible estafa',
+  'notify.doubt': 'Ojo: mensaje dudoso'
 } as const
 
 export type MessageKey = keyof typeof es

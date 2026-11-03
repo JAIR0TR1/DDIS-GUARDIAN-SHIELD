@@ -1,5 +1,6 @@
 import { Menu, nativeImage, Tray, type NativeImage } from 'electron'
 import icon from '../../build/icon.png?asset'
+import type { Translate } from '../shared/i18n'
 
 /** Estado que comunica el icono: cian activo, ámbar duda, rojo amenaza, gris apagado. */
 export type TrayState = 'activo' | 'segura' | 'duda' | 'amenaza' | 'dormida'
@@ -10,14 +11,6 @@ const DOT_RGB: Record<TrayState, [number, number, number]> = {
   duda: [251, 191, 36],
   amenaza: [244, 63, 94],
   dormida: [107, 114, 128]
-}
-
-const TOOLTIP: Record<TrayState, string> = {
-  activo: 'Escudo Guardián · vigilando',
-  segura: 'Escudo Guardián · todo en orden',
-  duda: 'Escudo Guardián · algo dudoso',
-  amenaza: 'Escudo Guardián · ¡amenaza detectada!',
-  dormida: 'Escudo Guardián · vigilante apagado'
 }
 
 const SIZE = 32
@@ -71,40 +64,54 @@ export interface TrayActions {
 export interface TrayController {
   setState: (state: TrayState) => void
   setWatcher: (enabled: boolean, shortcut: string) => void
+  /** Cambia el idioma del menú y de la ayuda emergente. */
+  setTranslator: (t: Translate) => void
   destroy: () => void
 }
 
-export function createTray(actions: TrayActions, initialShortcut: string): TrayController {
+export function createTray(
+  actions: TrayActions,
+  initialShortcut: string,
+  initialTranslator: Translate
+): TrayController {
   const tray = new Tray(iconFor('dormida'))
   let watcher = false
   let shortcut = initialShortcut
+  let t = initialTranslator
+  let state: TrayState = 'dormida'
 
   const rebuild = (): void => {
     tray.setContextMenu(
       Menu.buildFromTemplate([
-        { label: 'Abrir Escudo Guardián', click: actions.onOpen },
-        { label: `Analizar el portapapeles (${shortcut})`, click: actions.onAnalyzeClipboard },
+        { label: t('tray.open'), click: actions.onOpen },
+        { label: t('tray.analyze', { shortcut }), click: actions.onAnalyzeClipboard },
         { type: 'separator' },
         {
-          label: 'Vigilar el portapapeles',
+          label: t('tray.watch'),
           type: 'checkbox',
           checked: watcher,
           click: (item) => actions.onToggleWatcher(item.checked)
         },
         { type: 'separator' },
-        { label: 'Salir', click: actions.onQuit }
+        { label: t('tray.quit'), click: actions.onQuit }
       ])
     )
   }
   rebuild()
-  tray.setToolTip(TOOLTIP.dormida)
+  tray.setToolTip(t('tray.tip.dormida'))
   // Un clic abre la ventana principal.
   tray.on('click', actions.onOpen)
 
   return {
-    setState(state) {
-      tray.setImage(iconFor(state))
-      tray.setToolTip(TOOLTIP[state])
+    setState(next) {
+      state = next
+      tray.setImage(iconFor(next))
+      tray.setToolTip(t(`tray.tip.${next}`))
+    },
+    setTranslator(next) {
+      t = next
+      rebuild()
+      tray.setToolTip(t(`tray.tip.${state}`))
     },
     setWatcher(enabled, newShortcut) {
       watcher = enabled

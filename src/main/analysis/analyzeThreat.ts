@@ -3,6 +3,7 @@ import { guardScore, guardVerdict, toThreatResult } from '../../domain/explain'
 import { maskSensitive } from '../../domain/mask'
 import { threatResultSchema, type ThreatResult } from '../../shared/threat'
 import { userMessageOf } from './providerError'
+import type { Language } from '../../shared/i18n'
 
 /** Lo que recibe un proveedor de IA para casos ambiguos. */
 export interface ProviderInput {
@@ -10,6 +11,8 @@ export interface ProviderInput {
   text: string
   source: 'text' | 'link' | 'image'
   local: LocalAnalysis
+  /** Idioma en que la IA debe escribir etiquetas, consejo y voz de Nilo (por defecto español). */
+  language?: Language
 }
 
 /**
@@ -21,6 +24,8 @@ export interface ImageProviderInput {
   mimeType: string
   /** Contenido en base64, sin el prefijo «data:». */
   data: string
+  /** Idioma en que la IA debe escribir su respuesta (por defecto español). */
+  language?: Language
 }
 
 export interface ThreatProvider {
@@ -36,6 +41,8 @@ export interface AnalyzeDeps {
   provider: ThreatProvider | null
   /** Aviso a mostrar cuando el caso era ambiguo pero no hay proveedor (p. ej. falta la clave). */
   noProviderNotice?: string
+  /** Idioma de la interfaz: la IA escribe su respuesta en él. */
+  language?: Language
 }
 
 export interface AnalyzeOutput {
@@ -70,7 +77,8 @@ export async function analyzeThreat(
     const raw = await deps.provider.refine({
       ...input,
       text: maskSensitive(input.text).text,
-      local
+      local,
+      language: deps.language
     })
     const parsed = threatResultSchema.safeParse(raw)
     if (!parsed.success) {

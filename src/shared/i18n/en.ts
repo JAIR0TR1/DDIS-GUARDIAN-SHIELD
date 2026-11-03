@@ -317,5 +317,24 @@ export const en: Record<MessageKey, string> = {
   // Métricas de Inicio
   'home.stats.analyzed': 'Analyzed',
   'home.stats.threats': 'Threats stopped',
-  'home.stats.safe': 'Safe messages'
+  'home.stats.safe': 'Safe messages',
+
+  // Bandeja y notificaciones de Windows
+  'tray.tip.activo': 'Escudo Guardián · watching',
+  'tray.tip.segura': 'Escudo Guardián · all good',
+  'tray.tip.duda': 'Escudo Guardián · something doubtful',
+  'tray.tip.amenaza': 'Escudo Guardián · threat detected!',
+  'tray.tip.dormida': 'Escudo Guardián · watcher off',
+  'tray.open': 'Open Escudo Guardián',
+  'tray.analyze': 'Analyze the clipboard ({shortcut})',
+  'tray.watch': 'Watch the clipboard',
+  'tray.quit': 'Quit',
+  'notify.hidden.title': 'Escudo Guardián is still watching',
+  'notify.hidden.body':
+    'It is in the tray, next to the clock. To close it completely: right-click its icon → Quit.',
+  'notify.running.title': 'Escudo Guardián was already open',
+  'notify.running.body':
+    'I brought you the one already running. If you just changed the code, close it from the tray (right-click → Quit) and open it again.',
+  'notify.danger': 'Careful! Possible scam',
+  'notify.doubt': 'Heads up: doubtful message'
 }

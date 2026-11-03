@@ -37,9 +37,11 @@ export function registerDataIpc({ data, analysis, keys, config, controller }: Ip
     controller.setShortcut(typeof shortcut === 'string' ? shortcut : '')
   )
   ipcMain.handle(IPC.data.getSettings, () => data.getSettings())
-  ipcMain.handle(IPC.data.saveSettings, (_e, value: unknown) =>
-    data.saveSettings(settingsSchema.parse(value))
-  )
+  ipcMain.handle(IPC.data.saveSettings, async (_e, value: unknown) => {
+    const saved = await data.saveSettings(settingsSchema.parse(value))
+    controller.onSettingsSaved(saved)
+    return saved
+  })
   ipcMain.handle(IPC.data.getCreature, () => data.getCreature())
   ipcMain.handle(IPC.data.saveCreature, (_e, value: unknown) =>
     data.saveCreature(creatureSchema.parse(value))

@@ -173,6 +173,10 @@ describe('cacheKey', () => {
   it('cambia si cambian los umbrales', () => {
     expect(cacheKey('hola', 30, 70)).not.toBe(cacheKey('hola', 20, 70))
   })
+  it('cambia con el idioma: la IA responde en el idioma de la interfaz', () => {
+    expect(cacheKey('hola', 30, 70, 'es')).not.toBe(cacheKey('hola', 30, 70, 'en'))
+    expect(cacheKey('hola', 30, 70)).toBe(cacheKey('hola', 30, 70, 'es'))
+  })
 })
 
 // ---------- Servicio completo con almacenamiento falso ----------
