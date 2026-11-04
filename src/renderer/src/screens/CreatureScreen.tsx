@@ -50,7 +50,7 @@ export function CreatureScreen({
   ]
   return (
     <>
-      <motion.div variants={variants} className="col-span-12 md:col-span-5">
+      <motion.div variants={variants} className="col-span-12 self-start md:col-span-5">
         <CollectibleCard creature={creature} mood={mood} typeText={typeText} reduced={reduced} />
       </motion.div>
 
@@ -138,7 +138,8 @@ function CollectibleCard({
   }
 
   return (
-    <div className="h-full" style={{ perspective: 900 }}>
+    // Proporción de carta coleccionable (3:4) en vez de estirarse a la altura de la columna.
+    <div className="mx-auto aspect-[3/4] w-full max-w-[420px]" style={{ perspective: 900 }}>
       <motion.div
         onPointerMove={onMove}
         onPointerLeave={onLeave}
@@ -160,7 +161,7 @@ function CollectibleCard({
               {t('creature.card.level', { n: creature.level })}
             </span>
           </div>
-          <CreatureAvatar size={200} state={mood} rings title={`${creature.name}, ${typeText}`} />
+          <CreatureAvatar size={236} state={mood} rings title={`${creature.name}, ${typeText}`} />
           <h2 className="font-display text-[26px] font-semibold leading-tight">{creature.name}</h2>
           <p className="text-sm text-text-muted">{typeText}</p>
           <div className="flex items-center gap-2">

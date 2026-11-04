@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { motion, type Variants } from 'framer-motion'
-import { Flame, Heart, ShieldAlert, ShieldCheck, Swords, Trophy } from 'lucide-react'
+import { Flame, Heart, HeartCrack, ShieldAlert, ShieldCheck, Swords, Trophy } from 'lucide-react'
 import type { Creature } from '@shared/models'
 import type { ThreatResult } from '@shared/threat'
 import { neutralizeLinks } from '@shared/safeText'
@@ -171,7 +171,11 @@ export function Arena({ creature, variants, reduced, onCreature }: ArenaProps): 
             title={creature.name}
           />
           <h2 className="flex items-center gap-2 font-display text-[28px] font-semibold tracking-tight">
-            <Trophy aria-hidden className={cn('size-7', won ? 'text-warn' : 'text-text-muted')} />
+            {won ? (
+              <Trophy aria-hidden className="size-7 text-warn" />
+            ) : (
+              <HeartCrack aria-hidden className="size-7 text-danger-text" />
+            )}
             {won ? t('arena.end.win') : t('arena.end.lose')}
           </h2>
           <p className="tabular text-[15px] text-text-muted">
