@@ -13,9 +13,34 @@ interface Shot {
   rect?: { x: number; y: number; width: number; height: number }
   /** Redimensiona la ventana antes de capturar. */
   size?: [number, number]
+  /**
+   * Teclas reales que se envían a la ventana ANTES del js (p. ej. ["Tab", "Shift+Tab", "Enter"]),
+   * para probar el recorrido con teclado como lo haría una persona.
+   */
+  keys?: string[]
+  /** No guarda imagen: útil para pasos intermedios del recorrido con teclado. */
+  skipImage?: boolean
 }
 
 const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
+
+type Modifier = 'shift' | 'control' | 'alt'
+const MODIFIERS: Record<string, Modifier> = { Shift: 'shift', Ctrl: 'control', Alt: 'alt' }
+
+/** Envía una tecla real (con modificadores tipo "Shift+Tab") a la ventana. */
+async function sendKey(win: BrowserWindow, combo: string): Promise<void> {
+  const parts = combo.split('+')
+  const keyCode = parts.pop() ?? combo
+  const modifiers = parts.map((part) => MODIFIERS[part]).filter((m): m is Modifier => !!m)
+  win.webContents.sendInputEvent({ type: 'keyDown', keyCode, modifiers })
+  // Las teclas imprimibles necesitan además el evento 'char' para escribir texto, y Enter también:
+  // Chromium activa los botones con ese evento.
+  if (keyCode.length === 1) win.webContents.sendInputEvent({ type: 'char', keyCode, modifiers })
+  if (keyCode === 'Enter')
+    win.webContents.sendInputEvent({ type: 'char', keyCode: '\r', modifiers })
+  await sleep(30)
+  win.webContents.sendInputEvent({ type: 'keyUp', keyCode, modifiers })
+}
 
 /**
  * SOLO DESARROLLO. Si GUARDIAN_SHOTS contiene un JSON con una lista de capturas, la app las toma
@@ -44,12 +69,17 @@ export function runDevScreenshots(win: BrowserWindow): void {
         await sleep(600)
         for (const shot of shots) {
           if (shot.size) win.setSize(shot.size[0], shot.size[1])
+          for (const key of shot.keys ?? []) {
+            await sendKey(win, key)
+            await sleep(120)
+          }
           if (shot.js) {
             const result: unknown = await win.webContents.executeJavaScript(shot.js)
             // Si el script devuelve un valor (p. ej. una medición), se imprime para poder leerlo.
             if (result !== undefined) console.log(`[shot:${shot.name}]`, JSON.stringify(result))
           }
           await sleep(shot.wait)
+          if (shot.skipImage) continue
           const image = await win.webContents.capturePage(shot.rect)
           writeFileSync(join(dir, `${shot.name}.png`), image.toPNG())
         }
