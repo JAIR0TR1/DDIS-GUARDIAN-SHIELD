@@ -31,7 +31,7 @@ export const en: Record<MessageKey, string> = {
   'settings.saveFailed': "I couldn't save the change. Please try again.",
   'settings.privacy': 'Privacy',
   'settings.privacy.body':
-    'Local rules check everything on your computer. Only doubtful messages send a fragment to Google AI, with passwords, codes and card numbers masked. Your history never leaves this device.',
+    'Local rules check everything on your computer. Only doubtful messages send a fragment to Google AI, with passwords, codes and card numbers masked. Your history only syncs with your own account: no one else can see it.',
   'settings.shortcut': 'Global shortcut',
   'settings.shortcut.hint': 'Analyzes what you copied, from any program.',
   'settings.shortcut.press': 'Press the new combination… (Esc to cancel)',

@@ -33,7 +33,7 @@ export const es = {
   'settings.saveFailed': 'No pude guardar el cambio. Inténtalo de nuevo.',
   'settings.privacy': 'Privacidad',
   'settings.privacy.body':
-    'Las reglas locales revisan todo en tu computador. Solo los mensajes dudosos envían un fragmento a la IA de Google, con claves, códigos y números de tarjeta tapados. Tu historial nunca sale de este equipo.',
+    'Las reglas locales revisan todo en tu computador. Solo los mensajes dudosos envían un fragmento a la IA de Google, con claves, códigos y números de tarjeta tapados. Tu historial solo se sincroniza con tu cuenta: nadie más puede verlo.',
   'settings.shortcut': 'Atajo global',
   'settings.shortcut.hint': 'Analiza lo que copiaste, desde cualquier programa.',
   'settings.shortcut.press': 'Presiona la nueva combinación… (Esc para cancelar)',
