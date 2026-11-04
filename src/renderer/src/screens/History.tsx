@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { History as HistoryIcon, Trash2 } from 'lucide-react'
 import type { HistoryEntry } from '@shared/history'
@@ -41,6 +41,16 @@ export function History({
   const [confirming, setConfirming] = useState(false)
   const [busy, setBusy] = useState(false)
   const t = useT()
+  // Al pedir confirmación el foco va a «Cancelar» (la opción segura); al cancelar vuelve a
+  // «Borrar historial». Sin esto, el botón pulsado desaparecía y el foco se perdía.
+  const cancelRef = useRef<HTMLButtonElement>(null)
+  const clearRef = useRef<HTMLButtonElement>(null)
+  const wasConfirming = useRef(false)
+  useEffect(() => {
+    if (confirming) cancelRef.current?.focus()
+    else if (wasConfirming.current) clearRef.current?.focus()
+    wasConfirming.current = confirming
+  }, [confirming])
 
   if (history.length === 0) {
     return (
@@ -110,11 +120,23 @@ export function History({
             })}
           </ul>
 
-          <div className="mt-auto flex items-center justify-end gap-2 pt-4">
+          <div
+            className="mt-auto flex items-center justify-end gap-2 pt-4"
+            onKeyDown={(event) => {
+              if (event.key === 'Escape' && confirming && !busy) setConfirming(false)
+            }}
+          >
             {confirming ? (
               <>
-                <span className="mr-auto text-[13px] text-text-muted">{t('history.confirm')}</span>
-                <Button variant="ghost" onClick={() => setConfirming(false)} disabled={busy}>
+                <span className="mr-auto text-[13px] text-text-muted" role="status">
+                  {t('history.confirm')}
+                </span>
+                <Button
+                  ref={cancelRef}
+                  variant="ghost"
+                  onClick={() => setConfirming(false)}
+                  disabled={busy}
+                >
                   {t('history.cancel')}
                 </Button>
                 <Button variant="danger" onClick={() => void clear()} loading={busy}>
@@ -123,6 +145,7 @@ export function History({
               </>
             ) : (
               <Button
+                ref={clearRef}
                 variant="ghost"
                 onClick={() => setConfirming(true)}
                 icon={<Trash2 aria-hidden className="size-4" />}

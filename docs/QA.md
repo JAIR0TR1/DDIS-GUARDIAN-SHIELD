@@ -45,12 +45,14 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ## 4. Accesibilidad y entrada
 | # | Caso | Pasos | Resultado esperado | Verificado |
 |---|---|---|---|---|
-| 4.1 | Solo teclado | Recorrer todo con Tab / Shift+Tab / Enter / Espacio | Todo es alcanzable; foco cian siempre visible | ⬜ |
-| 4.2 | Atajo de análisis | `Ctrl+Enter` en el cuadro de texto | Inicia el análisis | ⬜ |
+| 4.1 | Solo teclado | Recorrer todo con Tab / Shift+Tab / Enter / Espacio | Todo es alcanzable; foco cian siempre visible | ✅ recorrido automático con teclas reales en las 6 pantallas (3 nov): todo alcanzable, con anillo de foco y nombre; corregido: apariencias bloqueadas sin foco, foco perdido en Ajustes, Historial, Analizar y Arena |
+| 4.2 | Atajo de análisis | `Ctrl+Enter` en el cuadro de texto | Inicia el análisis | ✅ teclas reales |
 | 4.3 | Movimiento reducido | Ajustes → «Reducir movimiento» (o activar en Windows) | Fundidos simples; Nilo en pose fija; sin saludo animado | ⬜ |
 | 4.4 | Contraste | Revisar textos sobre vidrio | Legibles | ✅ prueba automática |
 | 4.5 | Lector de pantalla | Narrador de Windows en Analizar | Se anuncian botones, resultados y errores | ⬜ |
-| 4.6 | Foco al analizar | Tras analizar, usar Tab | El foco no se pierde | ⬜ |
+| 4.6 | Foco al analizar | Tras analizar, usar Tab | El foco pasa al resultado (antes se perdía) | ✅ teclas reales |
+| 4.7 | Borrar historial con teclado | Enter en «Borrar historial», luego `Esc` | El foco va a «Cancelar»; `Esc` cancela y devuelve el foco | ✅ teclas reales |
+| 4.8 | Ajustes con flechas | Flechas sobre Apariencia o Idioma | Cambia la opción y el foco se queda en el selector | ✅ teclas reales |
 
 ## 5. Ventana
 | # | Caso | Pasos | Resultado esperado | Verificado |
@@ -127,7 +129,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | # | Caso | Pasos | Resultado esperado | Verificado |
 |---|---|---|---|---|
 | 12.1 | Empezar | Barra lateral → Arena → «Empezar partida» | Ronda 1 de 8, 3 corazones, un mensaje y su villano (o «¿Quién escribe?») | ✅ capturas |
-| 12.2 | Responder con teclado | `E` (estafa), `S` (seguro), `Enter` (siguiente) | Responde y avanza sin usar el ratón | ✅ |
+| 12.2 | Responder con teclado | `E` (estafa), `S` (seguro), `Enter` (siguiente) | Responde y avanza sin usar el ratón; el foco pasa a «Siguiente» al responder | ✅ teclas reales |
 | 12.3 | Acierto | Responder bien una estafa | «¡Bien! Derrotaste a …», señal clave, sube la racha | ✅ pruebas de dominio |
 | 12.4 | Error | Responder mal | Pierde un corazón y se explica qué era | ✅ pruebas de dominio |
 | 12.5 | Perder | Fallar 3 veces | «Te quedaste sin corazones», resumen y XP ganada | ✅ pruebas de dominio · ⬜ probarlo tú |

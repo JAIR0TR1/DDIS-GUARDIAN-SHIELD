@@ -92,8 +92,14 @@ export function Analyzer({
   const areaId = useId()
   const errorId = useId()
 
+  const resultRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     if (status === 'idle') areaRef.current?.focus()
+    // Al terminar, el foco pasa al resultado (antes quedaba en el cuerpo de la página): con
+    // teclado se sigue desde ahí y el lector de pantalla lo anuncia.
+    if (status === 'done') resultRef.current?.focus()
+    if (status === 'error') resultRef.current?.querySelector<HTMLElement>('button')?.focus()
   }, [status])
 
   /** Analiza una captura ya leída. Si falla, deja un mensaje amable y permite reintentar. */
@@ -377,7 +383,13 @@ export function Analyzer({
         </GlassCard>
       </motion.div>
 
-      <motion.div variants={variants} className="col-span-12 lg:col-span-5">
+      <motion.div
+        ref={resultRef}
+        variants={variants}
+        tabIndex={-1}
+        aria-label={t('analyzer.result')}
+        className="col-span-12 rounded-[24px] lg:col-span-5"
+      >
         {status === 'error' ? (
           <GlassCard title={t('analyzer.result')} className="h-full">
             <EmptyState

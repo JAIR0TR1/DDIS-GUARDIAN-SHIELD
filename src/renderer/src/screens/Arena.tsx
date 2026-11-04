@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import { Flame, Heart, HeartCrack, ShieldAlert, ShieldCheck, Swords, Trophy } from 'lucide-react'
 import type { Creature } from '@shared/models'
@@ -154,6 +154,16 @@ export function Arena({ creature, variants, reduced, onCreature }: ArenaProps): 
     return () => window.removeEventListener('keydown', onKey)
   }, [advance, feedback, phase, respond])
 
+  // Foco: al responder, los botones de respuesta desaparecen; el foco pasa a «Siguiente». En cada
+  // ronda nueva vuelve a «Es estafa» si se había quedado en el cuerpo de la página.
+  const nextRef = useRef<HTMLButtonElement>(null)
+  const scamRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (phase !== 'play') return
+    if (feedback) nextRef.current?.focus()
+    else if (document.activeElement === document.body) scamRef.current?.focus()
+  }, [feedback, game.index, phase])
+
   if (phase === 'intro') {
     return <Intro variants={variants} creatureName={creature.name} onStart={start} />
   }
@@ -269,7 +279,7 @@ export function Arena({ creature, variants, reduced, onCreature }: ArenaProps): 
                     }`
                   : t('arena.safeTip')}
               </p>
-              <Button variant="primary" onClick={advance} className="self-start" autoFocus>
+              <Button ref={nextRef} variant="primary" onClick={advance} className="self-start">
                 {game.index + 1 >= game.rounds.length || game.hearts <= 0
                   ? t('arena.finish')
                   : t('arena.next')}
@@ -279,6 +289,7 @@ export function Arena({ creature, variants, reduced, onCreature }: ArenaProps): 
           ) : (
             <div className="grid grid-cols-2 gap-3">
               <Button
+                ref={scamRef}
                 variant="danger"
                 size="lg"
                 onClick={() => respond(true)}

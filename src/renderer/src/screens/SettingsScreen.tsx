@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type FormEvent } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent } from 'react'
 import { motion, type Variants } from 'framer-motion'
 import {
   Cloud,
@@ -52,8 +52,13 @@ export function SettingsScreen({
   const toast = useToast()
   const t = useT()
   const [busy, setBusy] = useState(false)
+  // Evita guardados simultáneos SIN desactivar los controles: un control desactivado pierde el
+  // foco, y con teclado el usuario quedaba «fuera» de la página tras cada cambio.
+  const saving = useRef(false)
 
   const run = async (action: () => Promise<void>): Promise<void> => {
+    if (saving.current) return
+    saving.current = true
     setBusy(true)
     try {
       await action()
@@ -61,6 +66,7 @@ export function SettingsScreen({
       console.error('No se pudo guardar el ajuste', error)
       toast.show(t('settings.saveFailed'), 'error')
     } finally {
+      saving.current = false
       setBusy(false)
     }
   }
@@ -73,7 +79,6 @@ export function SettingsScreen({
             label={t('settings.appearance')}
             description={t('settings.appearance.hint')}
             value={settings.theme}
-            disabled={busy}
             options={[
               {
                 value: 'dark',
@@ -97,7 +102,6 @@ export function SettingsScreen({
             label={t('settings.language')}
             description={t('settings.language.hint')}
             value={settings.language}
-            disabled={busy}
             options={[
               { value: 'es', label: t('settings.language.es') },
               { value: 'en', label: t('settings.language.en') }
@@ -108,21 +112,19 @@ export function SettingsScreen({
             label={t('settings.reduceMotion')}
             description={t('settings.reduceMotion.hint')}
             checked={settings.reduceMotion}
-            disabled={busy}
             onChange={(reduceMotion) => run(() => onSaveSettings({ ...settings, reduceMotion }))}
           />
           <Switch
             label={t('settings.watcher')}
             description={t('settings.watcher.hint')}
             checked={profile.vigilante}
-            disabled={busy}
             onChange={(vigilante) => run(() => onSaveProfile({ ...profile, vigilante }))}
           />
           <Switch
             label={t('settings.notifySafe')}
             description={t('settings.notifySafe.hint')}
             checked={settings.notifySafe}
-            disabled={busy || !profile.vigilante}
+            disabled={!profile.vigilante}
             onChange={(notifySafe) => run(() => onSaveSettings({ ...settings, notifySafe }))}
           />
           <ShortcutField

@@ -65,7 +65,7 @@ Nilo, el Guardián, es la cara de la app. Se eligió una criatura (y no un panel
 | 1.4.3 Contraste mínimo (4,5:1) | Tokens de texto probados incluso sobre el peor caso del vidrio y la malla de fondo. Un ajuste real: el rojo de texto es `#FF8A9C` y `#F43F5E` se reserva a rellenos y bordes. | `tests/contrast.test.ts` (automática) |
 | 1.4.11 Contraste no textual (3:1) | Iconos del semáforo sobre vidrio. | `tests/contrast.test.ts` |
 | 1.4.1 Uso del color | El semáforo **siempre** lleva icono y texto («Peligroso»), nunca solo color. | Revisión de componentes |
-| 2.1.1 Teclado / 2.4.7 Foco visible | Todo es operable con teclado; anillo de foco cian visible; `Ctrl+Enter`, `Enter`, `Espacio` en interruptores. | Revisión; pendiente de prueba manual completa (ver QA) |
+| 2.1.1 Teclado / 2.4.7 Foco visible | Todo es operable con teclado; anillo de foco cian visible; `Ctrl+Enter`, `Enter`, `Espacio` en interruptores. | Recorrido automático con teclas reales en todas las pantallas (QA 4.1); encontró y corrigió 4 pérdidas de foco y un control inalcanzable |
 | 2.3.3 Animación | `prefers-reduced-motion` y el ajuste «Reducir movimiento»: fundidos simples y pose fija de la mascota. | Implementado; verificación manual en QA |
 | 4.1.2 Nombre, función, valor | `role="switch"`, `role="progressbar"` con valores, `aria-label` en iconos, `role="alert"` en errores. | Revisión de componentes |
 | 2.5.8 Tamaño del objetivo | Objetivos ≥ 32 px. | Revisión |

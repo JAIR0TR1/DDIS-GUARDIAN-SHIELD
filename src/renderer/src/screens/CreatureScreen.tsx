@@ -241,8 +241,13 @@ function SkinPicker({
             <li key={id}>
               <button
                 type="button"
-                onClick={() => void choose(id)}
-                disabled={saving || !unlocked}
+                // Las bloqueadas siguen siendo enfocables (aria-disabled, no disabled) para que con
+                // teclado o lector de pantalla se sepa que existen y qué nivel piden.
+                onClick={() => {
+                  if (unlocked) void choose(id)
+                }}
+                disabled={saving}
+                aria-disabled={!unlocked}
                 aria-pressed={selected}
                 aria-label={
                   unlocked
