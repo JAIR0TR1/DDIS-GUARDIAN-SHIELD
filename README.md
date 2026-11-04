@@ -5,15 +5,20 @@ Protege del fraude digital con una criatura guardiana, **Nilo**: analiza mensaje
 ## Instalar y usar (sin programar)
 1. Ejecuta `EscudoGuardian-0.2.0-setup.exe` (se genera con `npm run build:win` en `release/`).
 2. Windows puede mostrar el aviso azul «SmartScreen» porque el instalador no está firmado: pulsa **Más información → Ejecutar de todas formas**.
-3. Abre Escudo Guardián. La primera vez te pide tu nombre; después Nilo te saluda.
+3. Abre Escudo Guardián, **crea una cuenta** (correo y contraseña) o inicia sesión. La primera vez te pide tu nombre; después Nilo te saluda.
 4. En **Analizar**, pega un mensaje y pulsa Analizar. Sin clave de IA funciona en modo demo; para usar la IA real, pega tu clave de Gemini en **Ajustes** (se guarda cifrada).
 
-No es una página web ni usa servidor: es una aplicación de escritorio y los datos viven en cada equipo.
+No es una página web: es una aplicación de escritorio. Tus datos se guardan en el equipo y se sincronizan con tu cuenta en la nube, así que puedes entrar desde cualquier computador con la app instalada.
+
+Descarga directa: [Releases del repositorio](https://github.com/JAIR0TR1/DDIS-GUARDIAN-SHIELD/releases).
 
 ## Qué incluye
-- Analizador de mensajes, links y capturas con semáforo, puntaje, señales y acción recomendada.
+- Analizador de mensajes, links y capturas con semáforo, puntaje, señales y acción recomendada. Si una captura trae varios mensajes, cada uno se analiza por separado.
 - **Nilo**, un guardián 3D que saluda, sigue el puntero y reacciona al contexto con gestos y un objeto flotante según la estafa (regalo, paquete, maletín, teléfono…).
 - Historial, experiencia y niveles; modo presentación; modo demo sin red.
+- **Arena del Guardián**: minijuego de 8 rondas contra nueve villanos (uno por tipo de estafa) que entrena a reconocer estafas y le da experiencia a Nilo.
+- **Apariencias de Nilo** que se desbloquean por nivel y **carta coleccionable** holográfica.
+- Cuentas con correo y contraseña (medidor de fuerza y contraseña sugerida).
 - Interfaz en **español o inglés** y tema **oscuro, claro o del sistema**, desde Ajustes.
 - Vigilante del portapapeles, atajo global, alerta flotante e icono en la bandeja.
 
@@ -72,7 +77,7 @@ Informe de las reglas sobre 30 mensajes de ejemplo: [docs/corpus-report.md](docs
 Cada usuario crea una cuenta con correo y contraseña. Perfil, criatura, ajustes e historial se guardan en **Supabase** (PostgreSQL) y se sincronizan: inicias sesión en cualquier equipo y ves tus datos. Cada usuario solo puede leer y escribir sus propias filas (Row Level Security, ver `supabase/schema.sql`). Sin internet la app sigue funcionando con la copia local y sube los cambios después.
 
 ## Datos
-Además de la nube, todo se guarda en archivos JSON en la carpeta de datos del usuario (`%APPDATA%\Escudo Guardián` instalada; `%APPDATA%\escudo-guardian` en desarrollo). No hay base de datos ni módulos nativos.
+Además de la nube, todo se guarda en archivos JSON en la carpeta de datos del usuario (`%APPDATA%\escudo-guardian`, una subcarpeta por cuenta). No hay base de datos local ni módulos nativos.
 
 ## Documentación
 - [docs/design-brief.md](docs/design-brief.md): análisis de las referencias visuales y decisiones de diseño.

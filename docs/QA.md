@@ -12,7 +12,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ## 1. Resultados automáticos (última ejecución)
 | Comprobación | Resultado |
 |---|---|
-| Pruebas (`npm test`) | 154 pasan: contraste AA, reglas, corpus, XP, caché, almacenamiento JSON, Gemini con red simulada, enmascarado, atajos, filtro de privacidad del portapapeles, vigilante, validación de imágenes |
+| Pruebas (`npm test`) | 254 pasan (3 nov): contraste AA en ambos temas, reglas, corpus, XP, caché, almacenamiento JSON, Gemini con red simulada, enmascarado, atajos, filtro de privacidad del portapapeles, vigilante, validación de imágenes, gestos, traducciones, nube, contraseñas, Arena y apariencias |
 | Corpus de 30 mensajes | 14 de 15 estafas peligrosas, 1 en zona de IA, 0 estafas dadas por seguras, 0 falsos positivos (`docs/corpus-report.md`) |
 | `typecheck`, `lint`, `build` | Sin errores |
 | Rendimiento de la mascota 3D | 144 fps medidos con 1 y 2 lienzos (pantalla de 144 Hz) |
@@ -123,5 +123,32 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | 10.4 | Tema del sistema | Apariencia → Sistema y cambiar el modo de Windows | La app sigue el cambio sin reiniciar | ⬜ probarlo tú |
 | 10.5 | Reducir movimiento en caliente | Activarlo y desactivarlo sin cambiar de pantalla | Nilo se detiene y vuelve a moverse al instante; con el ajuste activo sigue cambiando de cara | ✅ capturas comparadas en ambos sentidos |
 
-## 11. Cómo reportar un fallo
+## 12. Arena del Guardián
+| # | Caso | Pasos | Resultado esperado | Verificado |
+|---|---|---|---|---|
+| 12.1 | Empezar | Barra lateral → Arena → «Empezar partida» | Ronda 1 de 8, 3 corazones, un mensaje y su villano (o «¿Quién escribe?») | ✅ capturas |
+| 12.2 | Responder con teclado | `E` (estafa), `S` (seguro), `Enter` (siguiente) | Responde y avanza sin usar el ratón | ✅ |
+| 12.3 | Acierto | Responder bien una estafa | «¡Bien! Derrotaste a …», señal clave, sube la racha | ✅ pruebas de dominio |
+| 12.4 | Error | Responder mal | Pierde un corazón y se explica qué era | ✅ pruebas de dominio |
+| 12.5 | Perder | Fallar 3 veces | «Te quedaste sin corazones», resumen y XP ganada | ✅ pruebas de dominio · ⬜ probarlo tú |
+| 12.6 | Recompensa con tope | Terminar una partida | La XP se suma a Nilo (máx. 50 por partida, validado en el proceso principal) | ✅ prueba automática |
+| 12.7 | Tema claro e inglés | Jugar con tema claro y con English | Textos legibles y traducidos | ✅ capturas |
+
+## 13. Apariencias, carta e Inicio
+| # | Caso | Pasos | Resultado esperado | Verificado |
+|---|---|---|---|---|
+| 13.1 | Apariencias bloqueadas | Criatura → Apariencias con nivel 1 | Solo «Clásico» elegible; el resto con candado y «Nivel N» | ✅ capturas |
+| 13.2 | Cambiar apariencia | Con nivel suficiente, elegir otra | Nilo cambia de color en toda la app (también en la alerta flotante) y se guarda | ✅ capturas |
+| 13.3 | No se puede forzar | Una apariencia bloqueada no se guarda aunque se intente | El proceso principal la rechaza | ✅ por diseño |
+| 13.4 | Carta holográfica | Mover el puntero sobre la carta | Se inclina y el brillo se desplaza; con movimiento reducido queda quieta | ✅ capturas · ⬜ probarlo tú |
+| 13.5 | Inicio | Abrir Inicio | Nilo grande con saludo, nivel, próxima apariencia y botones Analizar / Jugar la Arena | ✅ capturas |
+
+## 14. Capturas con varios mensajes
+| # | Caso | Pasos | Resultado esperado | Verificado |
+|---|---|---|---|---|
+| 14.1 | Dos mensajes | Analizar una captura con dos mensajes (uno estafa, uno normal) | «Encontré 2 mensajes en la captura» y una pestaña por mensaje, cada una con su semáforo | ✅ con Gemini real y en demo |
+| 14.2 | Historial | Revisar el Historial después | Cada mensaje queda como entrada aparte | ✅ |
+| 14.3 | Pestañas con teclado | Flechas izquierda/derecha sobre las pestañas | Cambia de mensaje | ⬜ |
+
+## 15. Cómo reportar un fallo
 Anota: qué hacías, qué esperabas, qué pasó, y si ocurre siempre. Adjunta una captura. Si es un error de la IA, indica si estabas en modo demo o real.
