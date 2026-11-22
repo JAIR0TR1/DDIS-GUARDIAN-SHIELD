@@ -138,19 +138,27 @@ function CollectibleCard({
   }
 
   return (
-    // Proporción de carta coleccionable (3:4) en vez de estirarse a la altura de la columna.
-    <div className="mx-auto aspect-[3/4] w-full max-w-[420px]" style={{ perspective: 900 }}>
+    // Proporción de carta coleccionable (3:4) como MÍNIMO (cqw = ancho del contenedor): si la
+    // ventana es angosta y el contenido necesita más alto, la carta crece en vez de cortarse.
+    <div
+      className="mx-auto w-full max-w-[420px] [container-type:inline-size]"
+      style={{ perspective: 900 }}
+    >
       <motion.div
         onPointerMove={onMove}
         onPointerLeave={onLeave}
         // El marco toma el color de la rareza; la inclinación se apaga con movimiento reducido.
-        style={{ ...(reduced ? {} : { rotateX, rotateY }), borderColor: `${color}b3` }}
+        style={{
+          ...(reduced ? {} : { rotateX, rotateY }),
+          borderColor: `${color}b3`,
+          minHeight: '133.33cqw'
+        }}
         aria-label={t('creature.portrait')}
         role="group"
-        className="relative flex h-full flex-col overflow-hidden rounded-[24px] border-2 p-1.5 shadow-[var(--shadow-panel)]"
+        className="relative flex flex-col overflow-hidden rounded-[24px] border-2 p-1.5 shadow-[var(--shadow-panel)]"
       >
         <div
-          className="relative flex h-full flex-col items-center gap-2 overflow-hidden rounded-[18px] px-4 pb-4 pt-3"
+          className="relative flex flex-1 flex-col items-center gap-2 overflow-hidden rounded-[18px] px-4 pb-4 pt-3"
           style={{
             background: `radial-gradient(120% 80% at 50% 0%, ${skin.palette.shield}33, transparent 60%), linear-gradient(180deg, var(--surface-solid), var(--color-bg))`
           }}
