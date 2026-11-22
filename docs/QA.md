@@ -105,7 +105,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ## 9. Cuentas y nube (Supabase)
 | # | Caso | Pasos | Resultado esperado | Verificado |
 |---|---|---|---|---|
-| 9.1 | Crear cuenta | Pantalla de cuentas → Crear cuenta → correo, contraseña fuerte y confirmación | Entra a la bienvenida (nombre) y luego a la sesión | ✅ en la app contra el Supabase real |
+| 9.1 | Crear cuenta | Pantalla de cuentas → Crear cuenta → correo, contraseña fuerte y confirmación | Entra a la bienvenida (nombre) y luego a la sesión | ✅ en la app contra el Supabase real (repetido el 22 nov tras restaurar el proyecto) |
 | 9.2 | Contraseña débil | Registrarse con `12345678` | Medidor «Débil» con consejo; no deja crear la cuenta | ✅ |
 | 9.3 | Sugerir contraseña | Botón «Sugerir contraseña segura» | Escribe una contraseña fuerte en ambos campos y la muestra para copiarla | ✅ (200 sugerencias, todas «Fuerte», en las pruebas) |
 | 9.4 | Contraseñas distintas | Confirmación diferente | «Las contraseñas no coinciden.» | ✅ |
@@ -171,7 +171,7 @@ Estos casos dependen de tu equipo real, de Windows o de internet, y no se pueden
 | 5.3 | Arrastrar la ventana | Arrastra la barra de título con el ratón | La ventana se mueve | ⬜ |
 | 7.12 | Salir desde la bandeja | Enciende el vigilante, cierra la ventana (X), clic derecho en el icono de la bandeja → Salir | La app se cierra del todo | ⬜ |
 
-**Nota sobre las cuentas (22 nov):** al probar, `gjbbylfssbtfrmyliunm.supabase.co` ya no resolvía en internet, algo típico de un proyecto gratuito de Supabase **pausado por inactividad**. Mientras esté pausado no se puede crear cuenta ni iniciar sesión. Entra a supabase.com → tu proyecto → **Restore project** y espera unos minutos. Después comprueba con `Invoke-WebRequest https://gjbbylfssbtfrmyliunm.supabase.co/auth/v1/health` que responde.
+**Nota sobre las cuentas (22 nov):** el proyecto gratuito de Supabase estaba pausado por inactividad y su dominio no resolvía. Se restauró desde supabase.com (Restore project) y se verificó contra el servidor real: el inicio de sesión con la cuenta de prueba, el registro de una cuenta nueva (sin confirmación por correo, llega a la bienvenida) y que una consulta sin sesión ve 0 filas. Un proyecto gratuito vuelve a pausarse tras una semana sin actividad: entra a la app con sesión la víspera de presentar y, si el dominio deja de responder, repite Restore project.
 
 ## 16. Cómo reportar un fallo
 Anota: qué hacías, qué esperabas, qué pasó, y si ocurre siempre. Adjunta una captura. Si es un error de la IA, indica si estabas en modo demo o real.

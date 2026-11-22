@@ -79,5 +79,5 @@ Versión 0.3.0 terminada y verificada en la rama `release-v0.3`, todavía sin un
 
 - Publicar el Release 0.3.0 en GitHub.
 - Las pruebas manuales que dependen de Windows, del instalador o de otro equipo (SmartScreen, notificación nativa, Narrador, otro computador): `docs/QA.md`, sección 15.
-- Reactivar el proyecto gratuito de Supabase si sigue pausado; mientras lo esté, no se puede crear cuenta ni iniciar sesión.
+- Mantener activo el proyecto gratuito de Supabase: se pausa tras una semana sin actividad y, pausado, no se puede crear cuenta ni iniciar sesión. Se restauró y verificó el 22 de noviembre.
 - No se hicieron pruebas con usuarios reales; la evaluación es una inspección con heurísticas más pruebas automáticas.

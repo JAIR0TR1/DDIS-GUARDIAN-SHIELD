@@ -4,7 +4,7 @@ Cada paso dice qué hacer en pantalla y qué decir. Los tiempos son aproximados.
 
 ## Antes de empezar (la víspera y 5 minutos antes)
 
-1. **Comprueba que el servidor de cuentas responde.** En PowerShell: `Invoke-WebRequest https://gjbbylfssbtfrmyliunm.supabase.co/auth/v1/health`. Si dice que no puede resolver el nombre, el proyecto gratuito de Supabase está pausado: entra a supabase.com, abre el proyecto y pulsa **Restore project**. Hazlo la víspera, porque tarda unos minutos.
+1. **Comprueba que el servidor de cuentas responde** (el 22 de noviembre estaba pausado y se restauró; un proyecto gratuito se pausa tras una semana sin actividad). En PowerShell: `Invoke-WebRequest https://gjbbylfssbtfrmyliunm.supabase.co/auth/v1/health`. Si dice que no puede resolver el nombre, el proyecto gratuito de Supabase está pausado: entra a supabase.com, abre el proyecto y pulsa **Restore project**. Hazlo la víspera, porque tarda unos minutos.
 2. **Instala `EscudoGuardian-0.3.0-setup.exe`**, abre la app e inicia sesión una vez. La sesión queda guardada y la app abre sin pedirla otra vez.
 3. Cierra Escudo Guardián en modo desarrollo si lo tenías abierto: la instalada y la de desarrollo comparten datos y no pueden correr juntas.
 4. Deja el vigilante del portapapeles apagado, la ventana a tamaño normal y el tema oscuro.
