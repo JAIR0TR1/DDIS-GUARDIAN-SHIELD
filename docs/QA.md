@@ -12,7 +12,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ## 1. Resultados automáticos (última ejecución)
 | Comprobación | Resultado |
 |---|---|
-| Pruebas (`npm test`) | 266 pasan (22 nov): contraste AA en ambos temas, reglas, corpus, XP, caché, almacenamiento JSON, Gemini con red simulada, enmascarado, atajos, filtro de privacidad del portapapeles, vigilante, validación de imágenes, gestos, traducciones, nube, contraseñas, Arena, apariencias, navegación de pestañas, capturas sin clave y coherencia de la versión |
+| Pruebas (`npm test`) | 267 pasan (22 nov): contraste AA en ambos temas, reglas, corpus, XP, caché, almacenamiento JSON, Gemini con red simulada, enmascarado, atajos, filtro de privacidad del portapapeles, vigilante, validación de imágenes, gestos, traducciones, nube, contraseñas, Arena, apariencias, navegación de pestañas, capturas sin clave y coherencia de la versión |
 | Corpus de 30 mensajes | 14 de 15 estafas peligrosas, 1 en zona de IA, 0 estafas dadas por seguras, 0 falsos positivos (`docs/corpus-report.md`) |
 | `typecheck`, `lint`, `build` | Sin errores |
 | Rendimiento de la mascota 3D | 144 fps medidos con 1 y 2 lienzos (pantalla de 144 Hz) |

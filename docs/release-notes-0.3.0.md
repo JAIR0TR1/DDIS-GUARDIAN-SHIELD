@@ -39,7 +39,7 @@ Sin clave de Gemini la app funciona en modo demo: las reglas locales son las rea
 
 ## Verificación
 
-- 266 pruebas automáticas pasan en 19 archivos, entre ellas el contraste AA en ambos temas y un corpus de 30 mensajes (15 estafas y 15 legítimos).
+- 267 pruebas automáticas pasan en 19 archivos, entre ellas el contraste AA en ambos temas y un corpus de 30 mensajes (15 estafas y 15 legítimos).
 - Con las reglas locales, 14 de las 15 estafas salen como peligrosas y la otra cae en la zona que se consulta a la IA. Ninguna estafa sale como segura y ningún mensaje legítimo sale como sospechoso.
 - El instalador se instaló en una carpeta temporal, se abrió y se desinstaló sin dejar archivos, accesos ni entradas de registro. El paquete no contiene `.env` ni claves.
 

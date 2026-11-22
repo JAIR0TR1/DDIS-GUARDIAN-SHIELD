@@ -45,7 +45,7 @@ Versiones tal como están en `package.json`:
 | Dato | Valor | Cómo comprobarlo |
 |---|---|---|
 | Versión | 0.3.0 | `package.json` |
-| Pruebas automáticas | 266 pasan, en 19 archivos | `npm test` |
+| Pruebas automáticas | 267 pasan, en 19 archivos | `npm test` |
 | Corpus de reglas | 30 mensajes: 15 estafas y 15 legítimos | `docs/corpus-report.md` |
 | Estafas del corpus | 14 salen como peligrosas, 1 cae en la zona que se consulta a la IA, 0 salen como seguras | `docs/corpus-report.md` |
 | Legítimos del corpus | 15 salen como seguros, 0 falsos positivos | `docs/corpus-report.md` |

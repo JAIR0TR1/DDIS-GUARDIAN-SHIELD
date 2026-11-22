@@ -62,7 +62,7 @@ Di: «La experiencia que gana Nilo analizando mensajes desbloquea apariencias. L
 1. Copia el texto «Ganaste un premio. Confirma tu clave en bit.ly/x» desde el Bloc de notas y pulsa `Ctrl+Shift+G`. Aparece la alerta flotante; `Enter` abre el detalle y `Esc` la descarta.
 2. Muestra el repositorio y la página de Releases.
 
-Di: «La app también funciona desde cualquier programa con un atajo global, y hay un vigilante del portapapeles opcional que solo usa reglas locales. El proyecto tiene 266 pruebas automáticas y un corpus de 30 mensajes: 14 de las 15 estafas salen como peligrosas y las 15 legítimas, como seguras. Todo el historial de commits está en el repositorio».
+Di: «La app también funciona desde cualquier programa con un atajo global, y hay un vigilante del portapapeles opcional que solo usa reglas locales. El proyecto tiene 267 pruebas automáticas y un corpus de 30 mensajes: 14 de las 15 estafas salen como peligrosas y las 15 legítimas, como seguras. Todo el historial de commits está en el repositorio».
 
 ## Preguntas que pueden hacerte
 
