@@ -120,7 +120,7 @@ export const en: Record<MessageKey, string> = {
   locale: 'en-US',
   'history.title': 'History',
   'history.empty.title': 'No analyses yet',
-  'history.empty.body': 'Every message you check is saved here, only on your computer.',
+  'history.empty.body': 'Every message you check is saved here, in your personal history.',
   'history.empty.action': 'Analyze a message',
   'history.list': 'Previous analyses',
   'history.confirm': 'Delete the whole history?',

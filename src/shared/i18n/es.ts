@@ -121,7 +121,7 @@ export const es = {
   locale: 'es-CO',
   'history.title': 'Historial',
   'history.empty.title': 'Aún no hay análisis',
-  'history.empty.body': 'Cada mensaje que revises queda guardado acá, solo en tu computador.',
+  'history.empty.body': 'Cada mensaje que revises queda guardado acá, en tu historial personal.',
   'history.empty.action': 'Analizar un mensaje',
   'history.list': 'Análisis anteriores',
   'history.confirm': '¿Borrar todo el historial?',
