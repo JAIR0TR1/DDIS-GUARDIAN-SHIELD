@@ -113,7 +113,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | 9.6 | Contraseña incorrecta | Entrar con una contraseña errada | «Correo o contraseña incorrectos.» | ✅ |
 | 9.7 | Aislamiento entre usuarios | Un usuario intenta leer o escribir filas de otro | La base de datos lo impide (RLS) | ✅ probado contra el Supabase real |
 | 9.8 | Cerrar sesión | Ajustes → Cuenta → Cerrar sesión | Vuelve a la pantalla de cuentas; el vigilante se apaga | ✅ cableado · ⬜ probarlo tú |
-| 9.9 | Sin internet | Desconectar el wifi con sesión iniciada y analizar | Funciona con los datos locales; al volver la conexión sube lo pendiente | ✅ por diseño (reglas probadas) · ⬜ probarlo tú |
+| 9.9 | Sin internet | Desconectar el wifi con sesión iniciada y analizar | Funciona con los datos locales; al volver la conexión sube lo pendiente | ✅ (22 nov, simulado) con la sesión guardada y el servidor inalcanzable: la app abre en sesión, muestra el historial (7 entradas), analiza «Legítimo» (+10 XP, 8 entradas, XP guardada) y registra que los cambios quedan pendientes; al reabrir con servidor conserva las 8 entradas · ⬜ repetirlo con el wifi apagado de verdad en la app instalada |
 | 9.10 | Datos previos | Primera cuenta que entra en un equipo que ya tenía datos | Se lleva el historial y la criatura existentes | ⬜ probarlo tú |
 
 ## 10. Idioma, tema y movimiento
