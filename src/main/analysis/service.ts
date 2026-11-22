@@ -154,9 +154,11 @@ export function createAnalysisService(
       const choice = await getProvider()
       const provider = choice.provider
       if (!provider?.refineImage) {
+        // El aviso de «sin clave» habla de reglas locales (plan B de los textos); para una captura
+        // no hay plan B, así que se usa siempre el mensaje propio de capturas.
         throw new ProviderError(
           'Sin proveedor de imágenes',
-          choice.notice ?? 'Para analizar capturas necesito la IA. Agrega tu clave en Ajustes.'
+          'Para analizar capturas necesito la IA. Agrega tu clave en Ajustes.'
         )
       }
 

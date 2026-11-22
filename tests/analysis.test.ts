@@ -8,6 +8,7 @@ import { guardScore, guardVerdict } from '../src/domain/explain'
 import { analyzeLocal } from '../src/domain/rules'
 import { analyzeThreat, type ThreatProvider } from '../src/main/analysis/analyzeThreat'
 import { demoProvider } from '../src/main/analysis/demoProvider'
+import { ProviderError } from '../src/main/analysis/providerError'
 import { cacheKey, createAnalysisService } from '../src/main/analysis/service'
 import { JsonStore } from '../src/main/storage/jsonStore'
 import type { AppData } from '../src/main/storage/appData'
@@ -248,6 +249,21 @@ describe('servicio de análisis', () => {
     await expect(service.run({ text: '   ', source: 'text' })).rejects.toThrow()
     await expect(service.run({ text: 'a'.repeat(6000), source: 'text' })).rejects.toThrow()
     await expect(service.run({ text: 'hola', source: 'video' })).rejects.toThrow()
+  })
+
+  it('una captura sin clave de IA dice que necesita la IA (no habla de reglas locales)', async () => {
+    const data = fakeData()
+    const service = createAnalysisService(data, async () => ({
+      provider: null,
+      notice: 'Falta la clave de Gemini, así que usé solo las reglas locales. Agrégala en Ajustes.'
+    }))
+    const tinyPng =
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=='
+    const error = await service.runImage({ mimeType: 'image/png', data: tinyPng }).catch((e) => e)
+    expect(error).toBeInstanceOf(ProviderError)
+    expect((error as ProviderError).userMessage).toMatch(/capturas necesito la IA/)
+    expect((error as ProviderError).userMessage).not.toMatch(/reglas locales/)
+    expect(data.history).toHaveLength(0)
   })
 
   it('el texto completo no se guarda en el historial, solo un fragmento', async () => {
