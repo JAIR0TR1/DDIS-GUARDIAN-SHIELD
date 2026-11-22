@@ -173,9 +173,13 @@ function Onboarding({
   const errorId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (step === STEPS - 1) inputRef.current?.focus()
-  }, [step])
+  // El campo del nombre solo existe cuando termina la animación de salida del paso anterior
+  // (AnimatePresence mode="wait"), así que un efecto sobre `step` lo buscaba antes de que
+  // existiera y el foco se perdía. Con una referencia, se enfoca en el momento en que aparece.
+  const attachInput = useCallback((element: HTMLInputElement | null) => {
+    inputRef.current = element
+    element?.focus({ preventScroll: true })
+  }, [])
 
   const next = (): void => setStep((s) => Math.min(STEPS - 1, s + 1))
   const back = (): void => setStep((s) => Math.max(0, s - 1))
@@ -226,7 +230,7 @@ function Onboarding({
                 {t('onboarding.name')}
               </label>
               <input
-                ref={inputRef}
+                ref={attachInput}
                 id={inputId}
                 value={name}
                 onChange={(e) => {
