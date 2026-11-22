@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 // Regenera el icono de la app con el Nilo 3D actual (npm run icon):
-//  1. Abre la app en modo desarrollo en la pantalla interna #icon y captura a Nilo.
+//  1. Abre la app en modo desarrollo en la pantalla interna #icon y captura a Nilo de cuerpo entero
+//     (para 48 px o más) y, en #icon-small, un primer plano de la cara (para 32 px o menos).
 //  2. Aplica las esquinas redondeadas y arma build/icon.ico y build/icon.png.
 import { spawn } from 'node:child_process'
 import { mkdirSync } from 'node:fs'
@@ -30,6 +31,12 @@ const shots = JSON.stringify([
     wait: 2500,
     rect: { x: 0, y: 0, width: 512, height: 512 },
     js: "location.hash = '#icon'; location.reload()"
+  },
+  {
+    name: 'icon-small-source',
+    wait: 2500,
+    rect: { x: 0, y: 0, width: 512, height: 512 },
+    js: "location.hash = '#icon-small'; location.reload()"
   }
 ])
 

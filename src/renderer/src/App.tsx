@@ -204,12 +204,13 @@ function Shell(): React.JSX.Element {
   }, [toast, t])
 
   const galleryMode = import.meta.env.DEV && window.location.hash === '#gallery'
-  const iconMode = import.meta.env.DEV && window.location.hash === '#icon'
+  const iconHash = window.location.hash
+  const iconMode = import.meta.env.DEV && (iconHash === '#icon' || iconHash === '#icon-small')
   const gesturesMode = import.meta.env.DEV && window.location.hash === '#gestos'
 
   let body: React.JSX.Element
   if (iconMode) {
-    body = <IconStage />
+    body = <IconStage variant={iconHash === '#icon-small' ? 'small' : 'full'} />
   } else if (gesturesMode) {
     body = <GestureStage />
   } else if (galleryMode) {
