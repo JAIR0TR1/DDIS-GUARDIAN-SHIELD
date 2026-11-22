@@ -65,7 +65,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | # | Caso | Pasos | Resultado esperado | Verificado |
 |---|---|---|---|---|
 | 6.1 | Generar | `npm run build:win` | Crea `release/EscudoGuardian-0.3.0-setup.exe` | ✅ regenerado el 22 nov (0.3.0, 117,7 MB; incluye `@supabase/supabase-js` en `app.asar`) |
-| 6.2 | Instalar y abrir | Ejecutar el instalador, abrir la app | Abre en modo demo, con icono de Nilo | ✅ (22 nov) instalación silenciosa en carpeta temporal: 75 archivos, crea registro y accesos, la app abre con su ventana «Escudo Guardián» y guarda datos |
+| 6.2 | Instalar y abrir | Ejecutar el instalador, abrir la app | Abre en modo demo, con icono de Nilo | ✅ (22 nov) instalación silenciosa en carpeta temporal: 75 archivos, crea registro y accesos, la app abre con su ventana «Escudo Guardián» y guarda datos | · instalado de verdad en el equipo del usuario (22 nov): `%LOCALAPPDATA%\Programs\EscudoGuardian`, 75 archivos, accesos en el escritorio y el menú Inicio, abre con ventana «Escudo Guardián»
 | 6.3 | SmartScreen | Primera ejecución | Aviso por no estar firmado: «Más información» → «Ejecutar de todas formas» | ⬜ |
 | 6.4 | Desinstalar | Desinstalar desde Windows | No quedan archivos, accesos ni registro | ✅ (22 nov) desinstalación silenciosa: 0 archivos en la carpeta, sin entrada de registro y sin accesos directos |
 | 6.5 | La clave no viaja | Inspeccionar el instalador | No hay `.env` ni claves | ✅ (22 nov) `app.asar` extraído y revisado: ningún `.env`, `.key` ni `.pem`; sin claves de Gemini (`AIza…`) ni de Supabase secreta (`sb_secret_…`; las únicas menciones son el prefijo dentro de la librería de Supabase) |
