@@ -40,7 +40,8 @@ interface Loaded {
   demoMode: boolean
 }
 
-const VERSION = __APP_VERSION__
+// Inyectada al compilar (electron.vite.config.ts); fuera de ese build, p. ej. en pruebas, no existe.
+const VERSION = typeof __APP_VERSION__ === 'string' ? __APP_VERSION__ : 'dev'
 /** Cuánto dura el color de Nilo en el fondo tras un análisis. */
 const TONE_MS = 9000
 

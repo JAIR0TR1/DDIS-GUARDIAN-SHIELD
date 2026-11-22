@@ -6,6 +6,12 @@ const root = resolve(__dirname, '..')
 const read = (file: string): string => readFileSync(resolve(root, file), 'utf-8')
 const { version } = JSON.parse(read('package.json')) as { version: string }
 
+/** La versión como número completo: «0.3.0» no debe aparecer dentro de «10.3.0» ni de «0.3.01». */
+const mentionsVersion = (text: string): boolean => {
+  const escaped = version.replace(/\./g, '\\.')
+  return new RegExp(`(?<![\\d.])${escaped}(?!\\d)`).test(text)
+}
+
 describe('coherencia de la versión entre código y documentos', () => {
   it('el README nombra el instalador de la versión actual', () => {
     expect(read('README.md')).toContain(`EscudoGuardian-${version}-setup.exe`)
@@ -16,7 +22,7 @@ describe('coherencia de la versión entre código y documentos', () => {
   })
 
   it('CLAUDE.md menciona la versión actual', () => {
-    expect(read('CLAUDE.md')).toContain(version)
+    expect(mentionsVersion(read('CLAUDE.md'))).toBe(true)
   })
 
   it('existen las notas de versión de la versión actual', () => {
@@ -26,6 +32,12 @@ describe('coherencia de la versión entre código y documentos', () => {
   it('el package-lock.json tiene la misma versión que package.json', () => {
     const lock = JSON.parse(read('package-lock.json')) as { version: string }
     expect(lock.version).toBe(version)
+  })
+
+  it('la comprobación de versión no confunde números parecidos', () => {
+    expect(mentionsVersion(`versión ${version}`)).toBe(true)
+    expect(mentionsVersion(`v1${version}`)).toBe(false)
+    expect(mentionsVersion(`${version}1`)).toBe(false)
   })
 
   it('la versión sigue el formato mayor.menor.parche', () => {
