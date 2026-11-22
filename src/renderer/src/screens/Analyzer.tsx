@@ -21,6 +21,7 @@ import { Button } from '../components/ui/Button'
 import { Kbd } from '../components/ui/Kbd'
 import { EmptyState } from '../components/ui/EmptyState'
 import { ThreatResultCard } from '../components/ui/ThreatResultCard'
+import { nextTabIndex } from '@domain/tabNav'
 import { HighlightedText } from '../components/HighlightedText'
 import { Badge } from '../components/ui/Badge'
 import { cn } from '../lib/cn'
@@ -629,11 +630,14 @@ function MessageTabs({
       n: outcomes.filter((o) => o.entry.result.verdict === verdict).length
     }))
     .filter((c) => c.n > 0)
+  const tabs = useRef<Array<HTMLButtonElement | null>>([])
   const move = (event: React.KeyboardEvent, index: number): void => {
-    const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0
-    if (step === 0) return
+    const next = nextTabIndex(event.key, index, outcomes.length)
+    if (next === null) return
     event.preventDefault()
-    onSelect((index + step + outcomes.length) % outcomes.length)
+    onSelect(next)
+    // El foco acompaña a la selección: sin esto la siguiente flecha partía de la pestaña vieja.
+    tabs.current[next]?.focus()
   }
   return (
     <div className="glass rounded-[16px] px-4 py-3">
@@ -657,6 +661,9 @@ function MessageTabs({
             <button
               key={item.entry.id}
               type="button"
+              ref={(element) => {
+                tabs.current[index] = element
+              }}
               role="tab"
               aria-selected={active}
               tabIndex={active ? 0 : -1}
