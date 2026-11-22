@@ -42,6 +42,19 @@ async function sendKey(win: BrowserWindow, combo: string): Promise<void> {
   win.webContents.sendInputEvent({ type: 'keyUp', keyCode, modifiers })
 }
 
+/** capturePage falla de vez en cuando con «UnknownVizError» (la GPU aún no pintó): se reintenta. */
+async function capture(win: BrowserWindow, rect: Shot['rect']): Promise<Electron.NativeImage> {
+  const attempts = 4
+  for (let attempt = 1; ; attempt += 1) {
+    try {
+      return await win.webContents.capturePage(rect)
+    } catch (error) {
+      if (attempt >= attempts) throw error
+      await sleep(700)
+    }
+  }
+}
+
 /**
  * SOLO DESARROLLO. Si GUARDIAN_SHOTS contiene un JSON con una lista de capturas, la app las toma
  * con capturePage (únicamente el contenido de la ventana, nunca el escritorio) y se cierra.
@@ -63,6 +76,10 @@ export function runDevScreenshots(win: BrowserWindow): void {
   const dir = process.env['GUARDIAN_SHOTS_DIR'] ?? join(app.getAppPath(), '.screenshots')
   mkdirSync(dir, { recursive: true })
 
+  // Si otra ventana tapa la de pruebas, Chromium frena las animaciones y las capturas salen con
+  // el contenido a medio aparecer. Solo en esta herramienta de desarrollo se desactiva ese freno.
+  win.webContents.setBackgroundThrottling(false)
+
   win.webContents.once('did-finish-load', () => {
     void (async () => {
       try {
@@ -80,7 +97,7 @@ export function runDevScreenshots(win: BrowserWindow): void {
           }
           await sleep(shot.wait)
           if (shot.skipImage) continue
-          const image = await win.webContents.capturePage(shot.rect)
+          const image = await capture(win, shot.rect)
           writeFileSync(join(dir, `${shot.name}.png`), image.toPNG())
         }
       } catch (error) {
