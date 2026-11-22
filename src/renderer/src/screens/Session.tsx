@@ -220,46 +220,49 @@ export function Session({
 
       <div className="flex min-w-0 flex-1 flex-col">
         <motion.header
-          className="flex shrink-0 items-start justify-between gap-6 px-7 pb-3 pt-5"
+          className="shrink-0 px-7 pb-3 pt-5"
           initial={{ opacity: 0, y: reduced ? 0 : -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ ...transition.slow, delay: 0.35 }}
         >
-          <div className="min-w-0">
-            <h1 className="truncate font-display text-[26px] font-semibold leading-tight tracking-tight">
-              {t('session.hello', { name: profile.name })}
-            </h1>
-            <p className="mt-1 flex items-center gap-2 text-sm text-text-muted">
-              <span className="pulse-dot text-safe" aria-hidden />
-              {t('session.active')}
-              <span className="text-text-subtle" aria-hidden>
-                ·
-              </span>
-              <span className="hud-label !text-text-subtle">
-                {demoMode ? t('mode.demo') : t('mode.real')}
-              </span>
-            </p>
-            <div className="mt-2.5 flex items-center gap-3">
-              <WatcherChip
-                on={profile.vigilante}
-                disabled={savingWatcher}
-                onToggle={toggleWatcher}
-              />
-              {profile.vigilante && watcherNote && (
-                <span role="status" className="text-[13px] text-text-muted">
-                  {watcherNote}
+          {/* Mismo ancho máximo que el contenido: en pantalla completa quedan alineados. */}
+          <div className="mx-auto flex max-w-[980px] items-start justify-between gap-6">
+            <div className="min-w-0">
+              <h1 className="truncate font-display text-[26px] font-semibold leading-tight tracking-tight">
+                {t('session.hello', { name: profile.name })}
+              </h1>
+              <p className="mt-1 flex items-center gap-2 text-sm text-text-muted">
+                <span className="pulse-dot text-safe" aria-hidden />
+                {t('session.active')}
+                <span className="text-text-subtle" aria-hidden>
+                  ·
                 </span>
-              )}
+                <span className="hud-label !text-text-subtle">
+                  {demoMode ? t('mode.demo') : t('mode.real')}
+                </span>
+              </p>
+              <div className="mt-2.5 flex items-center gap-3">
+                <WatcherChip
+                  on={profile.vigilante}
+                  disabled={savingWatcher}
+                  onToggle={toggleWatcher}
+                />
+                {profile.vigilante && watcherNote && (
+                  <span role="status" className="text-[13px] text-text-muted">
+                    {watcherNote}
+                  </span>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="w-52 shrink-0 pt-1">
-            <p className="tabular mb-1.5 flex justify-between font-mono text-[12px] text-text-muted">
-              <span>{t('session.level', { level: creature.level })}</span>
-              <span>
-                {creature.xp} / {needed} XP
-              </span>
-            </p>
-            <ProgressBar value={creature.xp} max={needed} label={t('session.xp')} />
+            <div className="w-52 shrink-0 pt-1">
+              <p className="tabular mb-1.5 flex justify-between font-mono text-[12px] text-text-muted">
+                <span>{t('session.level', { level: creature.level })}</span>
+                <span>
+                  {creature.xp} / {needed} XP
+                </span>
+              </p>
+              <ProgressBar value={creature.xp} max={needed} label={t('session.xp')} />
+            </div>
           </div>
         </motion.header>
 
