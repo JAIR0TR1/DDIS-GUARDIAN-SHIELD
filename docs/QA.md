@@ -12,7 +12,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ## 1. Resultados automáticos (última ejecución)
 | Comprobación | Resultado |
 |---|---|
-| Pruebas (`npm test`) | 260 pasan (22 nov): contraste AA en ambos temas, reglas, corpus, XP, caché, almacenamiento JSON, Gemini con red simulada, enmascarado, atajos, filtro de privacidad del portapapeles, vigilante, validación de imágenes, gestos, traducciones, nube, contraseñas, Arena, apariencias, navegación de pestañas y capturas sin clave |
+| Pruebas (`npm test`) | 266 pasan (22 nov): contraste AA en ambos temas, reglas, corpus, XP, caché, almacenamiento JSON, Gemini con red simulada, enmascarado, atajos, filtro de privacidad del portapapeles, vigilante, validación de imágenes, gestos, traducciones, nube, contraseñas, Arena, apariencias, navegación de pestañas, capturas sin clave y coherencia de la versión |
 | Corpus de 30 mensajes | 14 de 15 estafas peligrosas, 1 en zona de IA, 0 estafas dadas por seguras, 0 falsos positivos (`docs/corpus-report.md`) |
 | `typecheck`, `lint`, `build` | Sin errores |
 | Rendimiento de la mascota 3D | 144 fps medidos con 1 y 2 lienzos (pantalla de 144 Hz) |
@@ -64,11 +64,11 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ## 6. Instalador de Windows
 | # | Caso | Pasos | Resultado esperado | Verificado |
 |---|---|---|---|---|
-| 6.1 | Generar | `npm run build:win` | Crea `release/EscudoGuardian-0.2.0-setup.exe` | ✅ regenerado el 3 nov (0.2.0: Arena, apariencias, capturas con varios mensajes) (incluye `@supabase/supabase-js` en `app.asar`) |
-| 6.2 | Instalar y abrir | Ejecutar el instalador, abrir la app | Abre en modo demo, con icono de Nilo | ✅ instalación silenciosa en carpeta temporal |
+| 6.1 | Generar | `npm run build:win` | Crea `release/EscudoGuardian-0.3.0-setup.exe` | ✅ regenerado el 22 nov (0.3.0, 117,7 MB; incluye `@supabase/supabase-js` en `app.asar`) |
+| 6.2 | Instalar y abrir | Ejecutar el instalador, abrir la app | Abre en modo demo, con icono de Nilo | ✅ (22 nov) instalación silenciosa en carpeta temporal: 75 archivos, crea registro y accesos, la app abre con su ventana «Escudo Guardián» y guarda datos |
 | 6.3 | SmartScreen | Primera ejecución | Aviso por no estar firmado: «Más información» → «Ejecutar de todas formas» | ⬜ |
-| 6.4 | Desinstalar | Desinstalar desde Windows | No quedan archivos, accesos ni registro | ✅ |
-| 6.5 | La clave no viaja | Inspeccionar el instalador | No hay `.env` ni claves | ✅ (el archivo comprimido no contiene `.env`) |
+| 6.4 | Desinstalar | Desinstalar desde Windows | No quedan archivos, accesos ni registro | ✅ (22 nov) desinstalación silenciosa: 0 archivos en la carpeta, sin entrada de registro y sin accesos directos |
+| 6.5 | La clave no viaja | Inspeccionar el instalador | No hay `.env` ni claves | ✅ (22 nov) `app.asar` extraído y revisado: ningún `.env`, `.key` ni `.pem`; sin claves de Gemini (`AIza…`) ni de Supabase secreta (`sb_secret_…`; las únicas menciones son el prefijo dentro de la librería de Supabase) |
 
 ## 7. Funciones de fondo (P1)
 | # | Caso | Pasos | Resultado esperado | Verificado |

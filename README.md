@@ -28,7 +28,7 @@ Más capturas: [sospechoso](docs/screenshots/03-analizar-sospechoso.jpg) · [seg
 Las capturas se tomaron en **modo demo** con un perfil de ejemplo («Camila», nivel 3). Las reglas locales que dan el semáforo son las reales; lo único simulado es la segunda opinión de la IA en los casos dudosos, y la app lo indica en pantalla («Modo demo», «IA simulada»).
 
 ## Instalar y usar (sin programar)
-1. Ejecuta `EscudoGuardian-0.2.0-setup.exe` (se genera con `npm run build:win` en `release/`).
+1. Ejecuta `EscudoGuardian-0.3.0-setup.exe` (lo bajas de [Releases](https://github.com/JAIR0TR1/DDIS-GUARDIAN-SHIELD/releases) o lo generas con `npm run build:win` en `release/`).
 2. Windows puede mostrar el aviso azul «SmartScreen» porque el instalador no está firmado: pulsa **Más información → Ejecutar de todas formas**.
 3. Abre Escudo Guardián, **crea una cuenta** (correo y contraseña) o inicia sesión. La primera vez te pide tu nombre; después Nilo te saluda.
 4. En **Analizar**, pega un mensaje y pulsa Analizar. Sin clave de IA funciona en modo demo; para usar la IA real, pega tu clave de Gemini en **Ajustes** (se guarda cifrada).
