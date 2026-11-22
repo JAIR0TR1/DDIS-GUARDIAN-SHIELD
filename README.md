@@ -2,6 +2,31 @@
 
 Protege del fraude digital con una criatura guardiana, **Nilo**: analiza mensajes y links, avisa con semáforo (seguro, sospechoso, peligroso) y explica por qué. Proyecto universitario de Diseño de Interfaces (aplicación de escritorio; hermana de las apps de celular y reloj).
 
+## Capturas
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/02-analizar-peligroso.jpg" alt="Resultado «Peligroso» con las señales detectadas y la voz de Nilo"></td>
+    <td><img src="docs/screenshots/01-inicio.jpg" alt="Pantalla de inicio con Nilo, el nivel y la última amenaza"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Analizar: semáforo, puntaje, señales resaltadas y acción recomendada</sub></td>
+    <td align="center"><sub>Inicio: Nilo, nivel, métricas y la última amenaza</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/06-criatura-carta.jpg" alt="Carta coleccionable de Nilo con apariencias desbloqueables"></td>
+    <td><img src="docs/screenshots/07-arena.jpg" alt="Arena del Guardián: una ronda del minijuego"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Criatura: carta coleccionable y apariencias por nivel</sub></td>
+    <td align="center"><sub>Arena del Guardián: aprende a reconocer estafas jugando</sub></td>
+  </tr>
+</table>
+
+Más capturas: [sospechoso](docs/screenshots/03-analizar-sospechoso.jpg) · [seguro](docs/screenshots/04-analizar-seguro.jpg) · [historial](docs/screenshots/05-historial.jpg) · [alerta flotante](docs/screenshots/08-alerta-flotante.png) · [tema claro](docs/screenshots/09-tema-claro.jpg) · [en inglés](docs/screenshots/10-ingles.jpg).
+
+Las capturas se tomaron en **modo demo** con un perfil de ejemplo («Camila», nivel 3). Las reglas locales que dan el semáforo son las reales; lo único simulado es la segunda opinión de la IA en los casos dudosos, y la app lo indica en pantalla («Modo demo», «IA simulada»).
+
 ## Instalar y usar (sin programar)
 1. Ejecuta `EscudoGuardian-0.2.0-setup.exe` (se genera con `npm run build:win` en `release/`).
 2. Windows puede mostrar el aviso azul «SmartScreen» porque el instalador no está firmado: pulsa **Más información → Ejecutar de todas formas**.

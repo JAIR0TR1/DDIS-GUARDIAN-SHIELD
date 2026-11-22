@@ -97,6 +97,11 @@ export function runDevScreenshots(win: BrowserWindow): void {
           }
           await sleep(shot.wait)
           if (shot.skipImage) continue
+          // El puntero real del usuario puede quedar sobre la ventana y dejar un botón resaltado
+          // (hover): se lo aparta a una esquina vacía antes de capturar.
+          const [width, height] = win.getContentSize()
+          win.webContents.sendInputEvent({ type: 'mouseMove', x: width - 3, y: height - 3 })
+          await sleep(150)
           const image = await capture(win, shot.rect)
           writeFileSync(join(dir, `${shot.name}.png`), image.toPNG())
         }
