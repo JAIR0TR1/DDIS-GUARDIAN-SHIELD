@@ -22,7 +22,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 |---|---|---|---|---|
 | 2.1 | Primer arranque | Abrir la app sin perfil | Nilo saluda con la mano y aparece «¡Hola!»; onboarding de 3 pasos | ✅ capturas |
 | 2.2 | Onboarding | Siguiente ×2, escribir nombre, Enter | Entra a Sesión activa con la transición | ✅ capturas |
-| 2.3 | Nombre vacío | Enviar sin nombre | Mensaje de error y foco en el campo | ✅ teclas reales (22 nov): `Enter` con el campo vacío muestra «Escribe cómo te llamas» y deja el foco en el campo; escribir «Camila» + `Enter` entra a la sesión. Encontró y corrigió un fallo: el campo no recibía el foco al llegar al paso 3 |
+| 2.3 | Nombre vacío | Enviar sin nombre | Mensaje de error y foco en el campo | ✅ teclas reales (22 nov): `Enter` con el campo vacío muestra «Escribe cómo te llamas» y deja el foco en el campo; escribir «Camila» + `Enter` entra a la sesión. Repetido en la app instalada. Encontró y corrigió un fallo: el campo no recibía el foco al llegar al paso 3 |
 | 2.4 | Arranque siguiente | Cerrar y abrir | «Hola de nuevo, …» y entra en ~1 s; cualquier tecla lo acelera | ✅ capturas |
 | 2.5 | Analizar | Analizar → «Estafa clara» → Analizar | Escáner, señales resaltadas, «Peligroso», +30 XP, fondo rojizo | ✅ capturas y lectura de la pantalla (22 nov): Peligroso 95/100, +30 XP |
 | 2.6 | Dudoso y legítimo | Los otros dos ejemplos | «Sospechoso» (+20 XP) y «Seguro» (+10 XP) | ✅ (22 nov, modo demo): Legítimo → Seguro 0/100, +10 XP; Dudoso → Sospechoso 50/100, +20 XP (XP 0 → 10 → 30 → 60 con los tres ejemplos) |
@@ -59,7 +59,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 |---|---|---|---|---|
 | 5.1 | Redimensionar | Arrastrar bordes hasta 900×600 | Nada se corta; aparece desplazamiento si hace falta | ✅ (22 nov) con la mascota 3D: las 6 pantallas más Cuentas y Despertar a 900×600, en oscuro/español y claro/inglés, más 1100×720 y 1920×1080; detector de desbordes sin hallazgos. Corregidos: carta coleccionable cortada, formulario «Crear cuenta» cortado arriba y encabezado desalineado en pantalla completa |
 | 5.2 | Controles | Minimizar, maximizar/restaurar, cerrar | Funcionan; el icono de maximizar cambia | ✅ (22 nov): maximizar ensancha la ventana (1102 → 1536 px) y la etiqueta pasa a «Restaurar»; restaurar la devuelve; minimizar la manda fuera de pantalla (minimizada); cerrar con el vigilante apagado destruye la ventana |
-| 5.3 | Arrastrar ventana | Arrastrar la barra de título | Se mueve | ✅ la barra de título es región de arrastre (44 px de alto, todo el ancho) · ⬜ arrástrala con el ratón y comprueba que se mueve |
+| 5.3 | Arrastrar ventana | Arrastrar la barra de título | Se mueve | ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): arrastrar la barra de título con el ratón movió la ventana (+191, +76 px) y se devolvió a su sitio |
 
 ## 6. Instalador de Windows
 | # | Caso | Pasos | Resultado esperado | Verificado |
@@ -73,22 +73,22 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 ## 7. Funciones de fondo (P1)
 | # | Caso | Pasos | Resultado esperado | Verificado |
 |---|---|---|---|---|
-| 7.1 | Atajo global | Copia «Ganaste un premio. Confirma tu clave en bit.ly/x» y presiona `Ctrl+Shift+G` desde OTRO programa | Aparece la alerta flotante arriba, centrada, con el resultado | ✅ flujo simulado de punta a punta · ⬜ con el teclado real |
+| 7.1 | Atajo global | Copia «Ganaste un premio. Confirma tu clave en bit.ly/x» y presiona `Ctrl+Shift+G` desde OTRO programa | Aparece la alerta flotante arriba, centrada, con el resultado | ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): desde otra ventana, `Ctrl+Shift+G` abre la alerta (520×236, «Peligroso 80/100», botones Ver detalle y Descartar) en menos de 3 s; `Enter` la oculta y trae la ventana principal con el Historial; una segunda alerta se descarta con `Esc` |
 | 7.2 | Alerta: teclado | Con la alerta abierta: `Enter` y luego (otra alerta) `Esc` | Enter abre el Historial con esa entrada y oculta la alerta; Esc la descarta | ✅ automático |
-| 7.3 | Alerta: siempre encima | Abre la alerta con otro programa en pantalla completa de fondo | Se ve por encima | ✅ propiedad comprobada · ⬜ vista |
+| 7.3 | Alerta: siempre encima | Abre la alerta con otro programa en pantalla completa de fondo | Se ve por encima | ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): con otra ventana maximizada al frente, la alerta tiene el estilo de «siempre encima» y queda por encima en el orden de ventanas; captura de la ventana de la alerta |
 | 7.4 | Portapapeles vacío | Vacía el portapapeles y presiona el atajo | La alerta dice «No hay nada copiado» y se cierra sola | ✅ |
-| 7.5 | Cambiar el atajo | Ajustes → Cambiar → presiona otra combinación (p. ej. `Ctrl+Alt+K`) | Aviso «Listo: ahora es…»; si está ocupado, avisa y conserva el anterior | ✅ validación (pruebas) · ⬜ interfaz |
-| 7.6 | Icono de bandeja | Mira la bandeja de Windows | Nilo con un punto: cian (vigilando), gris (vigilante apagado), ámbar (duda), rojo (amenaza) | ✅ iconos generados · ⬜ en la barra real |
-| 7.7 | Clic en la bandeja | Clic en el icono; clic derecho | Abre la ventana; el menú tiene Abrir, Analizar el portapapeles, Vigilar y Salir | ⬜ |
+| 7.5 | Cambiar el atajo | Ajustes → Cambiar → presiona otra combinación (p. ej. `Ctrl+Alt+K`) | Aviso «Listo: ahora es…»; si está ocupado, avisa y conserva el anterior | ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): «Listo: ahora es Ctrl+Alt+K»; el atajo nuevo abre la alerta y `Ctrl+Shift+G` ya no; se restauró `Ctrl+Shift+G` con su aviso y vuelve a funcionar |
+| 7.6 | Icono de bandeja | Mira la bandeja de Windows | Nilo con un punto: cian (vigilando), gris (vigilante apagado), ámbar (duda), rojo (amenaza) | ✅ iconos generados · ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): el icono está en la bandeja (en los iconos ocultos) con el texto «Escudo Guardián · vigilando» · ⬜ ver tú el color del punto, ver «Pruebas para Jairo» |
+| 7.7 | Clic en la bandeja | Clic en el icono; clic derecho | Abre la ventana; el menú tiene Abrir, Analizar el portapapeles, Vigilar y Salir | ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): el clic derecho muestra «Abrir Escudo Guardián», «Analizar el portapapeles (Ctrl+Shift+G)» y «Salir» (la casilla «Vigilar el portapapeles» está en el código, pero la accesibilidad de Windows no la expone) · ⬜ clic izquierdo que abre la ventana |
 | 7.8 | Vigilante: lo que NO mira | Con el vigilante activo copia una contraseña (`P@ssw0rd-Segura9`), una tarjeta y un mensaje normal | No pasa nada: ni alerta ni historial | ✅ portapapeles real |
-| 7.9 | Vigilante: estafa | Con el vigilante activo copia un mensaje de estafa | Alerta flotante SIN robar el foco, notificación de Windows, entrada en el historial, sin usar la IA | ✅ alerta e historial · ⬜ notificación de Windows |
-| 7.9b | Vigilante: todo bien | Con el vigilante activo copia un mensaje normal (p. ej. un recordatorio de clase) | Aviso breve «Revisé lo que copiaste: todo en orden», sin robar el foco, que se va solo (4 s); el icono de bandeja se pone verde unos segundos. No se guarda en el historial. Se puede apagar en Ajustes («Avisar también cuando todo está bien») | ✅ aviso, foco e historial · ⬜ icono verde en la barra real |
+| 7.9 | Vigilante: estafa | Con el vigilante activo copia un mensaje de estafa | Alerta flotante SIN robar el foco, notificación de Windows, entrada en el historial, sin usar la IA | ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): una estafa copiada desde otra ventana abre la alerta en 0,6 s sin quitarle el foco a esa ventana, el historial pasa de 8 a 9 entradas y solo usa reglas locales · ⬜ notificación nativa de Windows (no se pudo confirmar por automatización) |
+| 7.9b | Vigilante: todo bien | Con el vigilante activo copia un mensaje normal (p. ej. un recordatorio de clase) | Aviso breve «Revisé lo que copiaste: todo en orden», sin robar el foco, que se va solo (4 s); no se guarda en el historial | ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): «Revisé lo que copiaste · Todo en orden», sin robar el foco, se va solo a los 4,6 s y el historial sigue en 9 entradas · ⬜ icono verde en la bandeja y notificación de Windows |
 | 7.10 | Vigilante: lo ya copiado | Copia algo y DESPUÉS activa el vigilante | No analiza lo que ya estaba copiado | ✅ prueba automática |
 | 7.11 | Interruptor visible | Chip de la cabecera («Vigilando portapapeles») | Enciende o apaga y queda guardado | ✅ |
-| 7.12 | Cerrar con vigilante activo | Cierra la ventana (X) con el vigilante encendido | La app sigue en la bandeja; «Salir» del menú la cierra | ✅ (22 nov) con el vigilante encendido, cerrar deja la ventana viva (oculta) · ⬜ clic derecho en el icono de la bandeja → «Salir» y comprueba que se cierra del todo |
-| 7.13 | Captura: arrastrar | En Analizar arrastra una imagen sobre la tarjeta | «Suelta la captura aquí»; luego resultado con el texto leído resaltado | ✅ simulado (demo y IA real) · ⬜ arrastre real |
+| 7.12 | Cerrar con vigilante activo | Cierra la ventana (X) con el vigilante encendido | La app sigue en la bandeja; «Salir» del menú la cierra | ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): con el vigilante encendido, la X deja los procesos vivos y la ventana oculta; clic derecho en el icono → «Salir» termina todos los procesos (0 restantes) |
+| 7.13 | Captura: arrastrar | En Analizar arrastra una imagen sobre la tarjeta | «Suelta la captura aquí»; luego resultado con el texto leído resaltado | ✅ simulado (demo y IA real) · ⬜ arrastre real desde el Explorador de archivos (no se pudo automatizar de forma fiable), ver «Pruebas para Jairo» |
 | 7.14 | Captura: archivo inválido | Arrastra un PDF | Mensaje «Ese archivo no es una captura válida…» | ✅ |
-| 7.15 | Captura: pegar y elegir | `Ctrl+V` con una imagen copiada; botón «Elegir captura» | Se analiza | ⬜ |
+| 7.15 | Captura: pegar y elegir | `Ctrl+V` con una imagen copiada; botón «Elegir captura» | Se analiza | ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): `Ctrl+V` con una imagen en el portapapeles muestra «Encontré 2 mensajes en la captura», con 2 pestañas, en modo demo · ⬜ «Elegir captura» con el diálogo nativo de Windows (no se pudo verificar de forma fiable), ver «Pruebas para Jairo» |
 | 7.16 | Captura sin IA | Modo real sin clave, soltar una captura | Aviso claro; no se guarda nada | ✅ (22 nov): «Para analizar capturas necesito la IA. Agrega tu clave en Ajustes.» y 0 entradas guardadas. Corregido: antes decía «usé solo las reglas locales», que no es cierto para capturas |
 
 ### Gestos de Nilo según el contexto
@@ -122,7 +122,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | 10.1 | Cambiar a inglés | Ajustes → Idioma → English | Toda la interfaz, el resultado del análisis, la bandeja y las notificaciones en inglés | ✅ capturas; prueba que recorre el corpus sin frases sin traducir |
 | 10.2 | Idioma antes de entrar | ES / EN en la pantalla de cuentas | La pantalla cambia; una cuenta nueva conserva ese idioma | ✅ |
 | 10.3 | Tema claro | Ajustes → Apariencia → Claro | Fondo claro, vidrio blanco, textos legibles (AA) | ✅ capturas y pruebas de contraste |
-| 10.4 | Tema del sistema | Apariencia → Sistema y cambiar el modo de Windows | La app sigue el cambio sin reiniciar | ⬜ probarlo tú |
+| 10.4 | Tema del sistema | Apariencia → Sistema y cambiar el modo de Windows | La app sigue el cambio sin reiniciar | ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): con «Sistema» elegido, cambiar `AppsUseLightTheme` en el registro y avisar a Windows pasa la app de oscuro a claro y de vuelta, sin reiniciar (luminancia 26 → 236 → 26). El valor original (oscuro) se restauró |
 | 10.5 | Reducir movimiento en caliente | Activarlo y desactivarlo sin cambiar de pantalla | Nilo se detiene y vuelve a moverse al instante; con el ajuste activo sigue cambiando de cara | ✅ capturas comparadas en ambos sentidos |
 
 ## 12. Arena del Guardián
@@ -142,7 +142,7 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | 13.1 | Apariencias bloqueadas | Criatura → Apariencias con nivel 1 | Solo «Clásico» elegible; el resto con candado y «Nivel N» | ✅ capturas |
 | 13.2 | Cambiar apariencia | Con nivel suficiente, elegir otra | Nilo cambia de color en toda la app (también en la alerta flotante) y se guarda | ✅ capturas |
 | 13.3 | No se puede forzar | Una apariencia bloqueada no se guarda aunque se intente | El proceso principal la rechaza | ✅ por diseño |
-| 13.4 | Carta holográfica | Mover el puntero sobre la carta | Se inclina y el brillo se desplaza; con movimiento reducido queda quieta | ✅ capturas · ⬜ probarlo tú |
+| 13.4 | Carta holográfica | Mover el puntero sobre la carta | Se inclina y el brillo se desplaza; con movimiento reducido queda quieta | ✅ capturas · ✅ (22 nov, app instalada 0.3.0, teclas y ratón reales con UI Automation): con el puntero real sobre la carta la imagen cambia (inclinación y brillo) |
 | 13.5 | Inicio | Abrir Inicio | Nilo grande con saludo, nivel, próxima apariencia y botones Analizar / Jugar la Arena | ✅ capturas |
 
 ## 14. Capturas con varios mensajes
@@ -152,24 +152,57 @@ Leyenda: ✅ comprobado · ⬜ pendiente de prueba manual · ⚠️ con salvedad
 | 14.2 | Historial | Revisar el Historial después | Cada mensaje queda como entrada aparte | ✅ |
 | 14.3 | Pestañas con teclado | Flechas izquierda/derecha sobre las pestañas | Cambia de mensaje | ✅ teclas reales (22 nov): ← y → cambian la pestaña y el foco las acompaña, dando la vuelta en los extremos; `Inicio` y `Fin` saltan a la primera y a la última. Corregido: antes el foco se quedaba en la pestaña vieja. Prueba automática en `tests/tabNav.test.ts` |
 
-## 15. Lo que solo tú puedes probar (con pasos)
-Estos casos dependen de tu equipo real, de Windows o de internet, y no se pueden comprobar desde las herramientas de desarrollo. Marca cada uno cuando lo pruebes.
+## 15. Pruebas para Jairo
+Estos casos dependen de tu equipo, de la notificación nativa de Windows, de otro computador o del wifi, y no se pudieron verificar de forma automática. Marca la casilla cuando salga como se describe.
 
-| # | Caso | Pasos exactos | Qué debería pasar | Hecho |
-|---|---|---|---|---|
-| 6.3 | SmartScreen | Ejecuta `EscudoGuardian-0.3.0-setup.exe` en un equipo donde no esté instalado | Windows muestra «Windows protegió tu PC»; «Más información» → «Ejecutar de todas formas» instala | ⬜ |
-| 7.1 | Atajo global real | Copia «Ganaste un premio. Confirma tu clave en bit.ly/x» desde el Bloc de notas y presiona `Ctrl+Shift+G` | Aparece la alerta flotante arriba, centrada; `Enter` abre el detalle y `Esc` la descarta | ⬜ |
-| 7.5 | Cambiar el atajo | Ajustes → Cambiar → presiona `Ctrl+Alt+K` | «Listo: ahora es Ctrl+Alt+K»; el atajo nuevo funciona | ⬜ |
-| 7.6 / 7.7 | Bandeja de Windows | Mira junto al reloj; clic izquierdo y clic derecho en el icono de Nilo | Icono con punto de color; abre la ventana; el menú tiene Abrir, Analizar el portapapeles, Vigilar y Salir | ⬜ |
-| 7.9 / 7.9b | Notificación de Windows | Instala la app (la notificación nativa no sale en modo desarrollo), enciende el vigilante y copia una estafa, luego un mensaje normal | Notificación de Windows con el aviso, alerta flotante sin robar el foco | ⬜ |
-| 7.15 | Pegar y elegir captura | Copia una imagen (`Win+Shift+S`) y presiona `Ctrl+V` en Analizar; luego prueba «Elegir captura» | Se analiza la imagen (necesita la clave de Gemini en modo real) | ⬜ |
-| 7.13 | Arrastrar captura | Arrastra un PNG desde el Explorador sobre la tarjeta de Analizar | «Suelta la captura aquí» y luego el resultado | ⬜ |
-| 4.5 | Lector de pantalla | `Win+Ctrl+Enter` abre el Narrador; recorre Analizar con `Tab` | Anuncia los botones, el resultado y los errores | ⬜ |
-| 10.4 | Tema del sistema | Ajustes → Apariencia → Sistema; cambia Windows entre modo claro y oscuro (Configuración → Personalización → Colores) | La app lo sigue sin reiniciar | ⬜ |
-| 3.3 / 9.9 | Sin internet | Con la sesión iniciada y `npm run dev:real`, apaga el wifi y analiza «Dudoso» | Resultado de las reglas con aviso de que no pudo conectarse; al volver la conexión se sincroniza | ⬜ |
-| 9.5 / 9.8 / 9.10 | Cuentas en otro equipo | Con el proyecto de Supabase activo (ver nota abajo), instala la app en otro computador e inicia sesión con la misma cuenta | Trae perfil, criatura e historial; «Cerrar sesión» vuelve a la pantalla de cuentas | ⬜ |
-| 5.3 | Arrastrar la ventana | Arrastra la barra de título con el ratón | La ventana se mueve | ⬜ |
-| 7.12 | Salir desde la bandeja | Enciende el vigilante, cierra la ventana (X), clic derecho en el icono de la bandeja → Salir | La app se cierra del todo | ⬜ |
+### 15.1 Notificación nativa de Windows (7.9 y 7.9b)
+1. Abre «Escudo Guardián» desde el acceso directo del escritorio e inicia sesión.
+2. En el encabezado, activa el interruptor «Vigilar el portapapeles».
+3. Abre el Bloc de notas (sin guardar nada), copia «Ganaste un premio. Confirma tu clave en bit.ly/x» y mira la esquina inferior derecha.
+4. Debes ver: una notificación de Windows de «Escudo Guardián» y la alerta flotante. Luego copia «Recordatorio: mañana tienes clase a las 8» y debes ver el aviso «todo en orden».
+5. Si no aparece la notificación, abre Configuración → Sistema → Notificaciones y comprueba que «Escudo Guardián» esté activado y que no esté el modo «No molestar».
+☐ Salió la notificación de Windows  ☐ Salió «todo en orden»
+
+### 15.2 Icono de la bandeja (7.6 y 7.7)
+1. Con el vigilante encendido, cierra la ventana con la X.
+2. Pulsa la flecha «Mostrar iconos ocultos» junto al reloj y busca a Nilo.
+3. Debes ver: un punto cian (vigilando). Apaga el vigilante desde su menú: el punto pasa a gris.
+4. Clic izquierdo sobre el icono: debe abrir la ventana. Clic derecho: debe mostrar «Abrir», «Analizar el portapapeles», «Vigilar el portapapeles» (con casilla) y «Salir».
+☐ Punto cian  ☐ Punto gris  ☐ El clic izquierdo abre la ventana  ☐ El menú tiene las 4 opciones
+
+### 15.3 Elegir captura y arrastrar captura (7.13 y 7.15)
+1. Haz una captura con `Win+Shift+S` y guárdala como PNG en el escritorio.
+2. En Analizar pulsa «Elegir captura», selecciona el PNG y confirma. Debes ver el resultado de la imagen (en modo demo, «Encontré 2 mensajes en la captura»).
+3. Abre el Explorador de archivos y arrastra el PNG hasta la tarjeta de Analizar. Debes ver «Suelta la captura aquí» mientras arrastras y luego el resultado.
+☐ «Elegir captura» funciona  ☐ Arrastrar desde el Explorador funciona
+
+### 15.4 SmartScreen (6.3), en un equipo donde NO esté instalada la app
+1. Copia `EscudoGuardian-0.3.0-setup.exe` a ese equipo (o descárgalo de la página de Releases).
+2. Ábrelo con doble clic.
+3. Debes ver: «Windows protegió tu PC». Pulsa «Más información» y luego «Ejecutar de todas formas»; el instalador avanza y la app abre.
+☐ Salió el aviso  ☐ Se pudo instalar y abrir
+
+### 15.5 Lector de pantalla (4.5)
+1. Pulsa `Win+Ctrl+Enter` para abrir el Narrador.
+2. En Analizar, recorre la pantalla con `Tab`.
+3. Debes oír: el nombre de cada botón («Analizar», «Elegir captura», los ejemplos), el resultado («Peligroso, 95 de 100») y los mensajes de error.
+4. Apaga el Narrador con `Win+Ctrl+Enter`.
+☐ Anuncia los botones  ☐ Anuncia el resultado  ☐ Anuncia los errores
+
+### 15.6 Sin internet de verdad (3.3 y 9.9)
+1. Abre la app instalada, inicia sesión y deja la ventana abierta.
+2. Apaga el wifi (o desconecta el cable).
+3. Analiza el ejemplo «Legítimo». Debes ver: el resultado normal y +10 XP; el historial sigue disponible.
+4. Cierra la app y vuelve a abrirla con el wifi apagado. Debes ver: entra sin pedir contraseña y con tus datos.
+5. Enciende el wifi, espera un minuto y abre otra vez: no debe haberse perdido nada.
+☐ Analiza sin internet  ☐ Abre sin internet con la sesión guardada  ☐ No se pierde nada al reconectar
+
+### 15.7 Cuentas en otro computador (9.5, 9.8 y 9.10)
+1. Con el proyecto de Supabase activo (ver la nota de abajo), instala la app en otro computador.
+2. Inicia sesión con la misma cuenta. Debes ver: «Hola de nuevo» con tu nombre, tu criatura, tu nivel y tu historial.
+3. En Ajustes pulsa «Cerrar sesión». Debes volver a la pantalla de cuentas y el vigilante se apaga.
+4. Para 9.10: en un equipo que ya tenía datos locales, entra con una cuenta nueva: se lleva el historial y la criatura existentes.
+☐ Trae mis datos  ☐ Cerrar sesión vuelve a cuentas  ☐ Una cuenta nueva se lleva los datos locales
 
 **Nota sobre las cuentas (22 nov):** el proyecto gratuito de Supabase estaba pausado por inactividad y su dominio no resolvía. Se restauró desde supabase.com (Restore project) y se verificó contra el servidor real: el inicio de sesión con la cuenta de prueba, el registro de una cuenta nueva (sin confirmación por correo, llega a la bienvenida) y que una consulta sin sesión ve 0 filas. Un proyecto gratuito vuelve a pausarse tras una semana sin actividad: entra a la app con sesión la víspera de presentar y, si el dominio deja de responder, repite Restore project.
 
